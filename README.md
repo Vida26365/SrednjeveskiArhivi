@@ -2,5 +2,8 @@
 
 Program za digitaizacijo in iskanje po srednjeveških zapisih.
 
-Cilj projekta je uspostaviti uporabniški vmesnik, kjer bo uporabnik popravljal napake in označil ključne besede v tekstu po katerih želi kasneje iskati.
-Tekstovne datoteke bodo pridobljene s pomočjo optične prpoznave črk (Optical charachter recognition)
+Cilj projekta je vzpostaviti uporabniški vmesnik, kjer bo uporabnik popravljal napake in označil ključne besede v tekstu po katerih želi kasneje iskati.
+
+V prejpnjem stoletju so bili ti srdnjeveški zapisi na pisalni stroj pretipkani. Ti dokumenti bodo skenirani in pretvorjeni v tekstovne datoteke s pomočjo optične prepoznave črk.
+
+Srednjeveški zapisi so pridojeni iz zasebnih virov in so primerni za javno objavo.
