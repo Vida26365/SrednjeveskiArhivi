@@ -1,0 +1,17 @@
+[application]
+
+[web.app]
+title = "Srednjeveški Arhivi"
+
+[web.resource]
+style = []
+script = []
+
+[web.resource.dev]
+style = []
+script = []
+
+[bundle]
+identifier = "io.github.vida26365.srednjeveskiarhivi"
+publisher = "Vida Mlinar; Filip Štamcar"
+category = "Utility"
