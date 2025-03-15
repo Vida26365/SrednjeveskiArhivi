@@ -1,21 +1,23 @@
 # Development
 
-Your new jumpstart project includes basic organization with an organized `assets` folder and a `components` folder.
-If you chose to develop with the router feature, you will also have a `views` folder.
+## Preparation
 
-### Tailwind
+Please ensure you have the following installed:
 
-1. Install npm: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
-2. Install the Tailwind CSS CLI: https://tailwindcss.com/docs/installation
-3. Run the following command in the root of the project to start the Tailwind CSS compiler:
+* [Rust & Cargo](https://www.rust-lang.org/tools/install)
+* [Node.js & npm](https://nodejs.org/en/download/)
+* [Dioxus CLI](https://dioxuslabs.com/learn/0.6/getting_started/#install-the-dioxus-cli)
+* [WebView](https://dioxuslabs.com/learn/0.6/getting_started/#platform-specific-dependencies)
+
+## Development
+
+Run the following command to start the Tailwind CSS compiler:
 
 ```bash
-npx tailwindcss -i ./input.css -o ./assets/tailwind.css --watch
+npm run watch
 ```
 
-### Serving Your App
-
-Run the following command in the root of your project to start developing with the default platform:
+In another terminal, run the following command to start the app:
 
 ```bash
 dx serve
@@ -25,4 +27,34 @@ To run for a different platform, use the `--platform platform` flag. E.g.
 
 ```bash
 dx serve --platform desktop
+```
+
+When using JetBrains IDEs or VS Code, you can use pre-configured tasks to run the above commands.
+
+## Building
+
+Run the following command to build the Tailwind CSS:
+
+```bash
+npm run build
+```
+
+Run the following command to build and package the app:
+
+```bash
+dx bundle
+```
+
+## Formatting
+
+Run the following command to format the code:
+
+```bash
+cargo +nightly fmt
+```
+
+Run the following command to statically analyze the code:
+
+```bash
+cargo clippy
 ```

@@ -1,0 +1,24 @@
+{
+  "name": "srednjeveski-arhivi",
+  "description": "Program for digitizing and searching medieval records",
+  "contributors": [
+    "Vida Mlinar",
+    "Filip Štamcar"
+  ],
+  "repository": "https://github.com/Vida26365/SrednjeveskiArhivi",
+  "license": "MIT",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@10.8.1",
+  "scripts": {
+    "build": "tailwindcss -i tailwind.css -o assets/styles/tailwind.css",
+    "watch": "tailwindcss -i tailwind.css -o assets/styles/tailwind.css --watch"
+  },
+  "dependencies": {
+    "daisyui": "^5.0.4",
+    "tailwindcss": "^4.0.14"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.14"
+  }
+}

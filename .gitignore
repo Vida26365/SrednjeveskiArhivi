@@ -9,15 +9,24 @@ $RECYCLE.BIN/
 .c9revisions
 .directory
 .fuse_hidden*
-.idea
 .nfs*
 .project
 .settings
 .vs
-.vscode
 *.iml
 [Dd]esktop.ini
 [Tt]humbs.db
+
+# VS Code
+.vscode/**
+!.vscode/settings.json
+!.vscode/tasks.json
+
+# IntelliJ IDEA
+.idea/**
+!.idea/runConfigurations/
+!.idea/runConfigurations/**
+!.idea/tailwindcss.xml
 
 # Logs
 logs/
@@ -46,3 +55,6 @@ bower_components/
 jspm_packages/
 node_modules/
 web_modules/
+
+# Tailwind CSS
+assets/styles/tailwind.css
