@@ -2,13 +2,9 @@ use dioxus::prelude::*;
 
 use crate::Route;
 
-const NAVBAR_CSS: Asset = asset!("/assets/styles/navbar.css");
-
 #[component]
 pub fn Navbar() -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: NAVBAR_CSS }
-
         div {
             id: "navbar",
             Link {
