@@ -9,6 +9,12 @@ Please ensure you have the following installed:
 * [Dioxus CLI](https://dioxuslabs.com/learn/0.6/getting_started/#install-the-dioxus-cli)
 * [WebView](https://dioxuslabs.com/learn/0.6/getting_started/#platform-specific-dependencies)
 
+Once the tools are installed, run the following command to install npm dependencies:
+
+```bash
+npm install
+```
+
 ## Development
 
 Run the following command to start the Tailwind CSS compiler:
