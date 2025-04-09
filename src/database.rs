@@ -2,7 +2,7 @@ use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbConn, EntityTrait
 use tokio::sync::OnceCell;
 
 use crate::directories::DIRECTORIES;
-use crate::entities::Document;
+use crate::entities::{Category, Document, LabelBoolean, LabelDate, LabelNumber, LabelText};
 
 static DATABASE: OnceCell<DatabaseConnection> = OnceCell::const_new();
 
@@ -21,7 +21,12 @@ async fn init_database() -> DatabaseConnection {
     let url = format!("sqlite:{}?mode=rwc", path.display());
     let database = Database::connect(url).await.expect("Failed to connect to database");
 
+    create_table(&database, Category).await;
     create_table(&database, Document).await;
+    create_table(&database, LabelBoolean).await;
+    create_table(&database, LabelNumber).await;
+    create_table(&database, LabelText).await;
+    create_table(&database, LabelDate).await;
 
     database
 }
