@@ -5,10 +5,17 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub name: String,
+    pub filename: String,
+    pub title: String,
+    pub summary: String,
+    pub content: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {}
 
-impl ActiveModelBehavior for ActiveModel {}
+impl ActiveModelBehavior for ActiveModel {
+    fn new() -> Self {
+        Self { id: sea_orm::ActiveValue::Set(Uuid::new_v4()), ..ActiveModelTrait::default() }
+    }
+}

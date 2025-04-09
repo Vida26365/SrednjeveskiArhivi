@@ -12,9 +12,10 @@ publish = false
 cfg-if = "1.0.0"
 dioxus = { version = "0.6.3", features = ["desktop", "router"] }
 directories = "6.0.0"
-sea-orm = { version = "1.1.8", features = ["sqlx-sqlite", "runtime-tokio", "macros"] }
+sea-orm = { version = "1.1.8", features = ["sqlx-sqlite", "runtime-tokio", "macros", "with-time", "with-uuid"] }
+time = "0.3.41"
 tokio = { version = "1.44.2", features = ["full"] }
-uuid = "1.16.0"
+uuid = { version = "1.16.0", features = ["v4"] }
 
 [build-dependencies]
 cfg_aliases = "0.2.1"
