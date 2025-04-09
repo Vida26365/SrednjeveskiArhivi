@@ -9,7 +9,7 @@ pub fn Display() -> Element {
         .expect("Should have been able to read the file");
     rsx! {
         div {
-            div {img {src : asset!("zapisi/GZL I-1 (1243 april 13)-1.jpg")}}
+            div {img {src : asset!("zapisi/jpgji/GZL I-1 (1243 april 13)-1.jpg")}}
             div {span {"{contents}"}}
         }
     }
