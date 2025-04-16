@@ -2,7 +2,7 @@ use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbConn, EntityTrait
 use tokio::sync::OnceCell;
 
 use crate::directories::DIRECTORIES;
-use crate::entities::{Category, Document, LabelBoolean, LabelDate, LabelNumber, LabelText};
+use crate::entities::{Category, Document, Label};
 
 static DATABASE: OnceCell<DatabaseConnection> = OnceCell::const_new();
 
@@ -23,10 +23,7 @@ async fn init_database() -> DatabaseConnection {
 
     create_table(&database, Category).await;
     create_table(&database, Document).await;
-    create_table(&database, LabelBoolean).await;
-    create_table(&database, LabelNumber).await;
-    create_table(&database, LabelText).await;
-    create_table(&database, LabelDate).await;
+    create_table(&database, Label).await;
 
     database
 }

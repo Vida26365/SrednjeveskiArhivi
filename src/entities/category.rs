@@ -3,10 +3,12 @@ use sea_orm::entity::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "category")]
 pub enum Type {
-    #[sea_orm(string_value = "text")]
-    Text,
-    #[sea_orm(string_value = "number")]
-    Number,
+    #[sea_orm(string_value = "string")]
+    String,
+    #[sea_orm(string_value = "integer")]
+    Integer,
+    #[sea_orm(string_value = "float")]
+    Float,
     #[sea_orm(string_value = "boolean")]
     Boolean,
     #[sea_orm(string_value = "date")]
@@ -16,11 +18,19 @@ pub enum Type {
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 #[sea_orm(table_name = "categories")]
 pub struct Model {
+    /// The category identifier.
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
+
+    /// The category identifier.
     #[sea_orm(indexed, unique)]
     pub name: String,
-    pub description: String,
+
+    /// The category description (optional).
+    #[sea_orm(nullable)]
+    pub description: Option<String>,
+
+    /// The category type.
     pub r#type: Type,
 }
 

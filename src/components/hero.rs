@@ -1,9 +1,13 @@
+use std::path::PathBuf;
+
 use dioxus::prelude::*;
 
 const HEADER: Asset = asset!("/assets/images/header.svg");
 
 #[component]
 pub fn Hero() -> Element {
+    let path = String::from("C:\\Users\\fs90700\\Documents\\SrednjeveskiArhivi\\zapisi\\GZL I-1 (1243 april 13)-1.jpg");
+
     rsx! {
         div {
             id: "hero",

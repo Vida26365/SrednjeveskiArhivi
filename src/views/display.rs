@@ -1,5 +1,6 @@
-use dioxus::prelude::*;
 use std::fs;
+
+use dioxus::prelude::*;
 
 #[component]
 pub fn Display() -> Element {

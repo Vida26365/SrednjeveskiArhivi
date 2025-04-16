@@ -1,13 +1,18 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name = "labels_number")]
+#[sea_orm(table_name = "labels")]
 pub struct Model {
+    /// The document that this label belongs to.
     #[sea_orm(primary_key, auto_increment = false)]
     pub document: Uuid,
+
+    /// The category that this label belongs to.
     #[sea_orm(primary_key, auto_increment = false)]
     pub category: Uuid,
-    pub value: i64,
+
+    /// The label value.
+    pub value: String,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, EnumIter, DeriveRelation)]

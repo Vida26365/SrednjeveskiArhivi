@@ -5,4 +5,10 @@
   "tailwindCSS.experimental.classRegex": [
     "class: \"(.*)\"",
   ],
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  },
 }

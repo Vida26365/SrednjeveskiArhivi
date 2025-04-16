@@ -1,10 +1,10 @@
 use dioxus::prelude::*;
 
-use crate::components::Hero;
+use crate::components::Documents;
 
 #[component]
 pub fn Home() -> Element {
     rsx! {
-        Hero {}
+        Documents {}
     }
 }
