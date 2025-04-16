@@ -30,7 +30,7 @@ const TAILWIND: Asset = asset!("/assets/styles/tailwind.css");
 fn main() {
 
     //test stvari///////////////////////////////////////////
-    pdf_to_text::pfd_to_img();
+    pdf_to_text::img_to_text();
     //////////////////////////////////////////////////////////7
 
 
