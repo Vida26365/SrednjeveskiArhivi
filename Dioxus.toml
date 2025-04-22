@@ -13,5 +13,5 @@ script = []
 
 [bundle]
 identifier = "io.github.vida26365.srednjeveskiarhivi"
-publisher = "Vida Mlinar; Filip Štamcar"
+publisher = "vidam"
 category = "Utility"

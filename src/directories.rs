@@ -5,7 +5,7 @@ use std::sync::LazyLock;
 use cfg_if::cfg_if;
 use directories::BaseDirs;
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AppDirectories {
     pub sysdata: PathBuf,
     pub userdata: PathBuf,

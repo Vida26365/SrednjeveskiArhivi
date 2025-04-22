@@ -5384,6 +5384,8 @@ dependencies = [
  "image",
  "pdf2image",
  "sea-orm",
+ "serde",
+ "serde_json",
  "time",
  "tokio",
  "uuid",

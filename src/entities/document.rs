@@ -1,4 +1,9 @@
 use sea_orm::entity::prelude::*;
+use sea_orm::FromJsonQueryResult;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct Keywords(pub Vec<String>);
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 #[sea_orm(table_name = "documents")]
@@ -12,6 +17,10 @@ pub struct Model {
 
     /// The document title.
     pub title: String,
+
+    /// The document keywords (optional).
+    #[sea_orm(nullable)]
+    pub keywords: Keywords,
 
     /// The document summary (optional).
     #[sea_orm(nullable)]

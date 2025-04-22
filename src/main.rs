@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use crate::components::Navbar;
 use crate::database::get_database;
 use crate::directories::DIRECTORIES;
-use crate::views::{Blog, Display, Home};
+use crate::views::{Blog, Home};
 
 mod components;
 mod database;
@@ -12,7 +12,7 @@ mod entities;
 mod pdf_to_text;
 mod views;
 
-#[derive(Debug, Clone, Routable, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Routable)]
 #[rustfmt::skip]
 enum Route {
     #[layout(Navbar)]
@@ -28,10 +28,6 @@ const FAVICON: Asset = asset!("/assets/images/favicon.ico");
 const TAILWIND: Asset = asset!("/assets/styles/tailwind.css");
 
 fn main() {
-    //test stvari///////////////////////////////////////////
-    pdf_to_text::pfd_to_img();
-    //////////////////////////////////////////////////////////7
-
     let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
     runtime.block_on(get_database());
 
@@ -39,7 +35,7 @@ fn main() {
         .with_resource_directory(DIRECTORIES.sysdata.join("assets"))
         .with_data_directory(DIRECTORIES.userdata.join("webview"));
 
-    dioxus::LaunchBuilder::desktop().with_cfg(config).launch(App)
+    LaunchBuilder::desktop().with_cfg(config).launch(App)
 }
 
 #[component]
@@ -55,8 +51,3 @@ fn App() -> Element {
         Router::<Route> {}
     }
 }
-
-// #[cfg(test)]
-// fn test() {
-//     pdf_to_text::pfd_to_img();
-// }

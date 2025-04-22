@@ -1,40 +1,61 @@
 use dioxus::prelude::*;
 use sea_orm::EntityTrait;
 
+use crate::components::alerts::error::AlertError;
+use crate::components::alerts::info::AlertInfo;
+use crate::components::alerts::success::AlertSuccess;
+use crate::components::alerts::warning::AlertWarning;
 use crate::database::get_database;
 use crate::entities::Document;
 
 #[component]
 pub fn Documents() -> Element {
-    let documents = use_resource(move || async move {
+    let documents = use_resource(|| async move {
         let database = get_database().await;
         Document::find().all(database).await
     });
 
     rsx! {
-        div {
-            display: "flex",
-            flex_direction: "row",
-            // You can read resource just like a signal. If the resource is still
-            // running, it will return None
-            if let Some(response) = &*documents.read() {
-                match response {
-                    Ok(urls) => rsx! {
-                        for image in urls.iter().take(3) {
-                                span {
-                                    key: "{image.id}",
-                                    style: "margin: 10px; padding: 10px; border: 1px solid black;",
-                                    "Filename: {image.filename}",
+        div { class: "p-4",
+            {
+                match &*documents.read() {
+                    Some(Ok(docs)) => rsx! {
+                        div {
+                            // DaisyUI responsive table styling
+                            div { class: "overflow-x-auto",
+                                table { class: "table w-full",
+                                    thead {
+                                        tr {
+                                            th { "Filename" }
+                                            th { "Title" }
+                                            th { "Keywords" }
+                                            th { "Summary" }
+                                            th { "Content" }
+                                        }
+                                    }
+                                    tbody {
+                                        {docs.iter().map(|doc| rsx! {
+                                            tr {
+                                                td { "{doc.filename}" }
+                                                td { "{doc.title}" }
+                                                // td { "{doc.keywords}.0.join(\", \")" }
+                                                td { "{doc.summary.as_deref().unwrap_or(\"\")}" }
+                                                td { "{doc.content.as_deref().unwrap_or(\"\")}" }
+                                            }
+                                        })}
+                                    }
                                 }
+                            }
                         }
                     },
-                    Err(err) => rsx! { "Failed to fetch response: {err}" },
+                    Some(Err(err)) => rsx! {
+                        AlertInfo { message: "Error loading documents".to_string(), details: err.to_string() }
+                    },
+                    None => rsx! {
+                        div { class: "text-center mt-4", "Loading documents..." }
+                    },
                 }
-            } else {
-                "Loading..."
             }
         }
     }
-
-
 }
