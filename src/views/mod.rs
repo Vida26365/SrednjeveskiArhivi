@@ -1,3 +1,2 @@
-pub mod documents;
-
 pub mod blog;
+pub mod documents;

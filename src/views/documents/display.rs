@@ -1,23 +1,49 @@
 use dioxus::prelude::*;
-use dioxus::desktop::{use_asset_handler, wry::http::Response};
+use sea_orm::EntityTrait;
+use uuid::Uuid;
+
+use crate::components::alerts::error::AlertError;
+use crate::database::get_database;
+use crate::entities::Document;
 
 #[component]
-pub fn DocumentDisplay(id: uuid::Uuid) -> Element {
-    use_asset_handler("documents", |request, response| {
-        // We get the original path - make sure you handle that!
-        if request.uri().path() != "/logos/logo.png" {
-            return;
-        }
-
-        response.respond(Response::new(include_bytes!("./assets/logo.png").to_vec()));
+pub fn DocumentDisplay(id: Uuid) -> Element {
+    let document = use_resource(move || async move {
+        let database = get_database().await;
+        Document::find_by_id(id).one(database).await
     });
 
-    rsx! {
-        div {
-            id: "document-display",
-            h1 { "Document Display" }
-            p { "This is the document display page." }
-            // Add more content here as needed
-        }
+    match &*document.read_unchecked() {
+        Some(Ok(Some(document))) => rsx! {
+            div {
+                h1 { "{document.title}" }
+                p { b { "Filename: " } "{document.filename}" }
+                p { b { "Keywords: " } "{document.keywords.0.join(\", \")}" }
+                if let Some(summary) = &document.summary {
+                    p { b { "Summary: " } "{summary}" }
+                }
+                embed {
+                    src: "/content/{document.id}#toolbar=0",
+                    type: "application/pdf",
+                    width: "100%",
+                    height: "1000px",
+                }
+            }
+        },
+        Some(Ok(None)) => rsx! {
+            AlertError {
+                title: "Dokument ni najden".to_string(),
+                details: "".to_string(),
+            }
+        },
+        Some(Err(error)) => rsx! {
+            AlertError {
+                title: "Napaka pri nalaganju dokumenta".to_string(),
+                details: error.to_string(),
+            }
+        },
+        None => rsx! {
+            "Nalaganje dokumenta ..."
+        },
     }
 }

@@ -7,7 +7,7 @@ pub fn Navbar() -> Element {
     rsx! {
         div {
             id: "navbar",
-            class: "navbar bg-base-200 sticky top-0",
+            class: "navbar sticky top-0 z-50 bg-base-200",
             div {
                 class: "navbar-start",
                 Link {

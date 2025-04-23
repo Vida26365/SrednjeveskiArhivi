@@ -1,10 +1,10 @@
 use dioxus::prelude::*;
 use sea_orm::EntityTrait;
 
-use crate::Route;
 use crate::components::alerts::error::AlertError;
 use crate::database::get_database;
 use crate::entities::Document;
+use crate::Route;
 
 #[component]
 pub fn DocumentList() -> Element {
@@ -33,7 +33,7 @@ pub fn DocumentList() -> Element {
                             {documents.iter().map(|document| rsx! {
                                 tr {
                                     td { "{document.title}" }
-                                    td { "TODO"}
+                                    td { "TODO" }
                                     td { "TODO" }
                                     td { "{document.keywords.0.join(\", \")}" }
                                     td {
@@ -50,11 +50,11 @@ pub fn DocumentList() -> Element {
                 }
             }
         },
-        Some(Err(err)) => rsx! {
-                AlertError {
-                    message: "Napaka pri nalaganju dokumentov".to_string(),
-                    details: err.to_string()
-                }
+        Some(Err(error)) => rsx! {
+            AlertError {
+                title: "Napaka pri nalaganju dokumentov".to_string(),
+                details: error.to_string(),
+            }
         },
         None => rsx! {
             "Nalaganje dokumentov ..."

@@ -1,2 +1,2 @@
-pub mod list;
 pub mod display;
+pub mod list;

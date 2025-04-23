@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 #[component]
-pub fn AlertInfo(message: String, details: String) -> Element {
+pub fn AlertInfo(title: String, details: String) -> Element {
     rsx! {
         div {
             class: "alert alert-soft alert-info",
@@ -17,7 +17,7 @@ pub fn AlertInfo(message: String, details: String) -> Element {
                 }
             }
             div {
-                p { strong { "{message}" }}
+                p { strong { "{title}" }}
                 p { "{details}" }
             }
         }

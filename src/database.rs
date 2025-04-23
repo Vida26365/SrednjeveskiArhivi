@@ -1,3 +1,4 @@
+use dioxus::logger::tracing::info;
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbConn, EntityTrait, Schema};
 use tokio::sync::OnceCell;
 
@@ -17,9 +18,13 @@ async fn create_table<E: EntityTrait>(database: &DbConn, entity: E) {
 }
 
 async fn init_database() -> DatabaseConnection {
+    info!("Connecting to database...");
+
     let path = DIRECTORIES.userdata.join("storage.db");
     let url = format!("sqlite:{}?mode=rwc", path.display());
     let database = Database::connect(url).await.expect("Failed to connect to database");
+
+    info!("Creating tables...");
 
     create_table(&database, Category).await;
     create_table(&database, Document).await;
