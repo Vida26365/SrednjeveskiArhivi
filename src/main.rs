@@ -11,6 +11,7 @@ mod directories;
 mod entities;
 mod views;
 mod pdf_to_text;
+mod poskus;
 
 #[derive(Debug, Clone, Routable, PartialEq)]
 #[rustfmt::skip]
@@ -30,7 +31,8 @@ const TAILWIND: Asset = asset!("/assets/styles/tailwind.css");
 fn main() {
 
     //test stvari///////////////////////////////////////////
-    pdf_to_text::img_to_text();
+    pdf_to_text::imgs_to_text();
+    // poskus::main();
     //////////////////////////////////////////////////////////7
 
 
