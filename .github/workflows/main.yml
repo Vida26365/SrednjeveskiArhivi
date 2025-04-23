@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure Rust and Rustfmt
+      - name: Install Rust and Rustfmt
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: nightly
@@ -56,7 +56,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure Rust and Clippy
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Rust and Clippy
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
@@ -69,6 +75,18 @@ jobs:
         with:
           cache-on-failure: true
           cache-all-crates: true
+
+      - name: Install WebkitGtk
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev libxdo-dev libssl-dev librsvg2-dev
+
+      - name: Install Tailwind
+        run: npm ci
+
+      - name: Build Tailwind
+        run: npm run build
 
       - name: Run Clippy
         run: cargo clippy
@@ -92,7 +110,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure Rust
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
@@ -104,6 +128,18 @@ jobs:
         with:
           cache-on-failure: true
           cache-all-crates: true
+
+      - name: Install WebkitGtk
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev libxdo-dev libssl-dev librsvg2-dev
+
+      - name: Install Tailwind
+        run: npm ci
+
+      - name: Build Tailwind
+        run: npm run build
 
       - name: Run tests
         run: cargo test
@@ -130,7 +166,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure Rust
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
@@ -143,16 +185,22 @@ jobs:
           cache-on-failure: true
           cache-all-crates: true
 
+      - name: Install Dioxus CLI
+        uses: taiki-e/install-action@v2
+        with:
+          tool: dioxus-cli
+
       - name: Install WebkitGtk
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev libxdo-dev libssl-dev librsvg2-dev
 
-      - name: Install Dioxus CLI
-        uses: taiki-e/install-action@v2
-        with:
-          tool: dioxus-cli
+      - name: Install Tailwind
+        run: npm ci
+
+      - name: Build Tailwind
+        run: npm run build
 
       - name: Bundle application
         id: bundle
