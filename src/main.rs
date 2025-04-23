@@ -1,9 +1,11 @@
 use dioxus::prelude::*;
 
-use crate::components::Navbar;
+use crate::components::navbar::Navbar;
 use crate::database::get_database;
 use crate::directories::DIRECTORIES;
-use crate::views::{Blog, Home};
+use crate::views::blog::Blog;
+use crate::views::documents::list::DocumentList;
+use crate::views::documents::display::DocumentDisplay;
 
 mod components;
 mod database;
@@ -17,8 +19,13 @@ mod views;
 enum Route {
     #[layout(Navbar)]
 
-    #[route("/")]
-    Home {},
+    #[redirect("/", || Route::DocumentList {})]
+
+    #[route("/documents")]
+    DocumentList {},
+
+    #[route("/documents/:id")]
+    DocumentDisplay { id: uuid::Uuid },
 
     #[route("/blog/:id")]
     Blog { id: i32 },

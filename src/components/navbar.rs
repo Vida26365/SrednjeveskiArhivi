@@ -12,7 +12,7 @@ pub fn Navbar() -> Element {
                 class: "navbar-start",
                 Link {
                     class: "btn btn-ghost text-lg",
-                    to: Route::Home {},
+                    to: Route::DocumentList {},
                     "Dokumenti"
                 }
                 Link {
@@ -23,6 +23,9 @@ pub fn Navbar() -> Element {
             }
         }
 
-        Outlet::<Route> {}
+        main {
+            class: "p-2",
+            Outlet::<Route> {}
+        }
     }
 }

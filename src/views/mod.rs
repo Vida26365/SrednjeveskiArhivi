@@ -1,8 +1,3 @@
-mod home;
-pub use home::Home;
+pub mod documents;
 
-mod blog;
-pub use blog::Blog;
-
-mod display;
-pub use display::Display;
+pub mod blog;
