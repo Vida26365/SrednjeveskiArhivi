@@ -1,8 +1,9 @@
+use dioxus::logger::tracing::info;
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbConn, EntityTrait, Schema};
 use tokio::sync::OnceCell;
 
 use crate::directories::DIRECTORIES;
-use crate::entities::{Category, Document, LabelBoolean, LabelDate, LabelNumber, LabelText};
+use crate::entities::{Category, Document, Label};
 
 static DATABASE: OnceCell<DatabaseConnection> = OnceCell::const_new();
 
@@ -17,16 +18,17 @@ async fn create_table<E: EntityTrait>(database: &DbConn, entity: E) {
 }
 
 async fn init_database() -> DatabaseConnection {
+    info!("Connecting to database...");
+
     let path = DIRECTORIES.userdata.join("storage.db");
     let url = format!("sqlite:{}?mode=rwc", path.display());
     let database = Database::connect(url).await.expect("Failed to connect to database");
 
+    info!("Creating tables...");
+
     create_table(&database, Category).await;
     create_table(&database, Document).await;
-    create_table(&database, LabelBoolean).await;
-    create_table(&database, LabelNumber).await;
-    create_table(&database, LabelText).await;
-    create_table(&database, LabelDate).await;
+    create_table(&database, Label).await;
 
     database
 }

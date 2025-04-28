@@ -3,9 +3,10 @@ use std::path::PathBuf;
 use std::sync::LazyLock;
 
 use cfg_if::cfg_if;
+use dioxus::logger::tracing::info;
 use directories::BaseDirs;
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AppDirectories {
     pub sysdata: PathBuf,
     pub userdata: PathBuf,
@@ -13,7 +14,24 @@ pub struct AppDirectories {
 
 impl AppDirectories {
     pub fn new() -> Self {
-        let sysdata = PathBuf::from("."); // TODO: Set the correct path on all platforms
+        info!("Determining application directories...");
+
+        let sysdata = {
+            let executable = std::env::current_exe().expect("Failed to get current executable");
+            let current = executable.parent().expect("Failed to get parent directory").to_path_buf();
+
+            cfg_if! {
+                if #[cfg(platform_windows)] {
+                    current
+                } else if #[cfg(any(platform_linux, platform_bsd))] {
+                    current.join("..").join("lib").join("SrednjeveskiArhivi")
+                } else if #[cfg(platform_macos)] {
+                    current.join("..").join("Resources")
+                } else {
+                    compile_error!("Unknown operating system")
+                }
+            }
+        };
 
         let userdata = {
             let base = BaseDirs::new().expect("Failed to determine base system directories");
@@ -30,7 +48,10 @@ impl AppDirectories {
             }
         };
 
-        create_dir_all(&sysdata).expect("Failed to create system data directory");
+        info!("System data directory: {}", sysdata.display());
+        info!("User data directory: {}", userdata.display());
+
+        info!("Creating application directories...");
         create_dir_all(&userdata).expect("Failed to create user data directory");
 
         Self { sysdata, userdata }
