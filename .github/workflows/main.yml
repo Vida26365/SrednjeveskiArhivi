@@ -207,20 +207,19 @@ jobs:
         run: |
           dx bundle --release \
             --platform desktop \
-            --package-types "msi" \
             --package-types "deb" \
             --package-types "rpm" \
             --package-types "appimage" \
-            --package-types "dmg" \
-            --json-output \
-            --verbose \
-            | tee output.json
-          tail -1 output.json | jq -r '.json | fromjson | .BundleOutput.bundles[]' > bundles.txt
-          echo "bundles=$(jq -Rs '.' bundles.txt)" >> $GITHUB_OUTPUT
+            --package-types "msi" \
+            --package-types "dmg"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: bundle-${{ matrix.os }}
           path: |
-            ${{ steps.bundle.outputs.bundles }}
+            target/dx/srednjeveski-arhivi/bundle/linux/bundle/deb/*.deb
+            target/dx/srednjeveski-arhivi/bundle/linux/bundle/rpm/*.rpm
+            target/dx/srednjeveski-arhivi/bundle/linux/bundle/appimage/*.AppImage
+            target/dx/srednjeveski-arhivi/bundle/windows/bundle/msi/*.msi
+            target/dx/srednjeveski-arhivi/bundle/macos/bundle/dmg/*.dmg
