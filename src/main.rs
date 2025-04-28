@@ -37,7 +37,7 @@ enum Route {
     Blog { id: i32 },
 }
 
-const FAVICON: Asset = asset!("/assets/images/favicon.ico");
+const ICON: Asset = asset!("/assets/images/icon.ico");
 const TAILWIND: Asset = asset!("/assets/styles/tailwind.css");
 
 fn main() {
@@ -94,7 +94,7 @@ fn App() -> Element {
 
     rsx! {
         // Global app resources
-        document::Link { rel: "icon", href: FAVICON }
+        document::Link { rel: "icon", href: ICON }
         document::Link { rel: "stylesheet", href: TAILWIND }
 
         // Router view

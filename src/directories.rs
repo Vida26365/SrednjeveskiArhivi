@@ -37,8 +37,6 @@ impl AppDirectories {
         info!("User data directory: {}", userdata.display());
 
         info!("Creating application directories...");
-
-        create_dir_all(&sysdata).expect("Failed to create system data directory");
         create_dir_all(&userdata).expect("Failed to create user data directory");
 
         Self { sysdata, userdata }

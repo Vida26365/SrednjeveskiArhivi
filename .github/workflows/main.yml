@@ -28,7 +28,7 @@ jobs:
           cache: false
           rustflags: ''
 
-      - name: Configure cache
+      - name: Configure Rust cache
         uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
@@ -70,7 +70,7 @@ jobs:
           cache: false
           rustflags: ''
 
-      - name: Configure cache
+      - name: Configure Rust cache
         uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
@@ -123,7 +123,7 @@ jobs:
           cache: false
           rustflags: ''
 
-      - name: Configure cache
+      - name: Configure Rust cache
         uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
@@ -179,7 +179,7 @@ jobs:
           cache: false
           rustflags: ''
 
-      - name: Configure cache
+      - name: Configure Rust cache
         uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true

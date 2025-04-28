@@ -15,3 +15,20 @@ script = []
 identifier = "io.github.vida26365.srednjeveskiarhivi"
 publisher = "vidam"
 category = "Utility"
+
+icon = [
+    "assets/images/icon.ico",
+    "assets/images/icon.icns",
+    "assets/images/icon48.png",
+    "assets/images/icon64.png",
+    "assets/images/icon128.png",
+    "assets/images/icon256.png",
+]
+
+resources = []
+
+[bundle.windows]
+icon_path = "assets/images/icon.ico"
+webview_install_mode = { EmbedBootstrapper = { silent = true } }
+allow_downgrades = true
+tsp = true
