@@ -16,7 +16,22 @@ impl AppDirectories {
     pub fn new() -> Self {
         info!("Determining application directories...");
 
-        let sysdata = PathBuf::from("."); // TODO: Set the correct path on all platforms
+        let sysdata = {
+            let executable = std::env::current_exe().expect("Failed to get current executable");
+            let current = executable.parent().expect("Failed to get parent directory").to_path_buf();
+
+            cfg_if! {
+                if #[cfg(platform_windows)] {
+                    current
+                } else if #[cfg(any(platform_linux, platform_bsd))] {
+                    current.join("..").join("lib").join("SrednjeveskiArhivi")
+                } else if #[cfg(platform_macos)] {
+                    current.join("..").join("Resources")
+                } else {
+                    compile_error!("Unknown operating system")
+                }
+            }
+        };
 
         let userdata = {
             let base = BaseDirs::new().expect("Failed to determine base system directories");
