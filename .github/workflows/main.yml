@@ -215,11 +215,12 @@ jobs:
             --json-output \
             --verbose \
             | tee output.json
-          bundles=$(tail -1 output.json | jq -r '.json | fromjson | .BundleOutput.bundles | @json')
-          echo "bundles=$bundles" >> $GITHUB_OUTPUT
+          tail -1 output.json | jq -r '.json | fromjson | .BundleOutput.bundles[]' > bundles.txt
+          echo "bundles=$(jq -Rs '.' bundles.txt)" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: bundle-${{ matrix.os }}
-          path: ${{ join(fromJson(steps.bundle.outputs.bundles), '\n') }}
+          path: |
+            ${{ steps.bundle.outputs.bundles }}
