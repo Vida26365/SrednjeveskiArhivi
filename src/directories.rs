@@ -18,7 +18,8 @@ impl AppDirectories {
 
         let sysdata = {
             let executable = std::env::current_exe().expect("Failed to get current executable");
-            let current = executable.parent().expect("Failed to get parent directory").to_path_buf();
+            let current =
+                executable.parent().expect("Failed to get parent directory").to_path_buf();
 
             cfg_if! {
                 if #[cfg(platform_windows)] {

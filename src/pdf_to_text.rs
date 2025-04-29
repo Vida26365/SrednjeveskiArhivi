@@ -1,7 +1,8 @@
-use pdf2image::{PDF2ImageError, RenderOptionsBuilder, PDF};
 use std::path::Path;
 
-pub fn pfd_to_img(){
+use pdf2image::{PDF2ImageError, RenderOptionsBuilder, PDF};
+
+pub fn pfd_to_img() {
     let mapa_s_pdfji = Path::new("zapisi").join("pdfji"); //mapa
     let output_folder = Path::new("zapisi").join("jpgji"); //mapa
 
@@ -12,10 +13,12 @@ pub fn pfd_to_img(){
                 let file_name = file_path.file_stem().unwrap().to_string_lossy(); // Get the file name without extension
 
                 let pdf = PDF::from_file(&file_path).unwrap();
-                let pages = pdf.render(
-                    pdf2image::Pages::Range(1..=8),
-                    RenderOptionsBuilder::default().pdftocairo(true).build().unwrap(),
-                ).unwrap();
+                let pages = pdf
+                    .render(
+                        pdf2image::Pages::Range(1..=8),
+                        RenderOptionsBuilder::default().pdftocairo(true).build().unwrap(),
+                    )
+                    .unwrap();
 
                 std::fs::create_dir_all(&output_folder).unwrap();
                 // let neki = image::ImageFormat::Jpeg;
@@ -25,10 +28,8 @@ pub fn pfd_to_img(){
                     output_path = output_path.join(format!("{}.jpg", i + 1));
                     page.save_with_format(output_path, image::ImageFormat::Jpeg).unwrap();
                 }
-
-
             }
-            Err(er) => print!("{:?}", er)
+            Err(er) => print!("{:?}", er),
         }
     }
 }
