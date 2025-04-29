@@ -1,10 +1,13 @@
+# občasno zgreši del teksta
+# 3 prebere kot 5
+
 from PIL import Image
 import pytesseract
 import os
 
 zapisi = "zapisi"
 jpgji = "jpgji"
-txtji = "txtji"
+txtji = "txtji_tesseract"
 jpg_mapa = os.path.join(zapisi, jpgji)
 
 # Koristne stvari na: https://pypi.org/project/pytesseract/
