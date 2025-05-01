@@ -1,0 +1,23 @@
+#leva_stran {
+  background-color: blue;
+}
+
+#desna_stran {
+  background-color: blueviolet;
+}
+
+#drsnik {
+  background-color: yellowgreen;
+  /* width: 10px; */
+}
+/*
+#drsnik:hover {
+  color:aquamarine
+} */
+
+#container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  height: 100%;
+}
+

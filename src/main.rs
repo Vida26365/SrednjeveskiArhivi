@@ -5,6 +5,8 @@ use dioxus::desktop::wry::http::{Response, StatusCode};
 use dioxus::logger::tracing::{error, info};
 use dioxus::prelude::*;
 use uuid::Uuid;
+use dioxus::desktop::WindowBuilder;
+// use dioxus::desktop::PhysicalPosition;
 
 use crate::components::navbar::Navbar;
 use crate::database::get_database;
@@ -39,13 +41,15 @@ enum Route {
 
 const ICON: Asset = asset!("/assets/images/icon.ico");
 const TAILWIND: Asset = asset!("/assets/styles/tailwind.css");
+const UREJANJE: Asset = asset!("/assets/styles/urejanje.css");
 
 fn main() {
     dioxus::logger::initialize_default();
 
     let config = dioxus::desktop::Config::new()
         .with_resource_directory(DIRECTORIES.sysdata.join("assets"))
-        .with_data_directory(DIRECTORIES.userdata.join("webview"));
+        .with_data_directory(DIRECTORIES.userdata.join("webview"))
+        .with_window(make_window());
 
     let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
     runtime.block_on(get_database());
@@ -96,8 +100,20 @@ fn App() -> Element {
         // Global app resources
         document::Link { rel: "icon", href: ICON }
         document::Link { rel: "stylesheet", href: TAILWIND }
+        document::Link { rel: "stylesheet", href: UREJANJE }
 
         // Router view
         Router::<Route> {}
     }
+}
+
+
+fn make_window() -> WindowBuilder {
+    WindowBuilder::new()
+        // .with_transparent(true)
+        // .with_decorations(false)
+        // .with_resizable(false)
+        .with_always_on_top(false)
+        // .with_position(PhysicalPosition::new(0, 0))
+        // .with_max_inner_size(LogicalSize::new(100000, 50))
 }
