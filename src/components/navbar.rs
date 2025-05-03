@@ -15,11 +15,6 @@ pub fn Navbar() -> Element {
                     to: Route::DocumentList {},
                     "Dokumenti"
                 }
-                Link {
-                    class: "btn btn-ghost text-lg",
-                    to: Route::Blog { id: 1 },
-                    "Blog"
-                }
             }
         }
 

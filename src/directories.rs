@@ -18,16 +18,15 @@ impl AppDirectories {
 
         let sysdata = {
             let executable = std::env::current_exe().expect("Failed to get current executable");
-            let current =
-                executable.parent().expect("Failed to get parent directory").to_path_buf();
+            let base = executable.parent().expect("Failed to get parent directory").to_path_buf();
 
             cfg_if! {
                 if #[cfg(platform_windows)] {
-                    current
+                    base
                 } else if #[cfg(any(platform_linux, platform_bsd))] {
-                    current.join("..").join("lib").join("SrednjeveskiArhivi")
+                    base.join("..").join("lib").join("SrednjeveskiArhivi")
                 } else if #[cfg(platform_macos)] {
-                    current.join("..").join("Resources")
+                    base.join("..").join("Resources")
                 } else {
                     compile_error!("Unknown operating system")
                 }

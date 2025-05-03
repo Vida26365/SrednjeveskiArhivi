@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::components::navbar::Navbar;
 use crate::database::get_database;
 use crate::directories::DIRECTORIES;
-use crate::views::blog::Blog;
+use crate::utils::ocr::extract;
 use crate::views::documents::display::DocumentDisplay;
 use crate::views::documents::list::DocumentList;
 
@@ -17,7 +17,7 @@ mod components;
 mod database;
 mod directories;
 mod entities;
-mod pdf_to_text;
+mod utils;
 mod views;
 
 #[derive(Clone, Debug, PartialEq, Eq, Routable)]
@@ -31,10 +31,7 @@ enum Route {
     DocumentList {},
 
     #[route("/documents/:id")]
-    DocumentDisplay { id: uuid::Uuid },
-
-    #[route("/blog/:id")]
-    Blog { id: i32 },
+    DocumentDisplay { id: Uuid },
 }
 
 const ICON: Asset = asset!("/assets/images/icon.ico");
