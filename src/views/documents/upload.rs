@@ -1,15 +1,32 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
+use anyhow::{Context, Result};
 use dioxus::html::{FileEngine, HasFileData};
 use dioxus::logger::tracing::error;
 use dioxus::prelude::*;
+use sea_orm::entity::prelude::*;
+use sea_orm::ActiveValue;
+
+use crate::components::alerts::error::AlertError;
+use crate::components::alerts::success::AlertSuccess;
+use crate::database::get_database;
+use crate::directories::DIRECTORIES;
+use crate::entities::document;
+use crate::views::documents::upload::UploadState::Idle;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct FileDetails {
     path: PathBuf,
     name: String,
     size: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum UploadState {
+    Idle,
+    Success,
+    Error(String),
 }
 
 fn filesize(size: u64) -> String {
@@ -32,6 +49,8 @@ fn filesize(size: u64) -> String {
 #[component]
 pub fn DocumentUpload() -> Element {
     let mut uploaded = use_signal(Vec::<FileDetails>::new);
+
+    let mut state = use_signal(|| Idle);
 
     let upload = move |engine: Arc<dyn FileEngine>| {
         for path in engine.files() {
@@ -59,6 +78,7 @@ pub fn DocumentUpload() -> Element {
             };
 
             uploaded.write().push(file);
+            state.set(Idle);
         }
     };
 
@@ -66,12 +86,38 @@ pub fn DocumentUpload() -> Element {
         uploaded.write().retain(|existing| existing.path != file.path);
     };
 
+    let save = async move || -> Result<()> {
+        for file in uploaded.read().iter() {
+            let id = Uuid::now_v7();
+
+            let document = document::ActiveModel {
+                id: ActiveValue::Set(id),
+                filename: ActiveValue::Set(file.name.clone()),
+                title: ActiveValue::Set(file.name.clone()),
+                keywords: ActiveValue::Set(document::Keywords(vec![])),
+                summary: ActiveValue::NotSet,
+                content: ActiveValue::NotSet,
+            };
+
+            let storage = DIRECTORIES.userdata.join("documents");
+            let path = storage.join(id.to_string()).with_extension("pdf");
+
+            tokio::fs::create_dir_all(&storage).await.context("Failed to create storage")?;
+            tokio::fs::copy(&file.path, &path).await.context("Failed to copy file")?;
+
+            let database = get_database().await;
+            document.insert(database).await.context("Failed to insert document")?;
+        }
+
+        Ok(())
+    };
+
     let mut hovered = use_signal(|| false);
     let background = use_memo(move || if hovered() { "bg-alt-300" } else { "bg-alt-100" });
 
     rsx! {
         label {
-            class: "flex flex-col items-center justify-center w-full h-64 mb-4 rounded cursor-pointer {background} hover:bg-alt-200",
+            class: "flex flex-col items-center justify-center w-full h-64 mb-4 rounded-box cursor-pointer {background} hover:bg-alt-200",
             for: "upload",
             ondragover: move |evt| { evt.prevent_default(); hovered.set(true); },
             ondragleave: move |evt| { evt.prevent_default(); hovered.set(false); },
@@ -104,14 +150,47 @@ pub fn DocumentUpload() -> Element {
         }
 
         button {
-            class: "btn btn-soft btn-primary w-full mb-4 rounded",
+            class: "btn btn-soft btn-primary w-full mb-4 rounded-box",
             disabled: uploaded.read().is_empty(),
+            onclick: move |_| async move {
+                match save().await {
+                    Ok(_) => {
+                        uploaded.write().clear();
+                        state.set(UploadState::Success);
+                    }
+                    Err(err) => {
+                        state.set(UploadState::Error(err.to_string()));
+                    }
+                }
+            },
             "Naloži dokumente"
+        }
+
+        match state() {
+            UploadState::Idle => rsx! {},
+            UploadState::Success => rsx! {
+                div {
+                    class: "mb-4",
+                    AlertSuccess {
+                        title: "Dokumenti uspešno naloženi".to_string(),
+                        details: "".to_string(),
+                    }
+                }
+            },
+            UploadState::Error(error) => rsx! {
+                div {
+                    class: "mb-4",
+                    AlertError {
+                        title: "Napaka pri nalaganju dokumentov".to_string(),
+                        details: error.to_string(),
+                    }
+                }
+            },
         }
 
         for file in uploaded.read().iter().cloned().rev() {
             div {
-                class: "flex items-center justify-between p-3 mb-2 rounded bg-alt-100",
+                class: "flex items-center justify-between p-3 mb-2 rounded-box bg-alt-100",
                 div {
                     class: "flex items-center",
                     div {

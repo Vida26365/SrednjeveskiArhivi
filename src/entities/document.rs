@@ -19,7 +19,6 @@ pub struct Model {
     pub title: String,
 
     /// The document keywords (optional).
-    #[sea_orm(nullable)]
     pub keywords: Keywords,
 
     /// The document summary (optional).
@@ -36,6 +35,6 @@ pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {
     fn new() -> Self {
-        Self { id: sea_orm::ActiveValue::Set(Uuid::new_v4()), ..ActiveModelTrait::default() }
+        Self { id: sea_orm::ActiveValue::Set(Uuid::now_v7()), ..ActiveModelTrait::default() }
     }
 }

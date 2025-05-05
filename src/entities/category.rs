@@ -39,6 +39,6 @@ pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {
     fn new() -> Self {
-        Self { id: sea_orm::ActiveValue::Set(Uuid::new_v4()), ..ActiveModelTrait::default() }
+        Self { id: sea_orm::ActiveValue::Set(Uuid::now_v7()), ..ActiveModelTrait::default() }
     }
 }
