@@ -9,9 +9,9 @@ use uuid::Uuid;
 use crate::components::navbar::Navbar;
 use crate::database::get_database;
 use crate::directories::DIRECTORIES;
-use crate::utils::ocr::extract;
 use crate::views::documents::display::DocumentDisplay;
 use crate::views::documents::list::DocumentList;
+use crate::views::documents::upload::DocumentUpload;
 
 mod components;
 mod database;
@@ -29,6 +29,9 @@ enum Route {
 
     #[route("/documents")]
     DocumentList {},
+
+    #[route("/documents/upload")]
+    DocumentUpload {},
 
     #[route("/documents/:id")]
     DocumentDisplay { id: Uuid },
