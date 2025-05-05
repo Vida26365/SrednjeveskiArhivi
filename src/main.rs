@@ -37,6 +37,7 @@ enum Route {
 
     #[route("/blog/:id")]
     Blog { id: i32 },
+
 }
 
 const ICON: Asset = asset!("/assets/images/icon.ico");
@@ -114,6 +115,6 @@ fn make_window() -> WindowBuilder {
         // .with_decorations(false)
         // .with_resizable(false)
         .with_always_on_top(false)
-        // .with_position(PhysicalPosition::new(0, 0))
+        // .with_position(PhysicalPnosition::new(0, 0))
         // .with_max_inner_size(LogicalSize::new(100000, 50))
 }

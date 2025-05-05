@@ -1,23 +1,54 @@
-#leva_stran {
-  background-color: blue;
-}
+* { margin: 0; box-sizing: border-box; }
+html, body { height: 100dvh; font: 1.1rem/1.4 sans-serif; display: flex; flex-direction: column; }
+nav { padding: 1rem; }
+main { flex: 1; }
 
-#desna_stran {
-  background-color: blueviolet;
-}
+/* Resizable grid */
 
-#drsnik {
-  background-color: yellowgreen;
-  /* width: 10px; */
-}
-/*
-#drsnik:hover {
-  color:aquamarine
+/* .trije_divi {
+  touch-action: none;
+  display: grid;
 } */
 
-#container {
+.panes {
+  touch-action: none;
   display: grid;
-  grid-template-columns: auto auto auto;
-  height: 100%;
 }
 
+.pane {
+  position: relative;
+  overflow: hidden;
+  /* color: blueviolet; */
+}
+
+.gutter {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 3;
+  background: #000;
+}
+
+.trije_divi > .pane > .gutter {
+  cursor: col-resize;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+}
+
+/* .trije_divi > .pane > .gutter {
+  cursor: row-resize;
+  left: 0;
+  height: 8px;
+} */
+
+.leva_stran {
+  background-color: gray;
+}
+
+.srednja_stran {
+  background-color: rgb(149, 148, 189);
+}
+.desna_stran {
+  background-color: rgba(180, 39, 39, 0.256);
+}
