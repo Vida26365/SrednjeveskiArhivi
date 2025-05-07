@@ -37,7 +37,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
         Some(Err(error)) => rsx! {
             AlertError {
                 title: "Napaka pri nalaganju dokumenta".to_string(),
-                details: error.to_string(),
+                details: format!("{:?}", error),
             }
         },
         None => rsx! {

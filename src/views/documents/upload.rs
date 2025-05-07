@@ -157,7 +157,7 @@ pub fn DocumentUpload() -> Element {
                         state.set(UploadState::Success);
                     }
                     Err(error) => {
-                        state.set(UploadState::Error(error.to_string()));
+                        state.set(UploadState::Error(format!("{:?}", error)));
                     }
                 }
             },
@@ -180,7 +180,7 @@ pub fn DocumentUpload() -> Element {
                     class: "mb-4",
                     AlertError {
                         title: "Napaka pri nalaganju dokumentov".to_string(),
-                        details: error.to_string(),
+                        details: error,
                     }
                 }
             },

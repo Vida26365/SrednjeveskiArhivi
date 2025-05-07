@@ -8,9 +8,11 @@ pub struct Model {
     pub id: Uuid,
 
     /// The organization name.
+    #[sea_orm(indexed)]
     pub name: String,
 
     /// The organization description.
+    #[sea_orm(default_value = "")]
     pub description: String,
 }
 

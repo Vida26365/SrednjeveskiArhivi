@@ -53,7 +53,7 @@ pub fn DocumentList() -> Element {
         Some(Err(error)) => rsx! {
             AlertError {
                 title: "Napaka pri nalaganju dokumentov".to_string(),
-                details: error.to_string(),
+                details: format!("{:?}", error),
             }
         },
         None => rsx! {

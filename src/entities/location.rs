@@ -8,8 +8,12 @@ pub struct Model {
     pub id: Uuid,
 
     /// The location name.
+    #[sea_orm(indexed)]
     pub name: String,
-    // TODO: Other fields
+
+    /// The location description.
+    #[sea_orm(default_value = "")]
+    pub description: String,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, EnumIter, DeriveRelation)]
