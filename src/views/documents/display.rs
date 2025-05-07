@@ -1,7 +1,5 @@
-use dioxus::html::{textarea, ul};
 use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
-use sea_orm::sea_query::value;
 use sea_orm::EntityTrait;
 use uuid::Uuid;
 
@@ -11,7 +9,7 @@ use crate::entities::Document;
 
 fn vec_to_multyline(vec: Vec<String>) -> String {
     let mut value = String::new();
-    for key in &vec[1..] {
+    for key in &vec {
         value += &(String::from("\n") + key)
     }
     value
@@ -26,6 +24,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
 
     match &*document.read_unchecked() {
         Some(Ok(Some(document))) => rsx! {
+            document::Link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
             document::Script { src: asset!("/assets/scripts/grid.js") },
             // script { src: "/assets/scripts/grid.js"}
             div { class: "trije_divi panes pane h-full",
@@ -111,9 +110,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
             //     h1 { "{document.title}" }
             //     p { b { "Filename: " } "{document.filename}" }
             //     p { b { "Keywords: " } "{document.keywords.0.join(\", \")}" }
-            //     if let Some(summary) = &document.summary {
-            //         p { b { "Summary: " } "{summary}" }
-            //     }
+            //     p { b { "Summary: " } "{document.summary}" }
             //     embed {
             //         src: "/content/{document.id}#toolbar=0",
             //         type: "application/pdf",
@@ -131,7 +128,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
         Some(Err(error)) => rsx! {
             AlertError {
                 title: "Napaka pri nalaganju dokumenta".to_string(),
-                details: error.to_string(),
+                details: format!("{:?}", error),
             }
         },
         None => rsx! {
