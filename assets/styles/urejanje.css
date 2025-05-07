@@ -3,12 +3,7 @@ html, body { height: 100dvh; font: 1.1rem/1.4 sans-serif; display: flex; flex-di
 nav { padding: 1rem; }
 main { flex: 1; }
 
-/* Resizable grid */
 
-/* .trije_divi {
-  touch-action: none;
-  display: grid;
-} */
 
 .panes {
   touch-action: none;
@@ -41,6 +36,10 @@ main { flex: 1; }
   left: 0;
   height: 8px;
 } */
+
+.trije_divi {
+  height: 100%;
+}
 
 .leva_stran {
   background-color: gray;

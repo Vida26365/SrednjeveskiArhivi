@@ -1,13 +1,12 @@
 use std::fs;
 
-use dioxus::desktop::use_asset_handler;
 use dioxus::desktop::wry::http::{Response, StatusCode};
+use dioxus::desktop::{use_asset_handler, WindowBuilder};
 use dioxus::logger::tracing::{error, info};
 use dioxus::prelude::*;
 use uuid::Uuid;
-use dioxus::desktop::WindowBuilder;
-// use dioxus::desktop::PhysicalPosition;
 
+// use dioxus::desktop::PhysicalPosition;
 use crate::components::navbar::Navbar;
 use crate::database::get_database;
 use crate::directories::DIRECTORIES;
@@ -108,13 +107,12 @@ fn App() -> Element {
     }
 }
 
-
 fn make_window() -> WindowBuilder {
     WindowBuilder::new()
         // .with_transparent(true)
         // .with_decorations(false)
         // .with_resizable(false)
         .with_always_on_top(false)
-        // .with_position(PhysicalPnosition::new(0, 0))
-        // .with_max_inner_size(LogicalSize::new(100000, 50))
+    // .with_position(PhysicalPnosition::new(0, 0))
+    // .with_max_inner_size(LogicalSize::new(100000, 50))
 }
