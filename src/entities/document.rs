@@ -8,7 +8,7 @@ pub struct Keywords(pub Vec<String>);
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
 #[sea_orm(table_name = "documents")]
 pub struct Model {
-    /// The document identifier.
+    /// The document primary key.
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
 
@@ -18,16 +18,24 @@ pub struct Model {
     /// The document title.
     pub title: String,
 
-    /// The document keywords (optional).
+    /// The document summary.
+    pub summary: String,
+
+    /// The document metadata.
+    pub metadata: String,
+
+    /// The document content.
+    pub content: String,
+
+    /// The document keywords.
+    #[sea_orm(default_value = "[]")]
     pub keywords: Keywords,
 
-    /// The document summary (optional).
-    #[sea_orm(nullable)]
-    pub summary: Option<String>,
+    /// Other document data.
+    pub other: Json,
 
-    /// The document content (optional).
-    #[sea_orm(nullable)]
-    pub content: Option<String>,
+    /// Has the document been reviewed?
+    pub reviewed: bool,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, EnumIter, DeriveRelation)]

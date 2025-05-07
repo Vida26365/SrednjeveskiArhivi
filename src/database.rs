@@ -3,17 +3,24 @@ use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbConn, EntityTrait
 use tokio::sync::OnceCell;
 
 use crate::directories::DIRECTORIES;
-use crate::entities::{Category, Document, Label};
+use crate::entities::{Document, Location, Organization, Person};
 
 static DATABASE: OnceCell<DatabaseConnection> = OnceCell::const_new();
 
 async fn create_table<E: EntityTrait>(database: &DbConn, entity: E) {
     let backend = database.get_database_backend();
     let schema = Schema::new(backend);
-    let statement = backend.build(schema.create_table_from_entity(entity).if_not_exists());
 
-    if let Err(error) = database.execute(statement).await {
-        panic!("Failed to create table {}: {}", entity.table_name(), error);
+    database
+        .execute(backend.build(schema.create_table_from_entity(entity).if_not_exists()))
+        .await
+        .expect("Failed to create table");
+
+    for mut stmt in schema.create_index_from_entity(entity) {
+        database
+            .execute(backend.build(stmt.if_not_exists()))
+            .await
+            .expect("Failed to create index");
     }
 }
 
@@ -25,10 +32,10 @@ async fn init_database() -> DatabaseConnection {
     let database = Database::connect(url).await.expect("Failed to connect to database");
 
     info!("Creating tables...");
-
-    create_table(&database, Category).await;
     create_table(&database, Document).await;
-    create_table(&database, Label).await;
+    create_table(&database, Location).await;
+    create_table(&database, Organization).await;
+    create_table(&database, Person).await;
 
     database
 }

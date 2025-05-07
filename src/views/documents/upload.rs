@@ -94,9 +94,7 @@ pub fn DocumentUpload() -> Element {
                 id: ActiveValue::Set(id),
                 filename: ActiveValue::Set(file.name.clone()),
                 title: ActiveValue::Set(file.name.clone()),
-                keywords: ActiveValue::Set(document::Keywords(vec![])),
-                summary: ActiveValue::NotSet,
-                content: ActiveValue::NotSet,
+                ..Default::default()
             };
 
             let storage = DIRECTORIES.userdata.join("documents");
@@ -158,8 +156,8 @@ pub fn DocumentUpload() -> Element {
                         uploaded.write().clear();
                         state.set(UploadState::Success);
                     }
-                    Err(err) => {
-                        state.set(UploadState::Error(err.to_string()));
+                    Err(error) => {
+                        state.set(UploadState::Error(error.to_string()));
                     }
                 }
             },

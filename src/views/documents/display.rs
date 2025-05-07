@@ -19,9 +19,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                 h1 { "{document.title}" }
                 p { b { "Filename: " } "{document.filename}" }
                 p { b { "Keywords: " } "{document.keywords.0.join(\", \")}" }
-                if let Some(summary) = &document.summary {
-                    p { b { "Summary: " } "{summary}" }
-                }
+                p { b { "Summary: " } "{document.summary}" }
                 embed {
                     src: "/content/{document.id}#toolbar=0",
                     type: "application/pdf",
