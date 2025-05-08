@@ -7,6 +7,8 @@ use crate::components::alerts::error::AlertError;
 use crate::database::get_database;
 use crate::entities::Document;
 
+// use freyr::prelude::*;
+
 fn vec_to_multyline(vec: Vec<String>) -> String {
     let mut value = String::new();
     for key in &vec {
@@ -22,6 +24,27 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
         Document::find_by_id(id).one(database).await
     });
 
+    // let jeziki = Vec::from([
+    //     DropdownItem {label: String::from("Latinščina"), url: None},
+    //     DropdownItem {label: String::from("Slovenščina"), url: None},
+    //     DropdownItem {label: String::from("Nemščina"), url: None}
+    // ]);
+
+    let jeziki = Vec::from([
+        "Slovenščina",
+        "Latinščina",
+        "Nemščina"
+    ]);
+
+    // let config_dropdown = DropdownConfig {
+    //     title: String::from("Menu"),
+    //     label: jeziki,
+    //     background_color: DropdownColorScheme::Freyr,
+    //     title_color: DropdownTitleColor::Light,
+    //     labels_color: DropdownLabelsColor::Dark,
+    //     hover_color: DropdownHoverColor::Custom("#03346E"),
+    // };
+
     match &*document.read_unchecked() {
         Some(Ok(Some(document))) => rsx! {
             document::Link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
@@ -30,6 +53,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
             div { class: "trije_divi panes pane h-full",
                 div { class: "leva_stran pane",
                 form { onsubmit: move |event| { info!("Submitted! {event:?}") },
+                    // TODO: povsod v input treba dodati value oziroma ime
                     ul{
                         li {
                             label { "Ime datoteke:" }
@@ -38,6 +62,10 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                         li {
                             label { id: "naslov:", "Naslov dokumenta: "}
                             input { id: "naslov", value: document.title.clone()}
+                        }
+                        li {
+                            label {"Datum"} //TODO: Kakšen format inma datum
+                            // input { value: to_string(document.date.clone()) }
                         }
                         li {
                             label {"imena oseb"}
@@ -51,6 +79,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                                         list_styler_type: "square",
                                         ul {
                                             for variacije in name {
+                                                //TODO: variacije v svojem text area
                                                 li {
                                                     input {
                                                         spellcheck: "false",
@@ -64,10 +93,27 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                             }
                         }
                         li {
+                            label { "Lokacija: " }
+                            //TODO: Glavna lokacija i ostale lokacije
+                        }
+                        li {
                             label {"Ključne besede: "}
                             textarea { value: vec_to_multyline(document.keywords.0.clone())}
                         }
-                        input { r#type: "Submit" }
+                        li {
+                            label {"Jeziki"}
+                            select {
+                                for jezik in &jeziki {
+                                    option {
+                                        value: *jezik,
+                                        "{jezik}"
+                                    }
+                                }
+                            }
+                            //TODO: gumb dodaj jezik
+
+                        }
+                        li { input { r#type: "Submit", "shrani" } }
                     }
 
                 }
