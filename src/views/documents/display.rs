@@ -46,7 +46,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                                 list_styler_type: "square",
 
                                 //TODO: Format bo drugačen ko bo implementiran v bazi
-                                for name in [Vec::from(["ime1osebe1", "ime2osebe2"]), Vec::from(["oseba2"]), Vec::from(["filip", "še en filip", "pravzaprav so tu kar trije filipi"])] {
+                                for name in [Vec::from(["ime1osebe1", "ime2osebe2"]), Vec::from(["oseba2"]), Vec::from(["filip", "še en filip", "pravzaprav so tu kar trije filipi"]), Vec::from(["zdaj se je pa pojavila še ena vida"])] {
                                     li {
                                         list_styler_type: "square",
                                         ul {

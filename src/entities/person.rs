@@ -19,6 +19,16 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, PartialEq, Eq, EnumIter, DeriveRelation)]
 pub enum Relation {}
 
+impl Related<super::document::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::document_person::Relation::Document.def()
+    }
+
+    fn via() -> Option<RelationDef> {
+        Some(super::document_person::Relation::Person.def().rev())
+    }
+}
+
 impl ActiveModelBehavior for ActiveModel {
     fn new() -> Self {
         Self { id: sea_orm::ActiveValue::Set(Uuid::now_v7()), ..ActiveModelTrait::default() }
