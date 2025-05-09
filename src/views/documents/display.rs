@@ -1,3 +1,4 @@
+use anyhow::Result;
 use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
 use sea_orm::EntityTrait;
@@ -17,9 +18,9 @@ fn vec_to_multyline(vec: Vec<String>) -> String {
 
 #[component]
 pub fn DocumentDisplay(id: Uuid) -> Element {
-    let document = use_resource(move || async move {
+    let document: Resource<Result<_>> = use_resource(move || async move {
         let database = get_database().await;
-        Document::find_by_id(id).one(database).await
+        Ok(Document::find_by_id(id).one(database).await?)
     });
 
     match &*document.read_unchecked() {

@@ -16,9 +16,14 @@ pub fn AlertWarning(title: String, details: String) -> Element {
                     stroke_width: "2",
                 }
             }
+            strong { "{title}" }
+        }
+        if !details.is_empty() {
             div {
-                p { strong { "{title}" }}
-                p { "{details}" }
+                class: "alert alert-soft alert-warning mt-2",
+                role: "alert",
+                div { class: "h-6 w-6" }
+                p { class: "whitespace-pre-line", "{details}" }
             }
         }
     }

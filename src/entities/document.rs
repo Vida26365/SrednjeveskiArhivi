@@ -129,6 +129,6 @@ impl Linked for DocumentToPrimaryLocation {
     type ToEntity = super::location::Entity;
 
     fn link(&self) -> Vec<LinkDef> {
-        vec![Relation::Location.def().rev()]
+        vec![Relation::Location.def()]
     }
 }
