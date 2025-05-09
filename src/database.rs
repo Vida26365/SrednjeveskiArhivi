@@ -9,8 +9,11 @@ use crate::entities::{
     DocumentOrganization,
     DocumentPerson,
     Location,
+    LocationAlias,
     Organization,
+    OrganizationAlias,
     Person,
+    PersonAlias,
 };
 
 static DATABASE: OnceCell<DatabaseConnection> = OnceCell::const_new();
@@ -42,8 +45,13 @@ async fn init_database() -> DatabaseConnection {
     info!("Creating tables...");
 
     create_table(&database, Location).await;
+    create_table(&database, LocationAlias).await;
+
     create_table(&database, Organization).await;
+    create_table(&database, OrganizationAlias).await;
+
     create_table(&database, Person).await;
+    create_table(&database, PersonAlias).await;
 
     create_table(&database, Document).await;
     create_table(&database, DocumentLocation).await;

@@ -1,40 +1,38 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
-#[sea_orm(table_name = "locations")]
+#[sea_orm(table_name = "organizations_aliases")]
 pub struct Model {
-    /// The location primary key.
+    /// The organization alias primary key.
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
 
-    /// The location name.
+    /// The main organization primary key.
+    #[sea_orm(indexed, nullable)]
+    pub organization: Option<Uuid>,
+
+    /// The organization alias name.
     #[sea_orm(indexed)]
     pub name: String,
 
-    /// The location description.
+    /// The organization alias description.
     #[sea_orm(default_value = "")]
     pub description: String,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::location_alias::Entity")]
-    Alias,
+    #[sea_orm(
+        belongs_to = "super::organization::Entity",
+        from = "Column::Organization",
+        to = "super::organization::Column::Id"
+    )]
+    Organization,
 }
 
-impl Related<super::document::Entity> for Entity {
+impl Related<super::organization::Entity> for Entity {
     fn to() -> RelationDef {
-        super::document_location::Relation::Document.def()
-    }
-
-    fn via() -> Option<RelationDef> {
-        Some(super::document_location::Relation::Location.def().rev())
-    }
-}
-
-impl Related<super::location_alias::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Alias.def()
+        Relation::Organization.def()
     }
 }
 

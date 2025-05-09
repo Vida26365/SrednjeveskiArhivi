@@ -17,7 +17,10 @@ pub struct Model {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, EnumIter, DeriveRelation)]
-pub enum Relation {}
+pub enum Relation {
+    #[sea_orm(has_many = "super::organization_alias::Entity")]
+    Alias,
+}
 
 impl Related<super::document::Entity> for Entity {
     fn to() -> RelationDef {
@@ -26,6 +29,12 @@ impl Related<super::document::Entity> for Entity {
 
     fn via() -> Option<RelationDef> {
         Some(super::document_organization::Relation::Organization.def().rev())
+    }
+}
+
+impl Related<super::organization_alias::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Alias.def()
     }
 }
 
