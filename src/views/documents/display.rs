@@ -60,11 +60,11 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                             label { "{document.filename}" }
                         }
                         li {
-                            label { id: "naslov:", "Naslov dokumenta: "}
-                            input { id: "naslov", value: document.title.clone()}
+                            label { "Naslov dokumenta: "}
+                            input { name : "title", value: document.title.clone()}
                         }
                         li {
-                            label {"Datum"} //TODO: Kakšen format inma datum
+                            label {"Datum"} //TODO: Kakšen format ima datum
                             // input { value: to_string(document.date.clone()) }
                         }
                         li {
@@ -82,6 +82,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                                                 //TODO: variacije v svojem text area
                                                 li {
                                                     input {
+                                                        name : "ime",
                                                         spellcheck: "false",
                                                         value: "{variacije}"
                                                     }
