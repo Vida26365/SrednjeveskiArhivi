@@ -18,6 +18,15 @@ pub enum Date {
     Julian(icu_calendar::Date<icu_calendar::cal::Julian>),
 }
 
+impl Date {
+    pub fn to_iso(&self) -> icu_calendar::Date<icu_calendar::Iso> {
+        match self {
+            Date::Gregorian(date) => date.to_iso(),
+            Date::Julian(date) => date.to_iso(),
+        }
+    }
+}
+
 impl Serialize for Date {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
