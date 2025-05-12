@@ -23,6 +23,7 @@ const resizableGrid = (elParent, idx) => {
     if (isResizing || !evt.target.closest(".gutter")) return;
     isResizing = true;
     elPaneCurr = evt.currentTarget;
+    elPaneCurr.setPointerCapture(evt.pointerId);
     fr = [...elsPanes].map((elPane) => isVert ? elPane.clientHeight / elParent.clientHeight : elPane.clientWidth / elParent.clientWidth);
     paneIndex = [...elsPanes].indexOf(elPaneCurr);
     frStart = fr[paneIndex];
@@ -49,6 +50,7 @@ const resizableGrid = (elParent, idx) => {
   const pointerUp = (evt) => {
     removeEventListener("pointermove", pointerMove);
     removeEventListener("pointerup", pointerUp);
+    elPaneCurr.releasePointerCapture(evt.pointerId);
     isResizing = false;
   };
 

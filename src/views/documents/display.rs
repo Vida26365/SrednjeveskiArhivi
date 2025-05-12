@@ -1,3 +1,4 @@
+use anyhow::Result;
 use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
 use sea_orm::EntityTrait;
@@ -19,9 +20,9 @@ fn vec_to_multyline(vec: Vec<String>) -> String {
 
 #[component]
 pub fn DocumentDisplay(id: Uuid) -> Element {
-    let document = use_resource(move || async move {
+    let document: Resource<Result<_>> = use_resource(move || async move {
         let database = get_database().await;
-        Document::find_by_id(id).one(database).await
+        Ok(Document::find_by_id(id).one(database).await?)
     });
 
     // let jeziki = Vec::from([
@@ -74,7 +75,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                                 list_styler_type: "square",
 
                                 //TODO: Format bo drugačen ko bo implementiran v bazi
-                                for name in [Vec::from(["ime1osebe1", "ime2osebe2"]), Vec::from(["oseba2"]), Vec::from(["filip", "še en filip", "pravzaprav so tu kar trije filipi"])] {
+                                for name in [Vec::from(["ime1osebe1", "ime2osebe2"]), Vec::from(["oseba2"]), Vec::from(["filip", "še en filip", "pravzaprav so tu kar trije filipi"]), Vec::from(["zdaj se je pa pojavila še ena vida"])] {
                                     li {
                                         list_styler_type: "square",
                                         ul {

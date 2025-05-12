@@ -3,7 +3,18 @@ use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbConn, EntityTrait
 use tokio::sync::OnceCell;
 
 use crate::directories::DIRECTORIES;
-use crate::entities::{Document, Location, Organization, Person};
+use crate::entities::{
+    Document,
+    DocumentLocation,
+    DocumentOrganization,
+    DocumentPerson,
+    Location,
+    LocationAlias,
+    Organization,
+    OrganizationAlias,
+    Person,
+    PersonAlias,
+};
 
 static DATABASE: OnceCell<DatabaseConnection> = OnceCell::const_new();
 
@@ -32,10 +43,20 @@ async fn init_database() -> DatabaseConnection {
     let database = Database::connect(url).await.expect("Failed to connect to database");
 
     info!("Creating tables...");
-    create_table(&database, Document).await;
+
     create_table(&database, Location).await;
+    create_table(&database, LocationAlias).await;
+
     create_table(&database, Organization).await;
+    create_table(&database, OrganizationAlias).await;
+
     create_table(&database, Person).await;
+    create_table(&database, PersonAlias).await;
+
+    create_table(&database, Document).await;
+    create_table(&database, DocumentLocation).await;
+    create_table(&database, DocumentOrganization).await;
+    create_table(&database, DocumentPerson).await;
 
     database
 }
