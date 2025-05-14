@@ -8,8 +8,8 @@ use dioxus::prelude::*;
 use sea_orm::entity::prelude::*;
 use sea_orm::ActiveValue;
 
-use crate::components::alerts::error::AlertError;
-use crate::components::alerts::success::AlertSuccess;
+use crate::components::alert_error::AlertError;
+use crate::components::alert_success::AlertSuccess;
 use crate::database::get_database;
 use crate::directories::DIRECTORIES;
 use crate::entities::document;

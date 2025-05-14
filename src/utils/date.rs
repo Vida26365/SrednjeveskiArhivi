@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 
 use sea_orm::FromJsonQueryResult;
@@ -12,17 +13,47 @@ pub enum Calendar {
     Julian,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, FromJsonQueryResult)]
+#[derive(Copy, Clone, Debug, FromJsonQueryResult)]
 pub enum Date {
     Gregorian(icu_calendar::Date<icu_calendar::cal::Gregorian>),
     Julian(icu_calendar::Date<icu_calendar::cal::Julian>),
 }
 
 impl Date {
-    pub fn to_iso(&self) -> icu_calendar::Date<icu_calendar::Iso> {
+    pub fn to_iso(self) -> icu_calendar::Date<icu_calendar::Iso> {
         match self {
             Date::Gregorian(date) => date.to_iso(),
             Date::Julian(date) => date.to_iso(),
+        }
+    }
+}
+
+impl Date {
+    pub fn calendar(&self) -> Calendar {
+        match self {
+            Date::Gregorian(_) => Calendar::Gregorian,
+            Date::Julian(_) => Calendar::Julian,
+        }
+    }
+
+    pub fn year(&self) -> i32 {
+        match self {
+            Date::Gregorian(date) => date.year().extended_year,
+            Date::Julian(date) => date.year().extended_year,
+        }
+    }
+
+    pub fn month(&self) -> u8 {
+        match self {
+            Date::Gregorian(date) => date.month().ordinal,
+            Date::Julian(date) => date.month().ordinal,
+        }
+    }
+
+    pub fn day(&self) -> u8 {
+        match self {
+            Date::Gregorian(date) => date.day_of_month().0,
+            Date::Julian(date) => date.day_of_month().0,
         }
     }
 }
@@ -101,3 +132,23 @@ impl Display for Date {
         }
     }
 }
+
+impl PartialOrd for Date {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Date {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.to_iso().cmp(&other.to_iso())
+    }
+}
+
+impl PartialEq for Date {
+    fn eq(&self, other: &Self) -> bool {
+        self.to_iso() == other.to_iso()
+    }
+}
+
+impl Eq for Date {}
