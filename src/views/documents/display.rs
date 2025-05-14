@@ -125,20 +125,26 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                 div { class: "srednja_stran pane",
                     form { onsubmit: move |event| { info!("Submitted! {event:?}") },
                         textarea {
+                            height: "200px",
                             width: "100%",
+                            resize: "vertical",
                             autocomplete: "false",
                             spellcheck: "false",
                             name: "povzetek",
                             value: document.summary.clone()
                         }
                         textarea {
+                            // height: "calc(100vh - 10px)",
+                            height: "450px",
                             width: "100%",
                             autocomplete: "false",
                             spellcheck: "false",
                             name: "zapis",
                             value: document.content.clone()
                         }
-                        input { r#type: "Submit" }
+                        input {
+                            height: "20px",
+                            r#type: "Submit" }
                     }
                 }
 

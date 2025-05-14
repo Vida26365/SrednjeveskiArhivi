@@ -47,7 +47,9 @@ fn main() {
         .with_title("Srednjeveški Arhivi")
         // .with_taskbar_icon(TODO)
         // .with_window_icon(TODO)
-        .with_always_on_top(false);
+        .with_always_on_top(false)
+        .with_resizable(true);
+        // .with_fullscreen(true);
 
     let config = dioxus::desktop::Config::new()
         .with_resource_directory(DIRECTORIES.sysdata.join("assets"))
