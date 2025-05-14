@@ -2,19 +2,10 @@ use anyhow::Result;
 use dioxus::prelude::*;
 use sea_orm::EntityTrait;
 
-use crate::components::alerts::error::AlertError;
+use crate::components::alerts::AlertError;
+use crate::components::mentions::{MentionFirst, MentionLast};
 use crate::database::get_database;
 use crate::entities::{Document, Organization};
-use crate::entities::document;
-
-#[component]
-fn FirstMention(documents: Vec<document::Model>) -> Element {
-    let first_mention = documents
-        .iter()
-        .min_by_key(|document| document.date);
-
-    rsx! { "TODO" }
-}
 
 #[component]
 pub fn OrganizationList() -> Element {
@@ -40,9 +31,12 @@ pub fn OrganizationList() -> Element {
                             }
                         }
                         tbody {
-                            for organization in organizations {
+                            for (organization, documents) in organizations {
                                 tr {
-                                    "{organization:#?}"
+                                    td { "{organization.name}" }
+                                    td { "{documents.len()}" }
+                                    td { MentionFirst { documents: documents.clone() } }
+                                    td { MentionLast { documents: documents.clone() } }
                                 }
                             }
                         }

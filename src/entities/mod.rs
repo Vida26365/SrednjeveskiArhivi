@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 pub mod document;
 pub mod document_location;
 pub mod document_organization;
