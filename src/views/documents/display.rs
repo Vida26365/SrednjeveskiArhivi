@@ -1,14 +1,19 @@
 use anyhow::Result;
 use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
-use sea_orm::EntityTrait;
+use sea_orm::{EntityTrait, ModelTrait};
 use uuid::Uuid;
+use strum::IntoEnumIterator;
 
 use crate::components::alerts::error::AlertError;
 use crate::database::get_database;
-use crate::entities::Document;
+use crate::entities::document::DocumentToPrimaryLocation;
+use crate::entities::{Document, Person};
+use crate::utils::language::Language;
+use crate::utils::read_input::parse_input;
 
-// use freyr::prelude::*;
+
+// https://stackoverflow.com/questions/53777136/dynamic-html-form-elements-as-array
 
 fn vec_to_multyline(vec: Vec<String>) -> String {
     let mut value = String::new();
@@ -22,38 +27,19 @@ fn vec_to_multyline(vec: Vec<String>) -> String {
 pub fn DocumentDisplay(id: Uuid) -> Element {
     let document: Resource<Result<_>> = use_resource(move || async move {
         let database = get_database().await;
-        Ok(Document::find_by_id(id).one(database).await?)
+        Ok(Document::find_by_id(id).find_also_linked(DocumentToPrimaryLocation).one(database).await?)
     });
 
-    // let jeziki = Vec::from([
-    //     DropdownItem {label: String::from("Latinščina"), url: None},
-    //     DropdownItem {label: String::from("Slovenščina"), url: None},
-    //     DropdownItem {label: String::from("Nemščina"), url: None}
-    // ]);
 
-    let jeziki = Vec::from([
-        "Slovenščina",
-        "Latinščina",
-        "Nemščina"
-    ]);
-
-    // let config_dropdown = DropdownConfig {
-    //     title: String::from("Menu"),
-    //     label: jeziki,
-    //     background_color: DropdownColorScheme::Freyr,
-    //     title_color: DropdownTitleColor::Light,
-    //     labels_color: DropdownLabelsColor::Dark,
-    //     hover_color: DropdownHoverColor::Custom("#03346E"),
-    // };
 
     match &*document.read_unchecked() {
-        Some(Ok(Some(document))) => rsx! {
+        Some(Ok(Some((document, location)))) => rsx! {
             document::Link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
             document::Script { src: asset!("/assets/scripts/grid.js") },
             // script { src: "/assets/scripts/grid.js"}
             div { class: "trije_divi panes pane h-full",
                 div { class: "leva_stran pane",
-                form { onsubmit: move |event| { info!("Submitted! {event:?}") },
+                form { onsubmit: async move |event| { parse_input(event) },
                     // TODO: povsod v input treba dodati value oziroma ime
                     ul{
                         li {
@@ -62,60 +48,69 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                         }
                         li {
                             label { "Naslov dokumenta: "}
-                            input { name : "title", value: document.title.clone()}
+                            input { name : "title", value: "{document.title}"}
                         }
                         li {
                             label {"Datum"} //TODO: Kakšen format ima datum
-                            // input { value: to_string(document.date.clone()) }
+                            input { name: "date", value: "{document.date.map_or(\"\".to_string(), |date| date.to_string())}" }
                         }
-                        li {
-                            label {"imena oseb"}
-                            ul {
-                                padding_left: "30px",
-                                list_styler_type: "square",
+                        // li {
+                        //     // label {"imena oseb"}
+                        //     // ul {
+                        //     //     padding_left: "30px",
+                        //     //     list_styler_type: "square",
 
-                                //TODO: Format bo drugačen ko bo implementiran v bazi
-                                for name in [Vec::from(["ime1osebe1", "ime2osebe2"]), Vec::from(["oseba2"]), Vec::from(["filip", "še en filip", "pravzaprav so tu kar trije filipi"]), Vec::from(["zdaj se je pa pojavila še ena vida"])] {
-                                    li {
-                                        list_styler_type: "square",
-                                        ul {
-                                            for variacije in name {
-                                                //TODO: variacije v svojem text area
-                                                li {
-                                                    input {
-                                                        name : "ime",
-                                                        spellcheck: "false",
-                                                        value: "{variacije}"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        //     //     //glavno ime
+                        //     //     li {
+                        //     //         input { value: document.find_related(Person).all(get_database().await).await.unwrap() }
+                        //     //     }
+
+
+                        //         //TODO: Format bo drugačen ko bo implementiran v bazi
+                        //         // for name in [Vec::from(["ime1osebe1", "ime2osebe2"]), Vec::from(["oseba2"]), Vec::from(["filip", "še en filip", "pravzaprav so tu kar trije filipi"]), Vec::from(["zdaj se je pa pojavila še ena vida"])] {
+                        //         //     li {
+                        //         //         list_styler_type: "square",
+                        //         //         ul {
+                        //         //             for variacije in name {
+                        //         //                 //TODO: variacije v svojem text area
+                        //         //                 li {
+                        //         //                     input {
+                        //         //                         n"ime",
+                        //         //                         spellcheck: "false",
+                        //         //                         value: "{variacije}"
+                        //         //                     }
+                        //         //                 }
+                        //         //             }
+                        //         //         }
+                        //         //     }
+                        //         // }
+                        //     }
+                        // }
                         li {
                             label { "Lokacija: " }
                             //TODO: Glavna lokacija i ostale lokacije
+                            input { name: "main_location", value: "{location.clone().map_or(\"\".to_string(), |location| location.name)}" }
                         }
                         li {
                             label {"Ključne besede: "}
-                            textarea { value: vec_to_multyline(document.keywords.0.clone())}
+                            textarea { name: "keyword", value: vec_to_multyline(document.keywords.0.clone())}
                         }
                         li {
                             label {"Jeziki"}
-                            select {
-                                for jezik in &jeziki {
-                                    option {
-                                        value: *jezik,
-                                        "{jezik}"
-                                    }
+                            ul {
+                                padding_left: "10px",
+                                for jezik in Language::iter() {
+                                li {input {
+                                    r#type: "checkbox",
+                                    value: "{jezik.two_letter_code()}",
+                                    // name: "{jezik.name()}",
+                                    name: "language"
                                 }
-                            }
-                            //TODO: gumb dodaj jezik
+                                label { "{jezik.name()}" }}
+                            }}
 
                         }
-                        li { input { r#type: "Submit", "shrani" } }
+                        li { input { r#type: "Submit"} }
                     }
 
                 }
@@ -131,7 +126,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                             autocomplete: "false",
                             spellcheck: "false",
                             name: "povzetek",
-                            value: document.summary.clone()
+                            value: "{document.summary}"
                         }
                         textarea {
                             // height: "calc(100vh - 10px)",
@@ -140,7 +135,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                             autocomplete: "false",
                             spellcheck: "false",
                             name: "zapis",
-                            value: document.content.clone()
+                            value: "{document.content}"
                         }
                         input {
                             height: "20px",
@@ -160,18 +155,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
             }
 
             }
-            // div {
-            //     h1 { "{document.title}" }
-            //     p { b { "Filename: " } "{document.filename}" }
-            //     p { b { "Keywords: " } "{document.keywords.0.join(\", \")}" }
-            //     p { b { "Summary: " } "{document.summary}" }
-            //     embed {
-            //         src: "/content/{document.id}#toolbar=0",
-            //         type: "application/pdf",
-            //         width: "100%",
-            //         height: "1000px",
-            //     }
-            // }
+
         },
         Some(Ok(None)) => rsx! {
             AlertError {

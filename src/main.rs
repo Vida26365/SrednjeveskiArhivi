@@ -12,6 +12,7 @@ use crate::directories::DIRECTORIES;
 use crate::views::documents::display::DocumentDisplay;
 use crate::views::documents::list::DocumentList;
 use crate::views::documents::upload::DocumentUpload;
+// use crate::testi::vidini_testi::DynamicInputAndTextarea;
 
 mod components;
 mod database;
@@ -19,6 +20,8 @@ mod directories;
 mod entities;
 mod utils;
 mod views;
+mod testi;
+
 
 #[derive(Clone, Debug, PartialEq, Eq, Routable)]
 #[rustfmt::skip]
@@ -35,6 +38,8 @@ enum Route {
 
     #[route("/documents/:id")]
     DocumentDisplay { id: Uuid },
+
+
 }
 
 const ICON: Asset = asset!("/assets/images/icon.ico");

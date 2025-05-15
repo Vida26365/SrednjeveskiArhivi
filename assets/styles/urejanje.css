@@ -42,8 +42,14 @@ main { flex: 1; }
 }
 
 .leva_stran {
+  /* padding: 10px; */
   height: 100vh;
   background-color: gray;
+  /* margin-left: 10px; */
+}
+
+.leva_stran > * {
+  margin-left: 10px;
 }
 
 .srednja_stran {
@@ -57,4 +63,10 @@ main { flex: 1; }
 
 textarea {
   resize: vertical;
+  /* background-color: aliceblue; */
+}
+
+textarea {
+  border-color: #000;
+  border: 2px;
 }
