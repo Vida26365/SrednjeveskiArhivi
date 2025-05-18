@@ -8,10 +8,9 @@ use strum::IntoEnumIterator;
 use crate::components::alerts::error::AlertError;
 use crate::database::get_database;
 use crate::entities::document::DocumentToPrimaryLocation;
-use crate::entities::{Document, Person};
+use crate::entities::{Document, Organization, OrganizationAlias, PersonAlias};
 use crate::utils::language::Language;
 use crate::utils::read_input::parse_input;
-
 
 // https://stackoverflow.com/questions/53777136/dynamic-html-form-elements-as-array
 
@@ -27,13 +26,39 @@ fn vec_to_multyline(vec: Vec<String>) -> String {
 pub fn DocumentDisplay(id: Uuid) -> Element {
     let document: Resource<Result<_>> = use_resource(move || async move {
         let database = get_database().await;
-        Ok(Document::find_by_id(id).find_also_linked(DocumentToPrimaryLocation).one(database).await?)
+
+        match Document::find_by_id(id).one(database).await? {
+            Some(document) => {
+                let location =
+                    document.find_linked(DocumentToPrimaryLocation).one(database).await?;
+
+                let locations = document
+                    .find_related(crate::entities::Location)
+                    .find_with_related(crate::entities::LocationAlias)
+                    .all(database)
+                    .await?;
+
+                let organizations = document
+                    .find_related(Organization)
+                    .find_with_related(OrganizationAlias)
+                    .all(database)
+                    .await?;
+
+                let persons = document
+                    .find_related(crate::entities::Person)
+                    .find_with_related(PersonAlias)
+                    .all(database)
+                    .await?;
+
+                Ok(Some((document, location, locations, organizations, persons)))
+            }
+
+            None => Ok(None),
+        }
     });
 
-
-
     match &*document.read_unchecked() {
-        Some(Ok(Some((document, location)))) => rsx! {
+        Some(Ok(Some((document, location, locations, organizations, persons)))) => rsx! {
             document::Link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
             document::Script { src: asset!("/assets/scripts/grid.js") },
             // script { src: "/assets/scripts/grid.js"}
