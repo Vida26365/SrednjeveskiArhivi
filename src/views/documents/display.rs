@@ -2,8 +2,8 @@ use anyhow::Result;
 use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
 use sea_orm::{EntityTrait, ModelTrait};
-use uuid::Uuid;
 use strum::IntoEnumIterator;
+use uuid::Uuid;
 
 use crate::components::alerts::error::AlertError;
 use crate::database::get_database;

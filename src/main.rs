@@ -18,10 +18,9 @@ mod components;
 mod database;
 mod directories;
 mod entities;
+mod testi;
 mod utils;
 mod views;
-mod testi;
-
 
 #[derive(Clone, Debug, PartialEq, Eq, Routable)]
 #[rustfmt::skip]
@@ -54,7 +53,7 @@ fn main() {
         // .with_window_icon(TODO)
         .with_always_on_top(false)
         .with_resizable(true);
-        // .with_fullscreen(true);
+    // .with_fullscreen(true);
 
     let config = dioxus::desktop::Config::new()
         .with_resource_directory(DIRECTORIES.sysdata.join("assets"))
