@@ -12,6 +12,15 @@ pub enum Calendar {
     Julian,
 }
 
+impl Display for Calendar {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Calendar::Gregorian => write!(fmt, "gregorjanski"),
+            Calendar::Julian => write!(fmt, "julijanski"),
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug, PartialEq, Eq, FromJsonQueryResult)]
 pub enum Date {
     Gregorian(icu_calendar::Date<icu_calendar::cal::Gregorian>),

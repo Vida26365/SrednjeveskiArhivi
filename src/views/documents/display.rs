@@ -10,6 +10,7 @@ use crate::database::get_database;
 use crate::entities::document::DocumentToPrimaryLocation;
 use crate::entities::{Document, Organization, OrganizationAlias, PersonAlias};
 use crate::utils::language::Language;
+use crate::utils::date::Calendar;
 use crate::utils::read_input::parse_input;
 
 // https://stackoverflow.com/questions/53777136/dynamic-html-form-elements-as-array
@@ -78,6 +79,22 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                         li {
                             label {"Datum"} //TODO: Kakšen format ima datum
                             input { name: "date", value: "{document.date.map_or(\"\".to_string(), |date| date.to_string())}" }
+                            select {
+                                for gaj in Calendar::iter() {
+                                    option {
+                                        value: "{gaj.to_string()}",
+                                        "calander"
+                                    }
+                                }
+                            }
+                        }
+                        li {
+                            label {"Imena oseb: "}
+
+                            button {
+                                onclick: |event| println!("clicked {event:?}" ), "Gumb"
+                            }
+
                         }
                         // li {
                         //     // label {"imena oseb"}
