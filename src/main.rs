@@ -12,13 +12,11 @@ use crate::directories::DIRECTORIES;
 use crate::views::documents::display::DocumentDisplay;
 use crate::views::documents::list::DocumentList;
 use crate::views::documents::upload::DocumentUpload;
-// use crate::testi::vidini_testi::DynamicInputAndTextarea;
 
 mod components;
 mod database;
 mod directories;
 mod entities;
-mod testi;
 mod utils;
 mod views;
 
