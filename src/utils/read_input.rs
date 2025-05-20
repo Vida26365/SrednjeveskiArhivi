@@ -1,4 +1,7 @@
+use core::panic;
+
 use dioxus::prelude::*;
+use crate::utils::date::Calendar;
 
 // Primer:
 // {"date": FormValue(["nqswlknq.sw"]), "title": FormValue(["c7c60e0f-a292-46fb-a5a2-592fe2068203.pdf"]), "keyword": FormValue(["11k\n1ss\n1s1"]), "language": FormValue(["en", "la"]), "main_location": FormValue(["khslqknsw"])}
@@ -19,10 +22,19 @@ pub fn parse_input(event: Event<FormData>) {
         None => println!("No languages found"),
     }
     let date = &val["date"].as_value();
+    // let calender =
+    let calender = {if &val["calendar"] == "Gregor" {
+        Calendar::Gregorian
+    } else if &val["calendar"] == "Julijan" {
+        Calendar::Julian
+    } else {
+        panic!("Narobe si napisala ime al pa ostaja še en koledar")
+    }};
 
     println!("Title: {:?}", title);
     println!("Main Location: {:?}", main_location);
     println!("Keywords: {:?}", keywords);
     // println!("Languages: {:?}", languages);
     println!("Date: {:?}", date);
+    println!("Calendar: {:?}", calender);
 }

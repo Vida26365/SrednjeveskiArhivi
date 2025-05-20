@@ -6,7 +6,7 @@ main { flex: 1; }
 
 
 .panes {
-  touch-action: none;
+  /* touch-action: auto; */
   display: grid;
 }
 
@@ -61,16 +61,18 @@ main { flex: 1; }
   background-color: rgba(180, 39, 39, 0.256);
 }
 
-textarea {
-  resize: vertical;
-  /* background-color: aliceblue; */
-}
 
-textarea {
+textarea, input {
+  /* TODO: Miška izginja */
   border-color: #000;
-  border: 2px;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 5px;
 }
 
 button {
-  background-color: #000;
+  background-color: #ffa962;
+  border-radius: 5px;
+  border-width: 2px;
+  padding: 2px 5px;
 }

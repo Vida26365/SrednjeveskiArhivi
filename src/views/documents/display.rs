@@ -1,4 +1,5 @@
 use anyhow::Result;
+use dioxus::html::{button, option};
 use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
 use sea_orm::{EntityTrait, ModelTrait};
@@ -10,7 +11,6 @@ use crate::database::get_database;
 use crate::entities::document::DocumentToPrimaryLocation;
 use crate::entities::{Document, Organization, OrganizationAlias, PersonAlias};
 use crate::utils::language::Language;
-use crate::utils::date::Calendar;
 use crate::utils::read_input::parse_input;
 
 // https://stackoverflow.com/questions/53777136/dynamic-html-form-elements-as-array
@@ -62,10 +62,10 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
         Some(Ok(Some((document, location, locations, organizations, persons)))) => rsx! {
             document::Link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
             document::Script { src: asset!("/assets/scripts/grid.js") },
-            // script { src: "/assets/scripts/grid.js"}
             div { class: "trije_divi panes pane h-full",
                 div { class: "leva_stran pane",
-                form { onsubmit: async move |event| { parse_input(event) },
+                form {
+                    onsubmit: async move |event| { parse_input(event) },
                     // TODO: povsod v input treba dodati value oziroma ime
                     ul{
                         li {
@@ -80,11 +80,14 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                             label {"Datum"} //TODO: Kakšen format ima datum
                             input { name: "date", value: "{document.date.map_or(\"\".to_string(), |date| date.to_string())}" }
                             select {
-                                for gaj in Calendar::iter() {
-                                    option {
-                                        value: "{gaj.to_string()}",
-                                        "calander"
-                                    }
+                                name: "calendar",
+                                option {
+                                    value: "Gregor",
+                                    "Gregorijanski"
+                                }
+                                option {
+                                    value: "Julijan",
+                                    "Julijanski"
                                 }
                             }
                         }
@@ -92,9 +95,8 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                             label {"Imena oseb: "}
 
                             button {
-                                onclick: |event| println!("clicked {event:?}" ), "Gumb"
+                                // onclick: |event| println!("clicked {event:?}" ), "Gumb"
                             }
-
                         }
                         // li {
                         //     // label {"imena oseb"}
@@ -152,7 +154,11 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                             }}
 
                         }
-                        li { input { r#type: "Submit"} }
+                        li {
+                            button {
+                                "Shrani"
+                            }
+                        }
                     }
 
                 }
