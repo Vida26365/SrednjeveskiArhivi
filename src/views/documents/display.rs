@@ -78,9 +78,9 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
 
             let document2 = use_signal(|| document.clone());
 
-            rsx! {
-        Some(Ok(Some((document, location, locations, organizations, persons)))) =>
-        {
+            // rsx! {
+        // Some(Ok(Some((document, location, locations, organizations, persons)))) =>
+        // {
             // let mut keywords = use_signal(move || {document.keywords.0.clone()});
             rsx! {
             document::Link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
@@ -295,8 +295,6 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
             }
 
             }
-        }
-
         }
     },
         Some(Ok(None)) => rsx! {
