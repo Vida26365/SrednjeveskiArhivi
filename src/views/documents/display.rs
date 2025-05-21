@@ -13,6 +13,8 @@ use crate::entities::{Document, Organization, OrganizationAlias, PersonAlias};
 use crate::utils::language::Language;
 use crate::utils::read_input::parse_input;
 
+use crate::views::documents::display_panes::input_fields;
+
 // https://stackoverflow.com/questions/53777136/dynamic-html-form-elements-as-array
 
 fn vec_to_multyline(vec: Vec<String>) -> String {
@@ -58,110 +60,156 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
         }
     });
 
+
     match &*document.read_unchecked() {
-        Some(Ok(Some((document, location, locations, organizations, persons)))) => rsx! {
+        Some(Ok(Some((document, location, locations, organizations, persons)))) =>
+        {
+            // let mut keywords = use_signal(move || {document.keywords.0.clone()});
+            rsx! {
             document::Link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
             document::Script { src: asset!("/assets/scripts/grid.js") },
             div { class: "trije_divi panes pane h-full",
                 div { class: "leva_stran pane",
-                form {
-                    onsubmit: async move |event| { parse_input(event) },
-                    // TODO: povsod v input treba dodati value oziroma ime
-                    ul{
-                        li {
-                            label { "Ime datoteke:" }
-                            label { "{document.filename}" }
-                        }
-                        li {
-                            label { "Naslov dokumenta: "}
-                            input { name : "title", value: "{document.title}"}
-                        }
-                        li {
-                            label {"Datum"} //TODO: Kakšen format ima datum
-                            input { name: "date", value: "{document.date.map_or(\"\".to_string(), |date| date.to_string())}" }
-                            select {
-                                name: "calendar",
-                                option {
-                                    value: "Gregor",
-                                    "Gregorijanski"
-                                }
-                                option {
-                                    value: "Julijan",
-                                    "Julijanski"
-                                }
-                            }
-                        }
-                        li {
-                            label {"Imena oseb: "}
+                input_fields::element {
+                    document: document.clone(),
+                    location: location.clone(),
+                },
+                // form {
+                // //     onsubmit: async move |event| { parse_input(event) },
+                //     ul{
+                //         li {
+                //             label { "Ime datoteke:" }
+                //             label { "{document.filename}" }
+                //         }
+                //         li {
+                //             label { "Naslov dokumenta: "}
+                //             input { name : "title", value: "{document.title}"}
+                //         }
+                //         li {
+                //             label {"Datum: "} //TODO: Kakšen format ima datum
+                //             input { name: "date", value: "{document.date.map_or(\"\".to_string(), |date| date.to_string())}" }
+                //             select {
+                //                 name: "calendar",
+                //                 option {
+                //                     value: "Gregor",
+                //                     "Gregorijanski"
+                //                 }
+                //                 option {
+                //                     value: "Julijan",
+                //                     "Julijanski"
+                //                 }
+                //             }
+                //         }
+                //         li {
+                //             label {"Imena oseb: "}
 
-                            button {
-                                // onclick: |event| println!("clicked {event:?}" ), "Gumb"
-                            }
-                        }
-                        // li {
-                        //     // label {"imena oseb"}
-                        //     // ul {
-                        //     //     padding_left: "30px",
-                        //     //     list_styler_type: "square",
+                //             button {
+                //                 // onclick: |event| println!("clicked {event:?}" ), "Gumb"
+                //             }
+                //         }
+                //         // li {
+                //         //     // label {"imena oseb"}
+                //         //     // ul {
+                //         //     //     padding_left: "30px",
+                //         //     //     list_styler_type: "square",
 
-                        //     //     //glavno ime
-                        //     //     li {
-                        //     //         input { value: document.find_related(Person).all(get_database().await).await.unwrap() }
-                        //     //     }
+                //         //     //     //glavno ime
+                //         //     //     li {
+                //         //     //         input { value: document.find_related(Person).all(get_database().await).await.unwrap() }
+                //         //     //     }
 
 
-                        //         //TODO: Format bo drugačen ko bo implementiran v bazi
-                        //         // for name in [Vec::from(["ime1osebe1", "ime2osebe2"]), Vec::from(["oseba2"]), Vec::from(["filip", "še en filip", "pravzaprav so tu kar trije filipi"]), Vec::from(["zdaj se je pa pojavila še ena vida"])] {
-                        //         //     li {
-                        //         //         list_styler_type: "square",
-                        //         //         ul {
-                        //         //             for variacije in name {
-                        //         //                 //TODO: variacije v svojem text area
-                        //         //                 li {
-                        //         //                     input {
-                        //         //                         n"ime",
-                        //         //                         spellcheck: "false",
-                        //         //                         value: "{variacije}"
-                        //         //                     }
-                        //         //                 }
-                        //         //             }
-                        //         //         }
-                        //         //     }
-                        //         // }
-                        //     }
-                        // }
-                        li {
-                            label { "Lokacija: " }
-                            //TODO: Glavna lokacija i ostale lokacije
-                            input { name: "main_location", value: "{location.clone().map_or(\"\".to_string(), |location| location.name)}" }
-                        }
-                        li {
-                            label {"Ključne besede: "}
-                            textarea { name: "keyword", value: vec_to_multyline(document.keywords.0.clone())}
-                        }
-                        li {
-                            label {"Jeziki"}
-                            ul {
-                                padding_left: "10px",
-                                for jezik in Language::iter() {
-                                li {input {
-                                    r#type: "checkbox",
-                                    value: "{jezik.two_letter_code()}",
-                                    // name: "{jezik.name()}",
-                                    name: "language"
-                                }
-                                label { "{jezik.name()}" }}
-                            }}
+                //         //         //TODO: Format bo drugačen ko bo implementiran v bazi
+                //         //         // for name in [Vec::from(["ime1osebe1", "ime2osebe2"]), Vec::from(["oseba2"]), Vec::from(["filip", "še en filip", "pravzaprav so tu kar trije filipi"]), Vec::from(["zdaj se je pa pojavila še ena vida"])] {
+                //         //         //     li {
+                //         //         //         list_styler_type: "square",
+                //         //         //         ul {
+                //         //         //             for variacije in name {
+                //         //         //                 //TODO: variacije v svojem text area
+                //         //         //                 li {
+                //         //         //                     input {
+                //         //         //                         n"ime",
+                //         //         //                         spellcheck: "false",
+                //         //         //                         value: "{variacije}"
+                //         //         //                     }
+                //         //         //                 }
+                //         //         //             }
+                //         //         //         }
+                //         //         //     }
+                //         //         // }
+                //         //     }
+                //         // }
+                //         li {
+                //             label { "Lokacija: " }
+                //             //TODO: Glavna lokacija i ostale lokacije
+                //             input { name: "main_location", value: "{location.clone().map_or(\"\".to_string(), |location| location.name)}" }
+                //         }
+                //         li {
+                //             // for klb in keywords {
+                //             //     input {
+                //             //             name: "neki",
+                //             //             value: "{klb}",
+                //             //             onkeypress: |event| {
+                //             //                 if event.key() == Enter {
+                //             //                     event.prevent_default();
+                //             //                     println!("Enter pressed");
+                //             //                 }
+                //             //             }
+                //             //         }
+                //             //     }
+                //             label {"Ključne besede: "}
 
-                        }
-                        li {
-                            button {
-                                "Shrani"
-                            }
-                        }
-                    }
+                //             input {
+                //                 name: "neq_keyword",
+                //                 value: "",
+                //                 onkeypress: move |event: Event<KeyboardData>| {
+                //                     if event.key() == Enter {
+                //                         event.prevent_default();
+                //                         keywords.push(String::new());
+                //                         println!("Enter pressed {:?}", &event);
+                //                         println!("Keywords: {:?}", keywords);
+                //                     }
+                //                 }
+                //             }
 
-                }
+
+                //             // for klb in ["1", "2", "3"] {
+                //             //     input {
+                //             //         name: "keyword",
+                //             //         value: "En value",
+                //             //         onkeypress: |event| {
+                //             //             if event.key() == Enter {
+                //             //                 event.prevent_default();
+                //             //                 println!("Enter pressed");
+                //             //             }
+                //             //         }
+                //             //     }
+                //             // }
+                //             // textarea { name: "keyword", value: vec_to_multyline(document.keywords.0.clone())}
+                //         }
+                //         li {
+                //             label {"Jeziki"}
+                //             ul {
+                //                 padding_left: "10px",
+                //                 for jezik in Language::iter() {
+                //                 li {input {
+                //                     r#type: "checkbox",
+                //                     value: "{jezik.two_letter_code()}",
+                //                     // name: "{jezik.name()}",
+                //                     name: "language"
+                //                 }
+                //                 label { "{jezik.name()}" }}
+                //             }}
+
+                //         }
+                //         li {
+                //             button {
+                //                 "Shrani"
+                //             }
+                //         }
+                //     }
+
+                // }
                 }
 
 
@@ -204,7 +252,8 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
 
             }
 
-        },
+        }
+    },
         Some(Ok(None)) => rsx! {
             AlertError {
                 title: "Dokument ni najden".to_string(),

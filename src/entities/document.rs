@@ -2,6 +2,8 @@ use sea_orm::entity::prelude::*;
 use sea_orm::{FromJsonQueryResult, LinkDef};
 use serde::{Deserialize, Serialize};
 
+use dioxus::prelude::*;
+
 use crate::utils::date::Date;
 use crate::utils::language::Language;
 
@@ -27,7 +29,7 @@ pub enum ReviewStatus {
     Reviewed,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Props)]
 #[sea_orm(table_name = "documents")]
 pub struct Model {
     /// The document primary key.

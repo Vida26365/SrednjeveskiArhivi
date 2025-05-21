@@ -62,7 +62,7 @@ main { flex: 1; }
 }
 
 
-textarea, input {
+textarea, input, select {
   /* TODO: Miška izginja */
   border-color: #000;
   border-style: solid;

@@ -1,6 +1,7 @@
 use sea_orm::entity::prelude::*;
+use dioxus::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Props)]
 #[sea_orm(table_name = "locations")]
 pub struct Model {
     /// The location primary key.

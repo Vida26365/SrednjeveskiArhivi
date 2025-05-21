@@ -11,8 +11,8 @@ pub fn parse_input(event: Event<FormData>) {
     println!("{:?}", val);
     let title = &val["title"].as_value();
     let main_location = &val["main_location"].as_value();
-    let keywords_form_value = &val["keyword"].as_value();
-    let keywords = keywords_form_value.lines().collect::<Vec<_>>();
+    // let keywords_form_value = &val["keyword"].as_value();
+    // let keywords = keywords_form_value.lines().collect::<Vec<_>>();
     // let languages : Option<&[String]>= Some(val["language"].as_slice());
     match val.get("language") {
         Some(languages) => {
@@ -33,7 +33,7 @@ pub fn parse_input(event: Event<FormData>) {
 
     println!("Title: {:?}", title);
     println!("Main Location: {:?}", main_location);
-    println!("Keywords: {:?}", keywords);
+    // println!("Keywords: {:?}", keywords);
     // println!("Languages: {:?}", languages);
     println!("Date: {:?}", date);
     println!("Calendar: {:?}", calender);
