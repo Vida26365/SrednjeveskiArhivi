@@ -1,6 +1,7 @@
 use core::panic;
 
 use dioxus::prelude::*;
+
 use crate::utils::date::Calendar;
 
 // Primer:
@@ -23,13 +24,15 @@ pub fn parse_input(event: Event<FormData>) {
     }
     let date = &val["date"].as_value();
     // let calender =
-    let calender = {if &val["calendar"] == "Gregor" {
-        Calendar::Gregorian
-    } else if &val["calendar"] == "Julijan" {
-        Calendar::Julian
-    } else {
-        panic!("Narobe si napisala ime al pa ostaja še en koledar")
-    }};
+    let calender = {
+        if &val["calendar"] == "Gregor" {
+            Calendar::Gregorian
+        } else if &val["calendar"] == "Julijan" {
+            Calendar::Julian
+        } else {
+            panic!("Narobe si napisala ime al pa ostaja še en koledar")
+        }
+    };
 
     println!("Title: {:?}", title);
     println!("Main Location: {:?}", main_location);

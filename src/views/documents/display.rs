@@ -83,8 +83,8 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
         // {
             // let mut keywords = use_signal(move || {document.keywords.0.clone()});
             rsx! {
-            document::Link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
-            document::Script { src: asset!("/assets/scripts/grid.js") },
+            link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
+            script { src: asset!("/assets/scripts/grid.js") },
             div { class: "trije_divi panes pane h-full",
                 div { class: "leva_stran pane",
                 input_fields::element {
@@ -274,11 +274,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                             name: "content",
                             value: "{document.content}"
                         }
-                        input {
-                            height: "20px",
-                            r#type: "submit",
-                            value: "Shrani"
-                        }
+                        button { "Shrani "}
                     }
                 }
 
