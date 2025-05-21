@@ -22,6 +22,7 @@ pub fn element(document: DocumentModel, location: Option<LocationModel>) -> Elem
                 li { DocumentName {document: document.clone()} }
                 li { Date {document: document.clone()} }
                 li { Persons {document: document.clone()} }
+                li { Organisations {document: document.clone()} }
                 li { Keywords {
                     document: document.clone(),
                     keywords: document.keywords.0.clone()
@@ -76,6 +77,14 @@ fn Date(document: DocumentModel) -> Element {
 fn Persons(document: DocumentModel) -> Element {
     rsx! {
         label { "Imena oseb:" }
+        label { "TODO" }
+    }
+}
+
+#[component]
+fn Organisations(document: DocumentModel) -> Element {
+    rsx! {
+        label { "Organizacije:" }
         label { "TODO" }
     }
 }

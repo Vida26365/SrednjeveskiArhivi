@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
 use dioxus::logger::tracing::info;
-use sea_orm::{EntityTrait, ModelTrait};
 use sea_orm::ActiveModelTrait;
 use sea_orm::ActiveValue::{Set};
 
@@ -15,7 +14,10 @@ pub fn element(document: DocumentModel) -> Element {
     let document2 = use_signal(|| document.clone());
 
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
+        link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
+        link { rel: "stylesheet", href: asset!("/assets/styles/function.css") },
+        script { src: asset!("/assets/scripts/auto_grow.js") },
+
         form {
             onsubmit: move |event: Event<FormData>| async move {
                             let mut document: crate::entities::document::ActiveModel = document2().clone().into();
@@ -30,34 +32,40 @@ pub fn element(document: DocumentModel) -> Element {
 
                             info!("Submitted! {event:?}")
                         },
-                        textarea {
-                            height: "80px",
-                            width: "100%",
-                            resize: "vertical",
-                            autocapitalize: "false",
-                            autocomplete: "false",
-                            spellcheck: "false",
-                            name: "summary",
-                            value: "{document.summary}"
+                        div {
+                            class: "grow-wrap",
+                            textarea {
+                                height: "auto",
+                                width: "100%",
+                                autocapitalize: "false",
+                                autocomplete: "false",
+                                spellcheck: "false",
+                                name: "summary",
+                                value: "{document.summary}"
+                            }
                         }
-                        textarea {
-                            height: "150px",
-                            width: "100%",
-                            resize: "vertical",
-                            autocapitalize: "false",
-                            autocomplete: "false",
-                            spellcheck: "false",
-                            name: "metadata",
-                            value: "{document.metadata}"
+                        div {
+                            class: "grow-wrap",
+                            textarea {
+                                width: "100%",
+                                resize: "vertical",
+                                autocapitalize: "false",
+                                autocomplete: "false",
+                                spellcheck: "false",
+                                name: "metadata",
+                                value: "{document.metadata}"
+                            }
                         }
-                        textarea {
-                            height: "300px",
-                            width: "100%",
-                            autocapitalize: "false",
-                            autocomplete: "false",
-                            spellcheck: "false",
-                            name: "content",
-                            value: "{document.content}"
+                        div {
+                            class: "grow-wrap",
+                            textarea {
+                                width: "100%",
+                                autocapitalize: "false",
+                                autocomplete: "false",
+                                spellcheck: "false",
+                                name: "content",
+                                value: "{document.content}"
+                            }
                         }
                         button { "Shrani" }
 

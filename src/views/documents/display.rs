@@ -1,11 +1,7 @@
 use anyhow::Result;
-use dioxus::html::{button, option};
-use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
 use sea_orm::{EntityTrait, ModelTrait};
-use sea_orm::ActiveModelTrait;
 use sea_orm::ActiveValue::{Set};
-use strum::IntoEnumIterator;
 use uuid::Uuid;
 
 use crate::components::alerts::error::AlertError;
@@ -20,9 +16,6 @@ use crate::entities::{
     Person,
     PersonAlias,
 };
-use crate::utils::date::Calendar;
-use crate::utils::language::Language;
-use crate::utils::read_input::parse_input;
 
 use crate::views::documents::display_panes::{input_fields, text_display};
 // use crate::views::documents::display_panes::text_display;
