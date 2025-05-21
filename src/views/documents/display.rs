@@ -3,13 +3,24 @@ use dioxus::html::{button, option};
 use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
 use sea_orm::{EntityTrait, ModelTrait};
+use sea_orm::ActiveModelTrait;
+use sea_orm::ActiveValue::{Set};
 use strum::IntoEnumIterator;
 use uuid::Uuid;
 
 use crate::components::alerts::error::AlertError;
 use crate::database::get_database;
 use crate::entities::document::DocumentToPrimaryLocation;
-use crate::entities::{Document, Organization, OrganizationAlias, PersonAlias};
+use crate::entities::{
+    Document,
+    Location,
+    LocationAlias,
+    Organization,
+    OrganizationAlias,
+    Person,
+    PersonAlias,
+};
+use crate::utils::date::Calendar;
 use crate::utils::language::Language;
 use crate::utils::read_input::parse_input;
 
@@ -36,8 +47,8 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                     document.find_linked(DocumentToPrimaryLocation).one(database).await?;
 
                 let locations = document
-                    .find_related(crate::entities::Location)
-                    .find_with_related(crate::entities::LocationAlias)
+                    .find_related(Location)
+                    .find_with_related(LocationAlias)
                     .all(database)
                     .await?;
 
@@ -48,7 +59,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                     .await?;
 
                 let persons = document
-                    .find_related(crate::entities::Person)
+                    .find_related(Person)
                     .find_with_related(PersonAlias)
                     .all(database)
                     .await?;
@@ -62,6 +73,12 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
 
 
     match &*document.read_unchecked() {
+        Some(Ok(Some((document, location, locations, organizations, persons)))) => {
+            // let document = document.clone();
+
+            let document2 = use_signal(|| document.clone());
+
+            rsx! {
         Some(Ok(Some((document, location, locations, organizations, persons)))) =>
         {
             // let mut keywords = use_signal(move || {document.keywords.0.clone()});
@@ -212,35 +229,62 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                 // }
                 }
 
+                div {
+                    class: "srednja_stran pane",
+                    form {
+                        onsubmit: move |event: Event<FormData>| async move {
+                            let mut document: crate::entities::document::ActiveModel = document2().clone().into();
 
-                div { class: "srednja_stran pane",
-                    form { onsubmit: move |event| { info!("Submitted! {event:?}") },
+                            let values = event.values();
+                            document.summary = Set(values["summary"].as_value());
+                            document.metadata = Set(values["metadata"].as_value());
+                            document.content = Set(values["content"].as_value());
+
+                            let database = get_database().await;
+                            document.update(database).await.unwrap(); // TODO: Handle error
+
+                            info!("Submitted! {event:?}")
+                        },
                         textarea {
                             height: "200px",
                             width: "100%",
                             resize: "vertical",
+                            autocapitalize: "false",
                             autocomplete: "false",
                             spellcheck: "false",
-                            name: "povzetek",
+                            name: "summary",
                             value: "{document.summary}"
                         }
                         textarea {
-                            // height: "calc(100vh - 10px)",
-                            height: "450px",
+                            height: "200px",
                             width: "100%",
+                            resize: "vertical",
+                            autocapitalize: "false",
                             autocomplete: "false",
                             spellcheck: "false",
-                            name: "zapis",
+                            name: "metadata",
+                            value: "{document.metadata}"
+                        }
+                        textarea {
+                            height: "450px",
+                            width: "100%",
+                            autocapitalize: "false",
+                            autocomplete: "false",
+                            spellcheck: "false",
+                            name: "content",
                             value: "{document.content}"
                         }
                         input {
                             height: "20px",
-                            r#type: "Submit" }
+                            r#type: "submit",
+                            value: "Shrani"
+                        }
                     }
                 }
 
 
-                div { class: "desna_stran pane",
+                div {
+                    class: "desna_stran pane",
                     embed {
                         src: "/content/{document.id}#toolbar=0",
                         type: "application/pdf",
@@ -251,6 +295,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
             }
 
             }
+        }
 
         }
     },
