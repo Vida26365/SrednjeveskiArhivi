@@ -22,7 +22,11 @@ pub fn element(document: DocumentModel, location: Option<LocationModel>) -> Elem
                 li { DocumentName {document: document.clone()} }
                 li { Date {document: document.clone()} }
                 li { Persons {document: document.clone()} }
-                li { Keywords {document: document.clone()} }
+                li { Keywords {
+                    document: document.clone(),
+                    keywords: document.keywords.0.clone()
+
+                }                 }
                 li { Lokacija {location: location.clone()} }
                 li { Languages {} }
                 li {
@@ -89,10 +93,9 @@ fn Lokacija(location: Option<LocationModel>) -> Element {
 }
 
 #[component]
-fn Keywords(document: DocumentModel) -> Element {
+fn Keywords(document: DocumentModel, keywords: Vec<String>) -> Element {
     // TODO: Make thid work
     // let mut keywords = use_(move || {document.keywords.0.clone()});
-    let mut keywords = document.keywords.0.clone();
     rsx! {
         label {"Ključne besede: "}
 
