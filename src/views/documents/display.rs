@@ -17,7 +17,7 @@ use crate::entities::{
     PersonAlias,
 };
 
-use crate::views::documents::display_panes::{input_fields, text_display};
+use crate::views::documents::display_panes::{input_display, text_display};
 // use crate::views::documents::display_panes::text_display;
 
 // https://stackoverflow.com/questions/53777136/dynamic-html-form-elements-as-array
@@ -75,7 +75,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
             script { src: asset!("/assets/scripts/grid.js") },
             div { class: "trije_divi panes pane h-full",
                 div { class: "leva_stran pane",
-                    input_fields::element {
+                    input_display::element {
                         document: document.clone(),
                         location: location.clone(),
                     }

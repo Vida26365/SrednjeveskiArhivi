@@ -103,23 +103,11 @@ fn Lokacija(location: Option<LocationModel>) -> Element {
 
 #[component]
 fn Keywords(document: DocumentModel, keywords: Vec<String>) -> Element {
-    // TODO: Make thid work
-    // let mut keywords = use_(move || {document.keywords.0.clone()});
+    // TODO: Make this work
+    // let mut keywords = use_signal(move || {document.keywords.0.clone()});
+    let mut signal = use_signal(move || {keywords.clone()});
     rsx! {
         label {"Ključne besede: "}
-
-        for klb in keywords.clone() { //TODO: Lepša rešitev za vse
-            input {
-                name: "neki",
-                value: "{klb}",
-                onkeypress: |event| {
-                    if event.key() == Enter {
-                        event.prevent_default();
-                        println!("Enter pressed");
-                    }
-                }
-            }
-        }
 
         input {
             name: "new_keyword",
@@ -127,9 +115,24 @@ fn Keywords(document: DocumentModel, keywords: Vec<String>) -> Element {
             onkeypress: move |event: Event<KeyboardData>| {
                 if event.key() == Enter {
                     // event.prevent_default();
-                    keywords.push(String::new());
+                    signal.write().push(String::new());
                     println!("Enter pressed {:?}", &event);
-                    println!("Keywords: {:?}", keywords);
+                    println!("Keywords: {:?}", signal);
+                }
+            }
+        }
+
+        for klb in signal.read().clone() { //TODO: Lepša rešitev za vse
+            input {
+                name: "neki",
+                value: "{klb}",
+                onkeypress: move |event: Event<KeyboardData>| {
+                    if event.key() == Enter {
+                        // event.prevent_default();
+                        signal.write().push(String::new());
+                        println!("Enter pressed {:?}", &event);
+                        println!("Keywords: {:?}", signal);
+                    }
                 }
             }
         }
