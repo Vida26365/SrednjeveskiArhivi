@@ -41,9 +41,6 @@ enum Route {
     OrganizationList {},
 }
 
-const ICON: Asset = asset!("/assets/images/icon.ico");
-const TAILWIND: Asset = asset!("/assets/styles/tailwind.css");
-
 fn main() {
     dioxus::logger::initialize_default();
 
@@ -66,7 +63,7 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    use_asset_handler("content", move |request, responder| {
+    use_asset_handler("content", |request, responder| {
         // Validate the request URL
         let Ok(id) = Uuid::parse_str(request.uri().path().trim_start_matches("/content/")) else {
             let response =
@@ -82,7 +79,7 @@ fn App() -> Element {
         info!("Loading document from path: {:?}", path);
 
         // Load the document content
-        spawn(async move {
+        spawn(async {
             match fs::read(path) {
                 Ok(content) => {
                     let response = Response::builder()
@@ -105,8 +102,9 @@ fn App() -> Element {
 
     rsx! {
         // Global app resources
-        document::Link { rel: "icon", href: ICON }
-        document::Link { rel: "stylesheet", href: TAILWIND }
+        document::Link { rel: "icon", href: asset!("/assets/images/icon.ico") }
+        document::Link { rel: "icon", href: asset!("/assets/images/icon.svg") }
+        document::Link { rel: "stylesheet", href: asset!("/assets/styles/tailwind.css") }
 
         // Router view
         Router::<Route> {}

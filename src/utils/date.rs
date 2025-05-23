@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
-use std::str::FromStr;
 
 use sea_orm::FromJsonQueryResult;
 use serde::ser::SerializeStruct;
@@ -51,8 +50,9 @@ pub enum Date {
 impl Date {
     pub fn parse(str: &str, calendar: &Calendar) -> Result<Self, String> {
         let parts: Vec<&str> = str.split('.').collect();
+
         if parts.len() != 3 {
-            return Err(format!("Invalid date format: {}", str));
+            return Err(format!("Invalid date format: {str}"));
         }
 
         let day = parts[0].parse::<u8>().map_err(|_| format!("Invalid day: {}", parts[0]))?;
@@ -60,16 +60,12 @@ impl Date {
         let year = parts[2].parse::<i32>().map_err(|_| format!("Invalid year: {}", parts[2]))?;
 
         match calendar {
-            Calendar::Gregorian => {
-                icu_calendar::Date::try_new_gregorian(year, month, day)
-                    .map(Date::Gregorian)
-                    .map_err(|e| format!("Invalid Gregorian date: {}", e))
-            }
-            Calendar::Julian => {
-                icu_calendar::Date::try_new_julian(year, month, day)
-                    .map(Date::Julian)
-                    .map_err(|e| format!("Invalid Julian date: {}", e))
-            }
+            Calendar::Gregorian => icu_calendar::Date::try_new_gregorian(year, month, day)
+                .map(Date::Gregorian)
+                .map_err(|error| format!("Invalid Gregorian date: {error}")),
+            Calendar::Julian => icu_calendar::Date::try_new_julian(year, month, day)
+                .map(Date::Julian)
+                .map_err(|error| format!("Invalid Julian date: {error}")),
         }
     }
 }
@@ -120,17 +116,17 @@ impl Serialize for Date {
     {
         let mut state = serializer.serialize_struct("Date", 4)?;
         match self {
-            Date::Gregorian(ref d) => {
+            Date::Gregorian(ref date) => {
                 state.serialize_field("calendar", &Calendar::Gregorian)?;
-                state.serialize_field("year", &d.year().extended_year)?;
-                state.serialize_field("month", &d.month().ordinal)?;
-                state.serialize_field("day", &d.day_of_month().0)?;
+                state.serialize_field("year", &date.year().extended_year)?;
+                state.serialize_field("month", &date.month().ordinal)?;
+                state.serialize_field("day", &date.day_of_month().0)?;
             }
-            Date::Julian(ref d) => {
+            Date::Julian(ref date) => {
                 state.serialize_field("calendar", &Calendar::Julian)?;
-                state.serialize_field("year", &d.year().extended_year)?;
-                state.serialize_field("month", &d.month().ordinal)?;
-                state.serialize_field("day", &d.day_of_month().0)?;
+                state.serialize_field("year", &date.year().extended_year)?;
+                state.serialize_field("month", &date.month().ordinal)?;
+                state.serialize_field("day", &date.day_of_month().0)?;
             }
         }
         state.end()
@@ -156,12 +152,16 @@ impl<'de> Deserialize<'de> for Date {
             Calendar::Gregorian => {
                 icu_calendar::Date::try_new_gregorian(helper.year, helper.month, helper.day)
                     .map(Date::Gregorian)
-                    .map_err(|e| serde::de::Error::custom(format!("Invalid Gregorian date: {}", e)))
+                    .map_err(|error| {
+                        serde::de::Error::custom(format!("Invalid Gregorian date: {error}"))
+                    })
             }
             Calendar::Julian => {
                 icu_calendar::Date::try_new_julian(helper.year, helper.month, helper.day)
                     .map(Date::Julian)
-                    .map_err(|e| serde::de::Error::custom(format!("Invalid Julian date: {}", e)))
+                    .map_err(|error| {
+                        serde::de::Error::custom(format!("Invalid Julian date: {error}"))
+                    })
             }
         }
     }

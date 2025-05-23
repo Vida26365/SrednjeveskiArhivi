@@ -1,10 +1,10 @@
 use dioxus::prelude::*;
 
-use crate::entities::document;
+use crate::entities::DocumentModel;
 use crate::Route;
 
 #[component]
-pub fn MentionFirst(documents: Vec<document::Model>) -> Element {
+pub fn MentionFirst(documents: Vec<DocumentModel>) -> Element {
     let first = documents
         .iter()
         .filter_map(|document| document.date.map(|date| (document, date)))

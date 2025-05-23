@@ -10,7 +10,7 @@ use crate::Route;
 
 #[component]
 pub fn DocumentList() -> Element {
-    let documents: Resource<Result<_>> = use_resource(|| async move {
+    let documents: Resource<Result<_>> = use_resource(async || {
         let database = get_database().await;
         Ok(Document::find().find_also_linked(DocumentToPrimaryLocation).all(database).await?)
     });
@@ -25,7 +25,7 @@ pub fn DocumentList() -> Element {
                         thead {
                             tr {
                                 th { "Naslov" }
-                                th { "Datum"}
+                                th { "Datum" }
                                 th { "Kraj" }
                                 th { "Ključne besede" }
                                 th { "Stanje" }
@@ -85,7 +85,7 @@ pub fn DocumentList() -> Element {
         Some(Err(error)) => rsx! {
             AlertError {
                 title: "Napaka pri nalaganju dokumentov".to_string(),
-                details: format!("{:?}", error),
+                details: format!("{error:?}"),
             }
         },
         None => rsx! {

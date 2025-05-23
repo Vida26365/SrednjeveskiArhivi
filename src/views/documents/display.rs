@@ -1,14 +1,10 @@
 use anyhow::Result;
-use dioxus::html::{button, option};
-use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
 use sea_orm::{EntityTrait, ModelTrait};
-use sea_orm::ActiveModelTrait;
-use sea_orm::ActiveValue::{Set};
-use strum::IntoEnumIterator;
 use uuid::Uuid;
 
 use crate::components::alerts::AlertError;
+use crate::components::documents::{PaneInput, PanePdf, PaneText};
 use crate::database::get_database;
 use crate::entities::document::DocumentToPrimaryLocation;
 use crate::entities::{
@@ -20,26 +16,10 @@ use crate::entities::{
     Person,
     PersonAlias,
 };
-use crate::utils::date::Calendar;
-use crate::utils::language::Language;
-use crate::utils::read_input::parse_input;
-
-use crate::views::documents::display_panes::{input_display, text_display};
-// use crate::views::documents::display_panes::text_display;
-
-// https://stackoverflow.com/questions/53777136/dynamic-html-form-elements-as-array
-
-fn vec_to_multyline(vec: Vec<String>) -> String {
-    let mut value = String::new();
-    for key in &vec {
-        value += &(String::from("\n") + key)
-    }
-    value
-}
 
 #[component]
 pub fn DocumentDisplay(id: Uuid) -> Element {
-    let document: Resource<Result<_>> = use_resource(move || async move {
+    let document: Resource<Result<_>> = use_resource(async || {
         let database = get_database().await;
 
         match Document::find_by_id(id).one(database).await? {
@@ -72,43 +52,35 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
         }
     });
 
-
     match &*document.read_unchecked() {
         Some(Ok(Some((document, location, locations, organizations, persons)))) => {
-            // let document = document.clone();
+            let document = use_signal(|| document.clone());
+            let location = use_signal(|| location.clone());
+            let locations = use_signal(|| locations.clone());
+            let organizations = use_signal(|| organizations.clone());
+            let persons = use_signal(|| persons.clone());
 
             rsx! {
-            link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
-            script { src: asset!("/assets/scripts/grid.js") },
-            div { class: "trije_divi panes pane h-full",
-                div { class: "leva_stran pane",
-                    input_display::element {
-                        document: document.clone(),
-                        location: location.clone(),
-                    }
-                }
+                link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
+                script { src: asset!("/assets/scripts/grid.js") },
 
                 div {
-                    class: "srednja_stran pane",
-                    text_display::element {
-                        document: document.clone(),
+                    class: "trije_divi panes pane h-full",
+                    div {
+                        class: "leva_stran pane",
+                        PaneInput { document, location, locations, organizations, persons }
+                    }
+                    div {
+                        class: "srednja_stran pane",
+                        PaneText { document }
+                    }
+                    div {
+                        class: "desna_stran pane",
+                        PanePdf { document }
                     }
                 }
-
-                div {
-                    class: "desna_stran pane",
-                    embed {
-                        src: "/content/{document.id}#toolbar=0",
-                        type: "application/pdf",
-                        width: "100%",
-                        height: "100%",
-                    }
-
-            }
-
             }
         }
-    },
         Some(Ok(None)) => rsx! {
             AlertError {
                 title: "Dokument ni najden".to_string(),
@@ -118,7 +90,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
         Some(Err(error)) => rsx! {
             AlertError {
                 title: "Napaka pri nalaganju dokumenta".to_string(),
-                details: format!("{:?}", error),
+                details: format!("{error:?}"),
             }
         },
         None => rsx! {

@@ -1,10 +1,10 @@
 use dioxus::prelude::*;
 
-use crate::entities::document;
+use crate::entities::DocumentModel;
 use crate::Route;
 
 #[component]
-pub fn MentionLast(documents: Vec<document::Model>) -> Element {
+pub fn MentionLast(documents: Vec<DocumentModel>) -> Element {
     let last = documents
         .iter()
         .filter_map(|document| document.date.map(|date| (document, date)))

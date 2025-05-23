@@ -1,4 +1,4 @@
-use std::{fmt::{Display, Formatter}, str::FromStr};
+use std::fmt::{Display, Formatter};
 
 use serde::{Deserialize, Serialize};
 use strum::EnumIter;

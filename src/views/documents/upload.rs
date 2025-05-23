@@ -42,7 +42,7 @@ fn filesize(size: u64) -> String {
         unit = current;
     }
 
-    format!("{:.2} {}", size, unit)
+    format!("{size:.2} {unit}")
 }
 
 #[component]
@@ -116,9 +116,9 @@ pub fn DocumentUpload() -> Element {
         label {
             class: "flex flex-col items-center justify-center w-full h-64 mb-4 rounded-box cursor-pointer {background} hover:bg-alt-200",
             for: "upload",
-            ondragover: move |evt| { evt.prevent_default(); hovered.set(true); },
-            ondragleave: move |evt| { evt.prevent_default(); hovered.set(false); },
-            ondrop: move |evt| { evt.prevent_default(); hovered.set(false); evt.files().map(upload); },
+            ondragover: move |event| { event.prevent_default(); hovered.set(true); },
+            ondragleave: move |event| { event.prevent_default(); hovered.set(false); },
+            ondrop: move |event| { event.prevent_default(); hovered.set(false); event.files().map(upload); },
             svg {
                 class: "mb-4",
                 width: "48",
@@ -142,7 +142,7 @@ pub fn DocumentUpload() -> Element {
                 class: "hidden",
                 accept: ".pdf",
                 multiple: true,
-                onchange: move |evt| { evt.files().map(upload); }
+                onchange: move |event| { event.files().map(upload); },
             }
         }
 
@@ -156,7 +156,7 @@ pub fn DocumentUpload() -> Element {
                         state.set(UploadState::Success);
                     }
                     Err(error) => {
-                        state.set(UploadState::Error(format!("{:?}", error)));
+                        state.set(UploadState::Error(format!("{error:?}")));
                     }
                 }
             },
@@ -219,8 +219,8 @@ pub fn DocumentUpload() -> Element {
                             path { d: "M3 6h18" }
                             path { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }
                             path { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }
-                            line { x1: "10", x2: "10", y1: "11", y2: "17"}
-                            line {x1: "14", x2: "14", y1: "11", y2: "17"}
+                            line { x1: "10", x2: "10", y1: "11", y2: "17" }
+                            line { x1: "14", x2: "14", y1: "11", y2: "17" }
                         }
                     }
                 }

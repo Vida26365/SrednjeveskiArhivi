@@ -9,7 +9,7 @@ use crate::entities::{Document, Organization};
 
 #[component]
 pub fn OrganizationList() -> Element {
-    let organizations: Resource<Result<_>> = use_resource(|| async move {
+    let organizations: Resource<Result<_>> = use_resource(async || {
         let database = get_database().await;
         Ok(Organization::find().find_with_related(Document).all(database).await?)
     });
@@ -47,7 +47,7 @@ pub fn OrganizationList() -> Element {
         Some(Err(error)) => rsx! {
             AlertError {
                 title: "Napaka pri nalaganju organizacij".to_string(),
-                details: format!("{:?}", error),
+                details: format!("{error:?}"),
             }
         },
         None => rsx! {
