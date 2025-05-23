@@ -12,6 +12,7 @@ use crate::directories::DIRECTORIES;
 use crate::views::documents::display::DocumentDisplay;
 use crate::views::documents::list::DocumentList;
 use crate::views::documents::upload::DocumentUpload;
+use crate::views::organizations::list::OrganizationList;
 
 mod components;
 mod database;
@@ -36,7 +37,8 @@ enum Route {
     #[route("/documents/:id")]
     DocumentDisplay { id: Uuid },
 
-
+    #[route("/organizations")]
+    OrganizationList {},
 }
 
 const ICON: Asset = asset!("/assets/images/icon.ico");
@@ -49,9 +51,7 @@ fn main() {
         .with_title("Srednjeveški Arhivi")
         // .with_taskbar_icon(TODO)
         // .with_window_icon(TODO)
-        .with_always_on_top(false)
-        .with_resizable(true);
-    // .with_fullscreen(true);
+        .with_always_on_top(false);
 
     let config = dioxus::desktop::Config::new()
         .with_resource_directory(DIRECTORIES.sysdata.join("assets"))

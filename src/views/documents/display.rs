@@ -8,7 +8,7 @@ use sea_orm::ActiveValue::{Set};
 use strum::IntoEnumIterator;
 use uuid::Uuid;
 
-use crate::components::alerts::error::AlertError;
+use crate::components::alerts::AlertError;
 use crate::database::get_database;
 use crate::entities::document::DocumentToPrimaryLocation;
 use crate::entities::{

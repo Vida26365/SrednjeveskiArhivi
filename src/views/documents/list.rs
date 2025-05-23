@@ -2,7 +2,7 @@ use anyhow::Result;
 use dioxus::prelude::*;
 use sea_orm::EntityTrait;
 
-use crate::components::alerts::error::AlertError;
+use crate::components::alerts::AlertError;
 use crate::database::get_database;
 use crate::entities::document::{DocumentToPrimaryLocation, ReviewStatus};
 use crate::entities::Document;
