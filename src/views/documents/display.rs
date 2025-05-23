@@ -19,7 +19,7 @@ use crate::entities::{
 
 #[component]
 pub fn DocumentDisplay(id: Uuid) -> Element {
-    let document: Resource<Result<_>> = use_resource(async || {
+    let document: Resource<Result<_>> = use_resource(move || async move {
         let database = get_database().await;
 
         match Document::find_by_id(id).one(database).await? {

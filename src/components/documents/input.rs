@@ -1,11 +1,12 @@
 use dioxus::events::Key::Enter;
-use dioxus::logger::tracing::info;
+use dioxus::logger::tracing::{debug, info};
 use dioxus::prelude::*;
-use sea_orm::ActiveModelTrait;
 use sea_orm::ActiveValue::Set;
+use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
 
 use crate::database::get_database;
+use crate::entities::document::{Keywords, Languages, ReviewStatus};
 use crate::entities::{
     DocumentActiveModel,
     DocumentModel,
@@ -16,7 +17,7 @@ use crate::entities::{
     PersonAliasModel,
     PersonModel,
 };
-use crate::utils::date::Calendar;
+use crate::utils::date::{Calendar, Date};
 use crate::utils::language::Language;
 
 type DocumentParam = Signal<DocumentModel>;
@@ -24,6 +25,57 @@ type LocationParam = Signal<Option<LocationModel>>;
 type LocationsParam = Signal<Vec<(LocationModel, Vec<LocationAliasModel>)>>;
 type OrganizationsParam = Signal<Vec<(OrganizationModel, Vec<OrganizationAliasModel>)>>;
 type PersonsParam = Signal<Vec<(PersonModel, Vec<PersonAliasModel>)>>;
+
+async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
+    debug!("Event: {event:?}");
+
+    let values = event.values();
+
+    document.title = Set(values["title"].as_value());
+
+    if values["date"].as_value().trim() == "" {
+        document.date = Set(None);
+    } else {
+        // TODO: Handle errors
+        let calendar = Calendar::from_variant_name(&values["calendar"].as_value()).unwrap();
+        let date = Date::parse(&values["date"].as_value(), &calendar).unwrap();
+        document.date = Set(Some(date));
+    }
+
+    // TODO: Handle persons
+    // TODO: Handle organizations
+    // TODO: Handle locations
+
+    match values.get("keywords") {
+        Some(keywords) => document.keywords = Set(Keywords(keywords.as_slice().into())),
+        None => document.keywords = Set(Keywords(vec![])),
+    }
+
+    match values.get("languages") {
+        Some(languages) => {
+            document.languages = Set(Languages(
+                languages
+                    .as_slice()
+                    .iter()
+                    .filter_map(|lang| Language::from_two_letter_code(lang))
+                    .collect(),
+            ))
+        }
+        None => document.languages = Set(Languages(vec![])),
+    }
+
+    match ReviewStatus::from_variant_name(&values["review"].as_value()) {
+        Some(review) => document.review = Set(review),
+        None => document.review = Set(ReviewStatus::NotReviewed),
+    }
+
+    debug!("Parsed: {document:?}");
+
+    let database = get_database().await;
+    document.update(database).await.unwrap(); // TODO: Handle errors
+
+    info!("Submitted!"); // TODO: Show success message
+}
 
 #[component]
 pub fn PaneInput(
@@ -36,16 +88,7 @@ pub fn PaneInput(
     rsx! {
         form {
             onsubmit: move |event: Event<FormData>| async move {
-                let mut document: DocumentActiveModel = document.read().clone().into();
-
-                let values = event.values();
-                document.title = Set(values["title"].as_value());
-
-                let database = get_database().await;
-                document.update(database).await.unwrap(); // TODO: Handle error
-
-                info!("Submitted! {event:?}")
-
+                submit(document.read().clone().into(), event).await;
             },
             ul {
                 li { InputFilename { document } }
@@ -56,6 +99,7 @@ pub fn PaneInput(
                 li { InputLocations { location, locations } }
                 li { InputKeywords { document } }
                 li { InputLanguages { document } }
+                li { InputReview { document } }
                 li {
                     button { "Shrani" }
                 }
@@ -93,6 +137,7 @@ fn InputDate(document: DocumentParam) -> Element {
             for calendar in Calendar::iter() {
                 option {
                     value: "{calendar.as_variant_name()}",
+                    selected: "{document.read().date.map_or(false, |date| date.calendar() == calendar)}",
                     "{calendar}"
                 }
             }
@@ -177,10 +222,28 @@ fn InputLanguages(document: DocumentParam) -> Element {
                 li {
                     input {
                         type: "checkbox",
-                        name: "language",
+                        name: "languages",
                         value: "{language.as_two_letter_code()}",
+                        checked: "{document.read().languages.0.contains(&language)}",
                     }
                     label { "{language.as_name()}" }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn InputReview(document: DocumentParam) -> Element {
+    rsx! {
+        label { "Stanje: " }
+        select {
+            name: "review",
+            for review in ReviewStatus::iter() {
+                option {
+                    value: "{review.as_variant_name()}",
+                    selected: "{document.read().review == review}",
+                    "{review}"
                 }
             }
         }

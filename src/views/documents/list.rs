@@ -51,19 +51,19 @@ pub fn DocumentList() -> Element {
                                             ReviewStatus::NotReviewed => rsx! {
                                                 span {
                                                     class: "badge badge-soft badge-warning",
-                                                    "Ni pregledan"
+                                                    "{ReviewStatus::NotReviewed}"
                                                 }
                                             },
                                             ReviewStatus::UnderReview => rsx! {
                                                 span {
                                                     class: "badge badge-soft badge-info",
-                                                    "V pregledu"
+                                                    "{ReviewStatus::UnderReview}"
                                                 }
                                             },
                                             ReviewStatus::Reviewed => rsx! {
                                                 span {
                                                     class: "badge badge-soft badge-success",
-                                                    "Pregledan"
+                                                    "{ReviewStatus::Reviewed}"
                                                 }
                                             },
                                         }

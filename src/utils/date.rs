@@ -55,9 +55,12 @@ impl Date {
             return Err(format!("Invalid date format: {str}"));
         }
 
-        let day = parts[0].parse::<u8>().map_err(|_| format!("Invalid day: {}", parts[0]))?;
-        let month = parts[1].parse::<u8>().map_err(|_| format!("Invalid month: {}", parts[1]))?;
-        let year = parts[2].parse::<i32>().map_err(|_| format!("Invalid year: {}", parts[2]))?;
+        let day =
+            parts[0].trim().parse::<u8>().map_err(|_| format!("Invalid day: {}", parts[0]))?;
+        let month =
+            parts[1].trim().parse::<u8>().map_err(|_| format!("Invalid month: {}", parts[1]))?;
+        let year =
+            parts[2].trim().parse::<i32>().map_err(|_| format!("Invalid year: {}", parts[2]))?;
 
         match calendar {
             Calendar::Gregorian => icu_calendar::Date::try_new_gregorian(year, month, day)

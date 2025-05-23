@@ -1,10 +1,26 @@
-use dioxus::logger::tracing::info;
+use dioxus::logger::tracing::{debug, info};
 use dioxus::prelude::*;
 use sea_orm::ActiveModelTrait;
 use sea_orm::ActiveValue::Set;
 
 use crate::database::get_database;
 use crate::entities::{DocumentActiveModel, DocumentModel};
+
+async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
+    debug!("Event: {event:?}");
+
+    let values = event.values();
+    document.summary = Set(values["summary"].as_value());
+    document.metadata = Set(values["metadata"].as_value());
+    document.content = Set(values["content"].as_value());
+
+    debug!("Parsed: {document:?}");
+
+    let database = get_database().await;
+    document.update(database).await.unwrap(); // TODO: Handle errors
+
+    info!("Submitted!"); // TODO: Show success message
+}
 
 #[component]
 pub fn PaneText(document: Signal<DocumentModel>) -> Element {
@@ -14,17 +30,7 @@ pub fn PaneText(document: Signal<DocumentModel>) -> Element {
 
         form {
             onsubmit: move |event: Event<FormData>| async move {
-                let mut document: DocumentActiveModel = document.read().clone().into();
-
-                let values = event.values();
-                document.summary = Set(values["summary"].as_value());
-                document.metadata = Set(values["metadata"].as_value());
-                document.content = Set(values["content"].as_value());
-
-                let database = get_database().await;
-                document.update(database).await.unwrap(); // TODO: Handle error
-
-                info!("Submitted! {event:?}")
+                submit(document.read().clone().into(), event).await;
             },
             div {
                 class: "grow-wrap",

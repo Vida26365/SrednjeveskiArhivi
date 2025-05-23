@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 use dioxus::prelude::*;
 use sea_orm::entity::prelude::*;
 use sea_orm::{FromJsonQueryResult, LinkDef};
@@ -26,6 +28,37 @@ pub enum ReviewStatus {
     /// The document is reviewed.
     #[sea_orm(string_value = "REVIEWED")]
     Reviewed,
+}
+
+impl ReviewStatus {
+    pub fn as_variant_name(&self) -> &'static str {
+        match self {
+            ReviewStatus::NotReviewed => "not-reviewed",
+            ReviewStatus::UnderReview => "under-review",
+            ReviewStatus::Reviewed => "reviewed",
+        }
+    }
+}
+
+impl ReviewStatus {
+    pub fn from_variant_name(name: &str) -> Option<Self> {
+        match name {
+            "not-reviewed" => Some(ReviewStatus::NotReviewed),
+            "under-review" => Some(ReviewStatus::UnderReview),
+            "reviewed" => Some(ReviewStatus::Reviewed),
+            _ => None,
+        }
+    }
+}
+
+impl Display for ReviewStatus {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ReviewStatus::NotReviewed => write!(fmt, "Ni pregledan"),
+            ReviewStatus::UnderReview => write!(fmt, "V pregledu"),
+            ReviewStatus::Reviewed => write!(fmt, "Pregledan"),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Props)]
