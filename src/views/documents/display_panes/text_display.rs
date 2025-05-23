@@ -74,5 +74,3 @@ pub fn element(document: DocumentModel) -> Element {
 }
 
 // #[component]
-
-

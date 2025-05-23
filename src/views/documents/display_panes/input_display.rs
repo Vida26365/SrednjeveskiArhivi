@@ -1,22 +1,37 @@
-use dioxus::prelude::*;
 use dioxus::events::Key::Enter;
+use dioxus::prelude::*;
 use strum::IntoEnumIterator;
+use sea_orm::{EntityTrait, ModelTrait};
+use sea_orm::ActiveModelTrait;
+use sea_orm::ActiveValue::{Set};
+use dioxus::logger::tracing::info;
+use crate::database::get_database;
 
-use crate::utils::language::Language;
-use crate::entities::{location, Document, Organization, OrganizationAlias, Person, PersonAlias};
 use crate::entities::document::Model as DocumentModel;
 use crate::entities::location::Model as LocationModel;
+use crate::entities::{location, Document, Organization, OrganizationAlias, Person, PersonAlias};
+use crate::utils::language::Language;
 use crate::utils::read_input::parse_input;
-
-
-
 
 #[component]
 pub fn element(document: DocumentModel, location: Option<LocationModel>) -> Element {
+    let document2 = use_signal(|| document.clone());
+
+
     rsx! {
-        document::Link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
         form {
-            onsubmit: async move |event| { parse_input(event) },
+            onsubmit: move |event: Event<FormData>| async move {
+                let mut document: crate::entities::document::ActiveModel = document2().into();
+
+                let values = event.values();
+                document.title = Set(values["title"].as_value());
+
+                let database = get_database().await;
+                document.update(database).await.unwrap(); // TODO: Handle error
+
+                info!("Submitted! {event:?}")
+
+            },
             ul {
                 li { Filename {document: document.clone()} }
                 li { DocumentName {document: document.clone()} }
@@ -149,15 +164,13 @@ fn Languages() -> Element {
                 li {
                     input {
                         r#type: "checkbox",
-                        value: "{jezik.two_letter_code()}",
+                        value: "{jezik.as_two_letter_code()}",
                         // name: "{jezik.name()}",
                         name: "language"
                     }
-                    label { "{jezik.name()}" }
+                    label { "{jezik.as_name()}" }
                 }
             }
         }
     }
 }
-
-

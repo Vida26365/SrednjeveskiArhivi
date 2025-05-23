@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 
 use sea_orm::FromJsonQueryResult;
 use serde::ser::SerializeStruct;
@@ -10,6 +11,25 @@ use strum::EnumIter;
 pub enum Calendar {
     Gregorian,
     Julian,
+}
+
+impl Calendar {
+    pub fn as_variant_name(&self) -> &'static str {
+        match self {
+            Calendar::Gregorian => "gregorian",
+            Calendar::Julian => "julian",
+        }
+    }
+}
+
+impl Calendar {
+    pub fn from_variant_name(str: &str) -> Option<Self> {
+        match str {
+            "gregorian" => Some(Calendar::Gregorian),
+            "julian" => Some(Calendar::Julian),
+            _ => None,
+        }
+    }
 }
 
 impl Display for Calendar {
@@ -25,6 +45,32 @@ impl Display for Calendar {
 pub enum Date {
     Gregorian(icu_calendar::Date<icu_calendar::cal::Gregorian>),
     Julian(icu_calendar::Date<icu_calendar::cal::Julian>),
+}
+
+impl Date {
+    pub fn parse(str: &str, calendar: &Calendar) -> Result<Self, String> {
+        let parts: Vec<&str> = str.split('.').collect();
+        if parts.len() != 3 {
+            return Err(format!("Invalid date format: {}", str));
+        }
+
+        let day = parts[0].parse::<u8>().map_err(|_| format!("Invalid day: {}", parts[0]))?;
+        let month = parts[1].parse::<u8>().map_err(|_| format!("Invalid month: {}", parts[1]))?;
+        let year = parts[2].parse::<i32>().map_err(|_| format!("Invalid year: {}", parts[2]))?;
+
+        match calendar {
+            Calendar::Gregorian => {
+                icu_calendar::Date::try_new_gregorian(year, month, day)
+                    .map(Date::Gregorian)
+                    .map_err(|e| format!("Invalid Gregorian date: {}", e))
+            }
+            Calendar::Julian => {
+                icu_calendar::Date::try_new_julian(year, month, day)
+                    .map(Date::Julian)
+                    .map_err(|e| format!("Invalid Julian date: {}", e))
+            }
+        }
+    }
 }
 
 impl Serialize for Date {

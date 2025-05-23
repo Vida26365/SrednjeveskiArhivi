@@ -1,5 +1,5 @@
-use sea_orm::entity::prelude::*;
 use dioxus::prelude::*;
+use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Props)]
 #[sea_orm(table_name = "locations")]

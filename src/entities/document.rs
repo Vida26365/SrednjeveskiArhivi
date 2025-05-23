@@ -1,8 +1,7 @@
+use dioxus::prelude::*;
 use sea_orm::entity::prelude::*;
 use sea_orm::{FromJsonQueryResult, LinkDef};
 use serde::{Deserialize, Serialize};
-
-use dioxus::prelude::*;
 
 use crate::utils::date::Date;
 use crate::utils::language::Language;
