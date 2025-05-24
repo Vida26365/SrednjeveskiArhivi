@@ -61,21 +61,21 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
             let persons = use_signal(|| persons.clone());
 
             rsx! {
-                link { rel: "stylesheet", href: asset!("/assets/styles/urejanje.css") },
+                link { rel: "stylesheet", href: asset!("/assets/styles/grid.css") },
                 script { src: asset!("/assets/scripts/grid.js") },
 
                 div {
-                    class: "trije_divi panes pane h-full",
+                    class: "panes",
                     div {
-                        class: "leva_stran pane",
+                        class: "pane px-3 pt-2 pb-4",
                         PaneInput { document, location, locations, organizations, persons }
                     }
                     div {
-                        class: "srednja_stran pane",
+                        class: "pane px-3 pt-2 pb-4",
                         PaneText { document }
                     }
                     div {
-                        class: "desna_stran pane",
+                        class: "pane",
                         PanePdf { document }
                     }
                 }

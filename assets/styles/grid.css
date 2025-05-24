@@ -1,0 +1,20 @@
+.panes {
+  display: grid;
+  margin: calc(var(--spacing) * -2);
+  height: calc(100vh - 64px);
+}
+
+.pane {
+  position: relative;
+}
+
+.gutter {
+  background-color: var(--color-base-300);
+  position: absolute;
+  cursor: col-resize;
+  width: calc(var(--spacing) * 2);
+  right: calc(var(--spacing) * -1);
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+}
