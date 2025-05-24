@@ -5,6 +5,8 @@ use anyhow::{Context, Result};
 use dioxus::html::{FileEngine, HasFileData};
 use dioxus::logger::tracing::error;
 use dioxus::prelude::*;
+use dioxus_heroicons::outline::Shape;
+use dioxus_heroicons::IconShape;
 use sea_orm::entity::prelude::*;
 use sea_orm::ActiveValue;
 
@@ -120,16 +122,14 @@ pub fn DocumentUpload() -> Element {
             ondragleave: move |event| { event.prevent_default(); hovered.set(false); },
             ondrop: move |event| { event.prevent_default(); hovered.set(false); event.files().map(upload); },
             svg {
-                class: "mb-4",
-                width: "48",
-                height: "48",
+                class: "size-12 mb-4",
                 fill: "none",
                 stroke: "currentColor",
                 stroke_width: "1.5",
                 stroke_linecap: "round",
                 stroke_linejoin: "round",
                 view_box: "0 0 24 24",
-                path { d: "M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" }
+                { Shape::ArrowUpTray.path() }
             }
             p {
                 class: "mb-2 text-sm",
@@ -207,20 +207,14 @@ pub fn DocumentUpload() -> Element {
                         class: "cursor-pointer text-base-content/50 hover:text-base-content",
                         onclick: move |_| { remove(&file); },
                         svg {
-                            class: "shrink-0 size-4",
-                            width: "24",
-                            height: "24",
+                            class: "size-4 shrink-0",
                             fill: "none",
                             stroke: "currentColor",
                             stroke_linecap: "round",
                             stroke_linejoin: "round",
                             stroke_width: "2",
                             view_box: "0 0 24 24",
-                            path { d: "M3 6h18" }
-                            path { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }
-                            path { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }
-                            line { x1: "10", x2: "10", y1: "11", y2: "17" }
-                            line { x1: "14", x2: "14", y1: "11", y2: "17" }
+                            { Shape::Trash.path() }
                         }
                     }
                 }

@@ -92,8 +92,8 @@ impl Date {
 
     pub fn year(&self) -> i32 {
         match self {
-            Date::Gregorian(date) => date.year().extended_year,
-            Date::Julian(date) => date.year().extended_year,
+            Date::Gregorian(date) => date.extended_year(),
+            Date::Julian(date) => date.extended_year(),
         }
     }
 
@@ -118,20 +118,12 @@ impl Serialize for Date {
         S: Serializer,
     {
         let mut state = serializer.serialize_struct("Date", 4)?;
-        match self {
-            Date::Gregorian(ref date) => {
-                state.serialize_field("calendar", &Calendar::Gregorian)?;
-                state.serialize_field("year", &date.year().extended_year)?;
-                state.serialize_field("month", &date.month().ordinal)?;
-                state.serialize_field("day", &date.day_of_month().0)?;
-            }
-            Date::Julian(ref date) => {
-                state.serialize_field("calendar", &Calendar::Julian)?;
-                state.serialize_field("year", &date.year().extended_year)?;
-                state.serialize_field("month", &date.month().ordinal)?;
-                state.serialize_field("day", &date.day_of_month().0)?;
-            }
-        }
+
+        state.serialize_field("calendar", &self.calendar())?;
+        state.serialize_field("year", &self.year())?;
+        state.serialize_field("month", &self.month())?;
+        state.serialize_field("day", &self.day())?;
+
         state.end()
     }
 }
@@ -172,22 +164,7 @@ impl<'de> Deserialize<'de> for Date {
 
 impl Display for Date {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Date::Gregorian(date) => write!(
-                fmt,
-                "{}. {}. {}",
-                date.day_of_month().0,
-                date.month().ordinal,
-                date.year().extended_year
-            ),
-            Date::Julian(date) => write!(
-                fmt,
-                "{}. {}. {}",
-                date.day_of_month().0,
-                date.month().ordinal,
-                date.year().extended_year
-            ),
-        }
+        write!(fmt, "{}. {}. {}", self.day(), self.month(), self.year())
     }
 }
 

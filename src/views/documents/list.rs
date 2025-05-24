@@ -39,14 +39,16 @@ pub fn DocumentList() -> Element {
                                     td { "{document.date.map_or(\"/\".to_string(), |date| date.to_string())}" }
                                     td { "{location.clone().map_or(\"/\".to_string(), |location| location.name)}" }
                                     td {
+                                        class: "space-x-1 space-y-1",
                                         for keyword in &document.keywords.0 {
                                             span {
-                                                class: "badge badge-soft me-1",
+                                                class: "badge badge-soft",
                                                 "{keyword}"
                                             }
                                         }
                                     }
                                     td {
+                                        class: "text-nowrap",
                                         match document.review {
                                             ReviewStatus::NotReviewed => rsx! {
                                                 span {

@@ -61,8 +61,8 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
             let persons = use_signal(|| persons.clone());
 
             rsx! {
-                link { rel: "stylesheet", href: asset!("/assets/styles/grid.css") },
-                script { src: asset!("/assets/scripts/grid.js") },
+                link { rel: "stylesheet", href: asset!("/assets/styles/grid.css") }
+                script { src: asset!("/assets/scripts/grid.js") }
 
                 div {
                     class: "panes",

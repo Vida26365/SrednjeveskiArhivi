@@ -29,11 +29,16 @@ pub fn PaneText(document: Signal<DocumentModel>) -> Element {
         script { src: asset!("/assets/scripts/autoresize.js") }
 
         form {
-            onsubmit: move |event: Event<FormData>| async move {
+            onsubmit: move |event| async move {
                 submit(document.read().clone().into(), event).await;
             },
             div {
-                class: "grow-wrap",
+                class: "mb-4",
+                label {
+                    class: "flex pb-2 font-semibold",
+                    for: "summary",
+                    "Povzetek"
+                }
                 textarea {
                     class: "textarea autoresize w-full",
                     aria_autocomplete: "none",
@@ -41,11 +46,17 @@ pub fn PaneText(document: Signal<DocumentModel>) -> Element {
                     autocomplete: "false",
                     spellcheck: "false",
                     name: "summary",
+                    id: "summary",
                     value: "{document.read().summary}",
                 }
             }
             div {
-                class: "grow-wrap",
+                class: "mb-4",
+                label {
+                    class: "flex pb-2 font-semibold",
+                    for: "metadata",
+                    "Metapodatki"
+                }
                 textarea {
                     class: "textarea autoresize w-full",
                     aria_autocomplete: "none",
@@ -53,11 +64,17 @@ pub fn PaneText(document: Signal<DocumentModel>) -> Element {
                     autocomplete: "false",
                     spellcheck: "false",
                     name: "metadata",
+                    id: "metadata",
                     value: "{document.read().metadata}",
                 }
             }
             div {
-                class: "grow-wrap",
+                class: "mb-4",
+                label {
+                    class: "flex pb-2 font-semibold",
+                    for: "content",
+                    "Vsebina"
+                }
                 textarea {
                     class: "textarea autoresize w-full",
                     aria_autocomplete: "none",
@@ -65,10 +82,14 @@ pub fn PaneText(document: Signal<DocumentModel>) -> Element {
                     autocomplete: "false",
                     spellcheck: "false",
                     name: "content",
+                    id: "content",
                     value: "{document.read().content}",
                 }
             }
-            button { "Shrani" }
+            button {
+                class: "btn btn-soft btn-primary rounded-box",
+                "Shrani"
+            }
         }
     }
 }

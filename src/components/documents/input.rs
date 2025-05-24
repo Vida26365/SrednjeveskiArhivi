@@ -1,6 +1,8 @@
 use dioxus::events::Key::Enter;
 use dioxus::logger::tracing::{debug, info};
 use dioxus::prelude::*;
+use dioxus_heroicons::outline::Shape;
+use dioxus_heroicons::IconShape;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
@@ -26,6 +28,14 @@ type LocationsParam = Signal<Vec<(LocationModel, Vec<LocationAliasModel>)>>;
 type OrganizationsParam = Signal<Vec<(OrganizationModel, Vec<OrganizationAliasModel>)>>;
 type PersonsParam = Signal<Vec<(PersonModel, Vec<PersonAliasModel>)>>;
 
+fn capitalize(str: &str) -> String {
+    let mut chars = str.chars();
+    match chars.next() {
+        Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+        None => String::new(),
+    }
+}
+
 async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     debug!("Event: {event:?}");
 
@@ -47,7 +57,17 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     // TODO: Handle locations
 
     match values.get("keywords") {
-        Some(keywords) => document.keywords = Set(Keywords(keywords.as_slice().into())),
+        Some(keywords) => {
+            document.keywords = Set(Keywords(
+                keywords
+                    .as_slice()
+                    .iter()
+                    .map(|kw| kw.trim())
+                    .filter(|kw| !kw.is_empty())
+                    .map(String::from)
+                    .collect(),
+            ))
+        }
         None => document.keywords = Set(Keywords(vec![])),
     }
 
@@ -87,10 +107,11 @@ pub fn PaneInput(
 ) -> Element {
     rsx! {
         form {
-            onsubmit: move |event: Event<FormData>| async move {
+            onsubmit: move |event| async move {
                 submit(document.read().clone().into(), event).await;
             },
             ul {
+                class: "space-y-4",
                 li { InputFilename { document } }
                 li { InputName { document } }
                 li { InputDate { document } }
@@ -101,7 +122,10 @@ pub fn PaneInput(
                 li { InputLanguages { document } }
                 li { InputReview { document } }
                 li {
-                    button { "Shrani" }
+                    button {
+                        class: "btn btn-soft btn-primary rounded-box",
+                        "Shrani"
+                    }
                 }
             }
         }
@@ -111,34 +135,81 @@ pub fn PaneInput(
 #[component]
 fn InputFilename(document: DocumentParam) -> Element {
     rsx! {
-        label { "Ime datoteke: " }
-        label { "{document.read().filename}" }
+        label {
+            class: "flex pb-2 font-semibold",
+            for: "filename",
+            "Ime datoteke"
+        }
+        input {
+            class: "input w-full",
+            aria_autocomplete: "none",
+            autocapitalize: "false",
+            autocomplete: "false",
+            spellcheck: "false",
+            readonly: "true",
+            name: "filename",
+            id: "filename",
+            value: "{document.read().filename}",
+        }
     }
 }
 
 #[component]
 fn InputName(document: DocumentParam) -> Element {
     rsx! {
-        label { "Naslov: " }
-        input { name : "title", value: "{document.read().title}" }
+        label {
+            class: "flex pb-2 font-semibold",
+            for: "title",
+            "Naslov"
+        }
+        input {
+            class: "input w-full",
+            aria_autocomplete: "none",
+            autocapitalize: "false",
+            autocomplete: "false",
+            spellcheck: "false",
+            name: "title",
+            id: "title",
+            value: "{document.read().title}",
+        }
     }
 }
 
 #[component]
 fn InputDate(document: DocumentParam) -> Element {
     rsx! {
-        label { "Datum: " }
+        label {
+            class: "flex pb-2 font-semibold",
+            for: "date",
+            "Datum"
+        }
         input {
+            class: "input mb-2 w-full",
+            aria_autocomplete: "none",
+            autocapitalize: "false",
+            autocomplete: "false",
+            spellcheck: "false",
             name: "date",
+            id: "date",
             value: "{document.read().date.map_or(\"\".to_string(), |date| date.to_string())}",
         }
-        select {
-            name: "calendar",
+        fieldset {
+            class: "space-y-2",
             for calendar in Calendar::iter() {
-                option {
-                    value: "{calendar.as_variant_name()}",
-                    selected: "{document.read().date.map_or(false, |date| date.calendar() == calendar)}",
-                    "{calendar}"
+                div {
+                    input {
+                        class: "radio",
+                        type: "radio",
+                        name: "calendar",
+                        id: "calendar-{calendar.as_variant_name()}",
+                        value: "{calendar.as_variant_name()}",
+                        checked: "{document.read().date.map_or(false, |date| date.calendar() == calendar)}",
+                    }
+                    label {
+                        class: "ps-2",
+                        for: "calendar-{calendar.as_variant_name()}",
+                        "{capitalize(&calendar.to_string())}"
+                    }
                 }
             }
         }
@@ -148,26 +219,42 @@ fn InputDate(document: DocumentParam) -> Element {
 #[component]
 fn InputPersons(persons: PersonsParam) -> Element {
     rsx! {
-        label { "Osebe: " }
-        label { "TODO" }
+        label {
+            class: "flex pb-2 font-semibold",
+            "Osebe"
+        }
+        span { "TODO" }
     }
 }
 
 #[component]
 fn InputOrganisations(organizations: OrganizationsParam) -> Element {
     rsx! {
-        label { "Organizacije: " }
-        label { "TODO" }
+        label {
+            class: "flex pb-2 font-semibold",
+            "Organizacije"
+        }
+        span { "TODO" }
     }
 }
 
 #[component]
 fn InputLocations(location: LocationParam, locations: LocationsParam) -> Element {
     rsx! {
-        label { "Lokacija: " }
+        label {
+            class: "flex pb-2 font-semibold",
+            for: "main-location",
+            "Lokacija"
+        }
         input {
+            class: "input w-full",
+            aria_autocomplete: "none",
+            autocapitalize: "false",
+            autocomplete: "false",
+            spellcheck: "false",
             name: "main-location",
-            value: "{location.read().clone().map_or(\"\".to_string(), |location| location.name)}"
+            id: "main-location",
+            value: "{location.read().clone().map_or(\"\".to_string(), |location| location.name)}",
         }
         // TODO: Ostale lokacije
     }
@@ -175,37 +262,86 @@ fn InputLocations(location: LocationParam, locations: LocationsParam) -> Element
 
 #[component]
 fn InputKeywords(document: DocumentParam) -> Element {
-    // TODO: Make this work
-
-    let mut signal = use_signal(move || document.read().keywords.0.clone());
+    let mut keywords = use_signal(move || document.read().keywords.0.clone());
+    let mut additional = use_signal(String::new);
 
     rsx! {
-        label {"Ključne besede: " }
+        label {
+            class: "flex pb-2 font-semibold",
+            "Ključne besede"
+        }
 
-        input {
-            name: "new-keyword",
-            value: "",
-            onkeypress: move |event: Event<KeyboardData>| {
-                if event.key() == Enter {
-                    // event.prevent_default();
-                    signal.write().push(String::new());
-                    println!("Enter pressed {:?}", &event);
-                    println!("Keywords: {:?}", signal);
+        for keyword in keywords.read().iter().cloned() {
+            div {
+                class: "input w-full mb-2",
+                input {
+                    aria_autocomplete: "none",
+                    autocapitalize: "false",
+                    autocomplete: "false",
+                    spellcheck: "false",
+                    name: "keywords",
+                    value: "{keyword}",
+                    onkeypress: move |event| {
+                        if event.key() == Enter {
+                            event.prevent_default();
+                        }
+                    }
+                }
+                button {
+                    class: "cursor-pointer text-base-content/50 hover:text-base-content",
+                    onclick: move |event| {
+                        event.prevent_default();
+                        keywords.write().retain(|existing| existing != &keyword);
+                    },
+                    svg {
+                        class: "size-4 shrink-0",
+                        fill: "none",
+                        stroke: "currentColor",
+                        stroke_linecap: "round",
+                        stroke_linejoin: "round",
+                        stroke_width: "2",
+                        view_box: "0 0 24 24",
+                        { Shape::Trash.path() }
+                    }
                 }
             }
         }
 
-        for klb in signal.read().clone() { // TODO: Lepša rešitev za vse
+        div {
+            class: "input w-full",
             input {
+                aria_autocomplete: "none",
+                autocapitalize: "false",
+                autocomplete: "false",
+                spellcheck: "false",
                 name: "keywords",
-                value: "{klb}",
-                onkeypress: move |event: Event<KeyboardData>| {
+                value: "{additional}",
+                oninput: move |event| {
+                    additional.set(event.value());
+                },
+                onkeypress: move |event| {
                     if event.key() == Enter {
-                        // event.prevent_default();
-                        signal.write().push(String::new());
-                        println!("Enter pressed {:?}", &event);
-                        println!("Keywords: {:?}", signal);
+                        event.prevent_default();
+                        keywords.write().push(additional.read().clone());
+                        additional.set(String::new());
                     }
+                }
+            }
+            button {
+                class: "cursor-pointer text-base-content/50 hover:text-base-content",
+                onclick: move |event| {
+                    event.prevent_default();
+                    additional.set(String::new());
+                },
+                svg {
+                    class: "size-4 shrink-0",
+                    fill: "none",
+                    stroke: "currentColor",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    stroke_width: "2",
+                    view_box: "0 0 24 24",
+                    { Shape::Trash.path() }
                 }
             }
         }
@@ -215,18 +351,27 @@ fn InputKeywords(document: DocumentParam) -> Element {
 #[component]
 fn InputLanguages(document: DocumentParam) -> Element {
     rsx! {
-        label { "Jeziki:" }
-        ul {
-            padding_left: "10px",
+        label {
+            class: "flex pb-2 font-semibold",
+            "Jeziki"
+        }
+        fieldset {
+            class: "space-y-2",
             for language in Language::iter() {
-                li {
+                div {
                     input {
+                        class: "checkbox",
                         type: "checkbox",
                         name: "languages",
+                        id: "languages-{language.as_two_letter_code()}",
                         value: "{language.as_two_letter_code()}",
                         checked: "{document.read().languages.0.contains(&language)}",
                     }
-                    label { "{language.as_name()}" }
+                    label {
+                        class: "ps-2",
+                        for: "languages-{language.as_two_letter_code()}",
+                        "{capitalize(language.as_name())}"
+                    }
                 }
             }
         }
@@ -236,14 +381,27 @@ fn InputLanguages(document: DocumentParam) -> Element {
 #[component]
 fn InputReview(document: DocumentParam) -> Element {
     rsx! {
-        label { "Stanje: " }
-        select {
-            name: "review",
+        label {
+            class: "flex pb-2 font-semibold",
+            "Stanje"
+        }
+        fieldset {
+            class: "space-y-2",
             for review in ReviewStatus::iter() {
-                option {
-                    value: "{review.as_variant_name()}",
-                    selected: "{document.read().review == review}",
-                    "{review}"
+                div {
+                    input {
+                        class: "radio",
+                        type: "radio",
+                        name: "review",
+                        id: "review-{review.as_variant_name()}",
+                        value: "{review.as_variant_name()}",
+                        checked: "{document.read().review == review}",
+                    }
+                    label {
+                        class: "ps-2",
+                        for: "review-{review.as_variant_name()}",
+                        "{review}"
+                    }
                 }
             }
         }
