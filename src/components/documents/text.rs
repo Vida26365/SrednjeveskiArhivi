@@ -25,8 +25,8 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 #[component]
 pub fn PaneText(document: Signal<DocumentModel>) -> Element {
     rsx! {
-        link { rel: "stylesheet", href: asset!("/assets/styles/function.css") },
-        script { src: asset!("/assets/scripts/auto_grow.js") },
+        link { rel: "stylesheet", href: asset!("/assets/styles/autoresize.css") }
+        script { src: asset!("/assets/scripts/autoresize.js") }
 
         form {
             onsubmit: move |event: Event<FormData>| async move {
@@ -35,8 +35,8 @@ pub fn PaneText(document: Signal<DocumentModel>) -> Element {
             div {
                 class: "grow-wrap",
                 textarea {
-                    height: "auto",
-                    width: "100%",
+                    class: "textarea autoresize w-full",
+                    aria_autocomplete: "none",
                     autocapitalize: "false",
                     autocomplete: "false",
                     spellcheck: "false",
@@ -47,7 +47,8 @@ pub fn PaneText(document: Signal<DocumentModel>) -> Element {
             div {
                 class: "grow-wrap",
                 textarea {
-                    width: "100%",
+                    class: "textarea autoresize w-full",
+                    aria_autocomplete: "none",
                     autocapitalize: "false",
                     autocomplete: "false",
                     spellcheck: "false",
@@ -58,7 +59,8 @@ pub fn PaneText(document: Signal<DocumentModel>) -> Element {
             div {
                 class: "grow-wrap",
                 textarea {
-                    width: "100%",
+                    class: "textarea autoresize w-full",
+                    aria_autocomplete: "none",
                     autocapitalize: "false",
                     autocomplete: "false",
                     spellcheck: "false",
