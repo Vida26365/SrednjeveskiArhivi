@@ -1,0 +1,8 @@
+OPENAI_BASE_URL = "http://localhost:11434/v1"
+OPENAI_API_KEY = "SOME-API-KEY"
+
+MODEL_OCR = "qwen2.5vl:7b"
+MODEL_SEGMENTATION = "qwen2.5vl:7b"
+
+DIRECTORY_SOURCE = "source"
+DIRECTORY_OUTPUT = "texts"
