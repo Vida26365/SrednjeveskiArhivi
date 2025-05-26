@@ -281,6 +281,16 @@ fn InputKeywords(document: DocumentParam) -> Element {
                     spellcheck: "false",
                     name: "keywords",
                     value: "{keyword}",
+                    oninput: {
+                        let keyword = keyword.clone();
+                        move |event: Event<FormData>| {
+                            let mut keywords = keywords.write();
+                            match keywords.iter().position(|existing| existing == &keyword) {
+                                Some(pos) => keywords[pos] = event.value(),
+                                None => keywords.push(event.value()),
+                            }
+                        }
+                    },
                     onkeypress: move |event| {
                         if event.key() == Enter {
                             event.prevent_default();
@@ -289,9 +299,12 @@ fn InputKeywords(document: DocumentParam) -> Element {
                 }
                 button {
                     class: "cursor-pointer text-base-content/50 hover:text-base-content",
-                    onclick: move |event| {
-                        event.prevent_default();
-                        keywords.write().retain(|existing| existing != &keyword);
+                    onclick: {
+                        let keyword = keyword.clone();
+                        move |event: Event<MouseData>| {
+                            event.prevent_default();
+                            keywords.write().retain(|existing| existing != &keyword);
+                        }
                     },
                     svg {
                         class: "size-4 shrink-0",
