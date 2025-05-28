@@ -6,7 +6,7 @@ use crate::entities::DocumentModel;
 pub fn PanePdf(document: Signal<DocumentModel>) -> Element {
     rsx! {
         embed {
-            src: "/content/{document.read().id}#toolbar=0",
+            src: "/content/{document.read().id}#toolbar=0&statusbar=0&view=FitH",
             type: "application/pdf",
             width: "100%",
             height: "100%",
