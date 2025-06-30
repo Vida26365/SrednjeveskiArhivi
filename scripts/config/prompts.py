@@ -3,7 +3,7 @@ PROMPT_OCR = """You are an assistant that takes an image, performs optical chara
 You must follow the following rules:
 
 1. Extract text from the image:
-   - Use OCR to extract text from the image
+   - Use optical character recognition to extract text from the image
    - Ensure the extracted text is accurate and complete
 
 2. Preserve original content:
@@ -44,7 +44,7 @@ You must follow the following rules:
 You must split the text into three segments:
 
 - `summary`: A summary of the text, commonly included at the beginning of the document.
-- `metadata`: Metadata about the document, such as date, location, sources, and seal status.
+- `metadata`: Metadata about the document, such as date, location, sources, typist, and seal status.
 - `content`: The main content of the document.
 
 Output format:
@@ -90,6 +90,6 @@ Example output:
 }
 ```
 
-NOTE: The segments might not be contiguous.
+NOTE: The document might be written in multiple languages. The segments might not be contiguous.
 
 IMPORTANT: Do NOT alter the content in any way. Respond ONLY with a valid JSON object of segments."""

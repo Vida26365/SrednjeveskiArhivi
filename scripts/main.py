@@ -1,7 +1,9 @@
 import base64
 import json
+import logging
 import os
 import re
+import sys
 import time
 from io import BytesIO
 
@@ -11,7 +13,6 @@ from openai.types.chat.chat_completion_content_part_image_param import ChatCompl
 from openai.types.chat.chat_completion_content_part_image_param import ImageURL
 from openai.types.chat.chat_completion_system_message_param import ChatCompletionSystemMessageParam
 from openai.types.chat.chat_completion_user_message_param import ChatCompletionUserMessageParam
-from tqdm import tqdm
 
 from config.config import (
     DIRECTORY_OUTPUT,
@@ -20,7 +21,10 @@ from config.config import (
     MODEL_SEGMENTATION,
     OPENAI_API_KEY,
     OPENAI_BASE_URL,
+    TEMPERATURE_OCR,
+    TEMPERATURE_SEGMENTATION,
 )
+from config.models import Document
 from config.prompts import PROMPT_OCR, PROMPT_SEGMENTATION
 
 
@@ -67,7 +71,12 @@ def ocr_image(image):
         ),
     ]
 
-    completion = CLIENT.chat.completions.create(model=MODEL_OCR, messages=messages)
+    completion = CLIENT.chat.completions.create(
+        model=MODEL_OCR,
+        temperature=TEMPERATURE_OCR,
+        messages=messages,
+    )
+
     return completion.choices[0].message.content
 
 
@@ -77,11 +86,22 @@ def segment_text(text):
         ChatCompletionUserMessageParam(role="user", content=text),
     ]
 
-    completion = CLIENT.chat.completions.create(model=MODEL_SEGMENTATION, messages=messages)
-    content = completion.choices[0].message.content
+    completion = CLIENT.beta.chat.completions.parse(
+        model=MODEL_SEGMENTATION,
+        temperature=TEMPERATURE_SEGMENTATION,
+        messages=messages,
+        response_format=Document,
+    )
+
+    message = completion.choices[0].message
+
+    if message.parsed:
+        return message.parsed.model_dump_json(indent=2) + "\n"
+
+    logging.error("  No parsed content found, parsing manually")
 
     # Ensure Unix line endings
-    content = content.replace("\r\n", "\n").replace("\\r\\n", "\\n")
+    content = message.content.replace("\r\n", "\n").replace("\\r\\n", "\\n")
 
     # Remove code block wrappers if present
     if content.strip().startswith("```"):
@@ -101,18 +121,29 @@ def segment_text(text):
         obj = json.loads(content)
         return json.dumps(obj, indent=2, ensure_ascii=False) + "\n"
     except ValueError:
-        tqdm.write("  Invalid JSON, using raw text")
+        logging.error("  Invalid JSON, using raw text")
         return content
 
 
 def main():
+    logging.basicConfig(
+        stream=sys.stdout,
+        level=logging.INFO,
+        format="[%(name)s] [%(asctime)s] [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
     os.makedirs(DIRECTORY_SOURCE, exist_ok=True)
     os.makedirs(DIRECTORY_OUTPUT, exist_ok=True)
 
-    # Wrap the file processing loop with tqdm
-    for filename in tqdm(os.listdir(DIRECTORY_SOURCE), desc="Processing documents", position=2, leave=True):
+    documents = os.listdir(DIRECTORY_SOURCE)
+
+    for idx, filename in enumerate(documents):
+        logging.info(f'Processing document "{filename}" ({idx + 1}/{len(documents)})')
+
         # Skip non-PDF files
         if not filename.lower().endswith(".pdf"):
+            logging.info("  Skipping non-PDF document")
             continue
 
         source = os.path.join(DIRECTORY_SOURCE, filename)
@@ -120,33 +151,33 @@ def main():
 
         # Skip already processed files
         if os.path.exists(output):
+            logging.info("  Skipping already processed document")
             continue
 
-        tqdm.write(f"Processing {filename}")
         start = time.time()
 
         # Extract pages from the file
+        logging.info("  Extracting pages from document")
         images = extract_pages(source)
-        texts = []
 
         # Extract text from each page
-        for idx, image in enumerate(tqdm(images, desc="Extracting pages", position=1, leave=False)):
-            tqdm.write(f"  Extracting text from page {idx + 1}")
+        texts = []
+        for idy, image in enumerate(images):
+            logging.info(f"  Extracting text from page {idy + 1}/{len(images)}")
             text = ocr_image(image)
             texts.append(text)
 
         # Segment the combined text
-        with tqdm(range(1), desc="Segmenting document", position=1, leave=False):
-            combined = "\n".join(texts)
-            tqdm.write("  Segmenting document")
-            segmented = segment_text(combined)
+        logging.info("  Segmenting content")
+        combined = "\n".join(texts)
+        segmented = segment_text(combined)
 
         # Save the output
+        logging.info("  Saving output")
         with open(output, "w", encoding="utf-8") as file:
-            tqdm.write("  Saving output")
             file.write(segmented)
 
-        tqdm.write(f"  Took {time.time() - start:.2f}s")
+        logging.info(f"  Took {time.time() - start:.2f}s")
 
 
 if __name__ == "__main__":
