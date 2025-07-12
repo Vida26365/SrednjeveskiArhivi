@@ -36,6 +36,12 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
+# Environments
+.python-version
+.venv/
+env/
+venv/
+
 # Distribution & Packaging
 build/
 debug/
@@ -56,6 +62,10 @@ bower_components/
 jspm_packages/
 node_modules/
 web_modules/
+
+# SLING
+scripts/source/
+scripts/output/
 
 # Tailwind CSS
 assets/styles/tailwind.css
