@@ -8,4 +8,5 @@ PARAMS_OCR = {"temperature": 0, "top_k": 1, "top_p": 0.1, "min_p": 1.0, "max_tok
 PARAMS_SEGMENTATION = {"temperature": 0, "top_k": 1, "top_p": 0.1, "min_p": 1.0, "max_tokens": 2048}
 
 DIRECTORY_SOURCE = "source"
-DIRECTORY_OUTPUT = "texts"
+DIRECTORY_OUTPUT_RAW = "output/raw"
+DIRECTORY_OUTPUT_SEGMENTED = "output/segmented"

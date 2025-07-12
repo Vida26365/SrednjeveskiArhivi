@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 
-## SET UP OLLAMA ##
+## SET UP VLLM ##
 
-echo "[SETUP] Setting up Ollama"
+echo "[SETUP] Setting up vLLM"
 
-rm -rf ollama
-mkdir -p ollama
-
-curl -L https://github.com/ollama/ollama/releases/download/v0.9.3/ollama-linux-amd64.tgz -o ollama.tgz
-tar -C ollama -xzf ollama.tgz
-rm ollama.tgz
+apptainer pull /tmp/vllm.sif docker://vllm/vllm-openai
+rm /tmp/vllm.sif
 
 ## SET UP PYTHON ##
 

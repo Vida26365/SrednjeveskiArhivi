@@ -15,7 +15,8 @@ from openai.types.chat.chat_completion_system_message_param import ChatCompletio
 from openai.types.chat.chat_completion_user_message_param import ChatCompletionUserMessageParam
 
 from config.config import (
-    DIRECTORY_OUTPUT,
+    DIRECTORY_OUTPUT_RAW,
+    DIRECTORY_OUTPUT_SEGMENTED,
     DIRECTORY_SOURCE,
     MODEL_OCR,
     MODEL_SEGMENTATION,
@@ -138,10 +139,11 @@ def process_document(filename):
         return
 
     source = os.path.join(DIRECTORY_SOURCE, filename)
-    output = os.path.join(DIRECTORY_OUTPUT, filename.rsplit(".", 1)[0] + ".json")
+    output_raw = os.path.join(DIRECTORY_OUTPUT_RAW, filename.rsplit(".", 1)[0] + ".txt")
+    output_segmented = os.path.join(DIRECTORY_OUTPUT_SEGMENTED, filename.rsplit(".", 1)[0] + ".json")
 
     # Skip already processed files
-    if os.path.exists(output):
+    if os.path.exists(output_raw) and os.path.exists(output_segmented):
         logging.info("  Skipping already processed document")
         return
 
@@ -158,14 +160,21 @@ def process_document(filename):
         text = ocr_image(image)
         texts.append(text)
 
-    # Segment the combined text
-    logging.info("  Segmenting content")
+    # Combine the extracted text
     combined = "\n".join(texts)
+
+    # Save the raw text
+    logging.info("  Saving raw content")
+    with open(output_raw, "w", encoding="utf-8") as file:
+        file.write(combined)
+
+    # Segment the raw text
+    logging.info("  Segmenting raw content")
     segmented = segment_text(combined)
 
-    # Save the output
-    logging.info("  Saving output")
-    with open(output, "w", encoding="utf-8") as file:
+    # Save the segmented text
+    logging.info("  Saving segmented content")
+    with open(output_segmented, "w", encoding="utf-8") as file:
         file.write(segmented)
 
     logging.info(f"  Took {time.time() - start:.2f}s")
@@ -179,8 +188,12 @@ def main():
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
+    logging.getLogger('openai').setLevel(logging.INFO)
+    logging.getLogger('httpx').setLevel(logging.WARNING)
+
     os.makedirs(DIRECTORY_SOURCE, exist_ok=True)
-    os.makedirs(DIRECTORY_OUTPUT, exist_ok=True)
+    os.makedirs(DIRECTORY_OUTPUT_RAW, exist_ok=True)
+    os.makedirs(DIRECTORY_OUTPUT_SEGMENTED, exist_ok=True)
 
     documents = os.listdir(DIRECTORY_SOURCE)
 
