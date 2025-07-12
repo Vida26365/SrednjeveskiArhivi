@@ -188,8 +188,8 @@ def main():
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    logging.getLogger('openai').setLevel(logging.INFO)
-    logging.getLogger('httpx').setLevel(logging.WARNING)
+    logging.getLogger("openai").setLevel(logging.INFO)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
     os.makedirs(DIRECTORY_SOURCE, exist_ok=True)
     os.makedirs(DIRECTORY_OUTPUT_RAW, exist_ok=True)
