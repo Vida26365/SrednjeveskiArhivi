@@ -4,7 +4,7 @@
 - dioxus knjižnjica, kjer lahko sestavljaš komponente, kot v html-ju
     - Za to sva se odločila, kljub temu, da dokumentacija ni popolna, zaradi bolj ali manj preproste uporabe
     -Iskanje primerov  implementacije v repozitorijih naključnih ljudi
-- baza ![struktura_baze](predstavitev_slike/srednjeveski-arhivi.png)
+- baza ![struktura_baze](slike/srednjeveski-arhivi.png)
 - automatično dodajanje polj ob kliku enter
 
 ## Težave
@@ -12,7 +12,7 @@
 - grda implementacija
 - Uporaba JavaScripta za drsnike
     - V rustu to ni mogoče
-    - [grid.js](assets/scripts/grid.js)
+    - [grid.js](../assets/scripts/grid.js)
 - Prevajalniški hrošč. In to celo dva
     - Pri prevajanju ring zaboja (ki ga najin projekt posredno uporablja za kriptografijo) s prevajalnikom GCC z orodjarno MinGW je prišlo do notranje napake prevajalnika, zaradi česar se projekt ni prevedel. Težavo sva prijavila razvijalcem projekta MinGW Builds (https://github.com/niXman/mingw-builds/issues/706), nato pa še neposredno razvijalcem prevajalnika GCC (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=120192). Izkazalo se je, da je to resničen hrošč v prevajalniku GCC z orodjarno MinGW, ki se ga da ponoviti z nekaj preprostimi vrsticami kode:
 
@@ -79,4 +79,3 @@ To težavo so sicer že odpravili, vendar bo objavljena šele v različici Rust 
     - Also link do SLINGa: https://www.sling.si/,
     - Prednosti: Je zastonj (če maš dostop do SLINGa), lahko uporabiš večje in kvalitetnejše modele, za večje količine dokumentov bi moral bit hitrejše,
     - Slabosti: Rabiš dostop do SLINGa, mal več dela uporabnika je (pač to izvažanje pa uvažanje, ampak itak se tega ne dela pogosto)
-

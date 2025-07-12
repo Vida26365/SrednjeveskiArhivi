@@ -4,13 +4,13 @@
     - rust model => tesseract
     - zmogljiv model Qwen 2.5 VL, ki ni primeren za poganjanje na zasebnem računalniku, zato ...
     - Superračunalnik od Arnesa prek Slovenskega nacionalnega superračunalniškega omrežja SLING
-    - ![Superračunalnik mail](predstavitev_slike/superracunalnik_mail.png)
-- Shranjevanje podatkov ![struktura_baze](predstavitev_slike/srednjeveski-arhivi.png)
+    - ![Superračunalnik mail](slike/superracunalnik_mail.png)
+- Shranjevanje podatkov ![struktura_baze](slike/srednjeveski-arhivi.png)
     - variacije imen
     - [Slovenska historična topografija](https://topografija.zrc-sazu.si/)
-    - ![mail na zsu]("predstavitev_slike/Posnetek zaslona 2025-05-25 220455.png")
+    - ![mail na zsu](slike/Posnetek%20zaslona%202025-05-25%20220455.png)
 - Vidina vizija drsnikov - se ne da v rustu
-    - [grid.js](assets/scripts/grid.js)
+    - [grid.js](../assets/scripts/grid.js)
 - Prvi prevajalniški hrošč
     - [issue](https://github.com/niXman/mingw-builds/issues/706)
     - [report](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=120192)
@@ -21,4 +21,4 @@
 
     - hrošč v Rustc
     - [issue](https://github.com/rust-lang/rust/issues/139142)
-    - težava odpravljena v Rust 1.88.0, ki bo izšla 25. 6. 2025
+    - težava odpravljena v Rust 1.88.0, ki je(!) izšla 25. 6. 2025
