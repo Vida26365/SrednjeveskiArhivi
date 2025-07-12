@@ -1,11 +1,11 @@
-OPENAI_BASE_URL = "http://localhost:11434/v1"
+OPENAI_BASE_URL = "http://localhost:8000/v1"
 OPENAI_API_KEY = "SOME-API-KEY"
 
-MODEL_OCR = "qwen2.5vl:32b-q8_0"
-MODEL_SEGMENTATION = "qwen2.5vl:32b-q8_0"
+MODEL_OCR = "Qwen/Qwen2.5-VL-72B-Instruct-AWQ"
+MODEL_SEGMENTATION = "Qwen/Qwen2.5-VL-72B-Instruct-AWQ"
 
-TEMPERATURE_OCR = 0
-TEMPERATURE_SEGMENTATION = 0
+PARAMS_OCR = {"temperature": 0, "top_k": 1, "top_p": 0.1, "min_p": 1.0, "max_tokens": 1024}
+PARAMS_SEGMENTATION = {"temperature": 0, "top_k": 1, "top_p": 0.1, "min_p": 1.0, "max_tokens": 2048}
 
 DIRECTORY_SOURCE = "source"
 DIRECTORY_OUTPUT = "texts"

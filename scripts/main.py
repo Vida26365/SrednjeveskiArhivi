@@ -21,8 +21,8 @@ from config.config import (
     MODEL_SEGMENTATION,
     OPENAI_API_KEY,
     OPENAI_BASE_URL,
-    TEMPERATURE_OCR,
-    TEMPERATURE_SEGMENTATION,
+    PARAMS_OCR,
+    PARAMS_SEGMENTATION,
 )
 from config.models import Document
 from config.prompts import PROMPT_OCR, PROMPT_SEGMENTATION
@@ -35,7 +35,7 @@ def extract_pages(path):
     images = []
     with pdfplumber.open(path) as pdf:
         for page in pdf.pages:
-            image = page.to_image(resolution=150, antialias=True).original
+            image = page.to_image(resolution=300, antialias=True).original
             images.append(image)
     return images
 
@@ -73,9 +73,12 @@ def ocr_image(image):
 
     completion = CLIENT.chat.completions.create(
         model=MODEL_OCR,
-        temperature=TEMPERATURE_OCR,
         messages=messages,
+        extra_body=PARAMS_OCR,
     )
+
+    if completion.choices[0].finish_reason != "stop":
+        raise ValueError(f"Invalid finish reason ({completion.choices[0].finish_reason}), skipping document")
 
     return completion.choices[0].message.content
 
@@ -88,10 +91,13 @@ def segment_text(text):
 
     completion = CLIENT.beta.chat.completions.parse(
         model=MODEL_SEGMENTATION,
-        temperature=TEMPERATURE_SEGMENTATION,
         messages=messages,
         response_format=Document,
+        extra_body=PARAMS_SEGMENTATION,
     )
+
+    if completion.choices[0].finish_reason != "stop":
+        raise ValueError(f"Invalid finish reason ({completion.choices[0].finish_reason}), skipping document")
 
     message = completion.choices[0].message
 
@@ -125,6 +131,46 @@ def segment_text(text):
         return content
 
 
+def process_document(filename):
+    # Skip non-PDF files
+    if not filename.lower().endswith(".pdf"):
+        logging.info("  Skipping non-PDF document")
+        return
+
+    source = os.path.join(DIRECTORY_SOURCE, filename)
+    output = os.path.join(DIRECTORY_OUTPUT, filename.rsplit(".", 1)[0] + ".json")
+
+    # Skip already processed files
+    if os.path.exists(output):
+        logging.info("  Skipping already processed document")
+        return
+
+    start = time.time()
+
+    # Extract pages from the file
+    logging.info("  Extracting pages from document")
+    images = extract_pages(source)
+
+    # Extract text from each page
+    texts = []
+    for idy, image in enumerate(images):
+        logging.info(f"  Extracting text from page {idy + 1}/{len(images)}")
+        text = ocr_image(image)
+        texts.append(text)
+
+    # Segment the combined text
+    logging.info("  Segmenting content")
+    combined = "\n".join(texts)
+    segmented = segment_text(combined)
+
+    # Save the output
+    logging.info("  Saving output")
+    with open(output, "w", encoding="utf-8") as file:
+        file.write(segmented)
+
+    logging.info(f"  Took {time.time() - start:.2f}s")
+
+
 def main():
     logging.basicConfig(
         stream=sys.stdout,
@@ -141,43 +187,10 @@ def main():
     for idx, filename in enumerate(documents):
         logging.info(f'Processing document "{filename}" ({idx + 1}/{len(documents)})')
 
-        # Skip non-PDF files
-        if not filename.lower().endswith(".pdf"):
-            logging.info("  Skipping non-PDF document")
-            continue
-
-        source = os.path.join(DIRECTORY_SOURCE, filename)
-        output = os.path.join(DIRECTORY_OUTPUT, filename.rsplit(".", 1)[0] + ".json")
-
-        # Skip already processed files
-        if os.path.exists(output):
-            logging.info("  Skipping already processed document")
-            continue
-
-        start = time.time()
-
-        # Extract pages from the file
-        logging.info("  Extracting pages from document")
-        images = extract_pages(source)
-
-        # Extract text from each page
-        texts = []
-        for idy, image in enumerate(images):
-            logging.info(f"  Extracting text from page {idy + 1}/{len(images)}")
-            text = ocr_image(image)
-            texts.append(text)
-
-        # Segment the combined text
-        logging.info("  Segmenting content")
-        combined = "\n".join(texts)
-        segmented = segment_text(combined)
-
-        # Save the output
-        logging.info("  Saving output")
-        with open(output, "w", encoding="utf-8") as file:
-            file.write(segmented)
-
-        logging.info(f"  Took {time.time() - start:.2f}s")
+        try:
+            process_document(filename)
+        except Exception as error:
+            logging.exception(f"  {error}")
 
 
 if __name__ == "__main__":
