@@ -13,6 +13,7 @@ use crate::views::documents::display::DocumentDisplay;
 use crate::views::documents::list::DocumentList;
 use crate::views::documents::upload::DocumentUpload;
 use crate::views::organizations::list::OrganizationList;
+// use crate::views::persons::list::PersonList;
 
 mod components;
 mod database;
@@ -39,6 +40,9 @@ enum Route {
 
     #[route("/organizations")]
     OrganizationList {},
+
+    // #[route("/persons")]
+    // PersonList {},
 }
 
 fn main() {

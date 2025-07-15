@@ -20,6 +20,11 @@ pub fn Navbar() -> Element {
                 Link {
                     class: "btn btn-primary btn-ghost aria-[current='page']:btn-soft rounded text-lg",
                     to: Route::OrganizationList {},
+                    "Osebe"
+                }
+                Link {
+                    class: "btn btn-primary btn-ghost aria-[current='page']:btn-soft rounded text-lg",
+                    to: Route::OrganizationList {},
                     "Organizacije"
                 }
             }

@@ -8,7 +8,7 @@ use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
 
 use crate::database::get_database;
-use crate::entities::document::{Keywords, Languages, ReviewStatus};
+use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::entities::{
     DocumentActiveModel,
     DocumentModel,
@@ -52,9 +52,23 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
         document.date = Set(Some(date));
     }
 
-    //TODO: Persons
     // TODO: Handle organizations
     // TODO: Handle locations
+
+    match values.get("persons") {
+        Some(persons) => {
+            document.persons = Set(Persons(
+                persons
+                    .as_slice()
+                    .iter()
+                    .map(|person| person.trim())
+                    .filter(|person| !person.is_empty())
+                    .map(String::from)
+                    .collect(),
+            ));
+        }
+        None => document.persons = Set(Persons(vec![])),
+    }
 
     match values.get("keywords") {
         Some(keywords) => {
@@ -240,10 +254,10 @@ fn InputPersons(persons: PersonsParam) -> Element {
                     name: "persons",
                     value: "{oseba}",
                     oninput: {
-                        let keyword = oseba.clone();
+                        let oseba = oseba.clone();
                         move |event: Event<FormData>| {
                             let mut persons = persons.write();
-                            match persons.iter().position(|existing| existing == &keyword) {
+                            match persons.iter().position(|existing| existing == &oseba) {
                                 Some(pos) => persons[pos] = event.value(),
                                 None => persons.push(event.value()),
                             }
@@ -258,10 +272,10 @@ fn InputPersons(persons: PersonsParam) -> Element {
                 button {
                     class: "cursor-pointer text-base-content/50 hover:text-base-content",
                     onclick: {
-                        let keyword = oseba.clone();
+                        let oseba = oseba.clone();
                         move |event: Event<MouseData>| {
                             event.prevent_default();
-                            persons.write().retain(|existing| existing != &keyword);
+                            persons.write().retain(|existing| existing != &oseba);
                         }
                     },
                     svg {
@@ -285,7 +299,7 @@ fn InputPersons(persons: PersonsParam) -> Element {
                 autocapitalize: "false",
                 autocomplete: "false",
                 spellcheck: "false",
-                name: "keywords",
+                name: "persons",
                 value: "{additional}",
                 oninput: move |event| {
                     additional.set(event.value());
@@ -348,10 +362,10 @@ fn InputOrganisations(organizations: OrganizationsParam) -> Element {
                     name: "organisations",
                     value: "{organizacija}",
                     oninput: {
-                        let keyword = organizacija.clone();
+                        let organisation = organizacija.clone();
                         move |event: Event<FormData>| {
                             let mut organisations = organisations.write();
-                            match organisations.iter().position(|existing| existing == &keyword) {
+                            match organisations.iter().position(|existing| existing == &organisation) {
                                 Some(pos) => organisations[pos] = event.value(),
                                 None => organisations.push(event.value()),
                             }
@@ -366,10 +380,10 @@ fn InputOrganisations(organizations: OrganizationsParam) -> Element {
                 button {
                     class: "cursor-pointer text-base-content/50 hover:text-base-content",
                     onclick: {
-                        let keyword = organizacija.clone();
+                        let organisation = organizacija.clone();
                         move |event: Event<MouseData>| {
                             event.prevent_default();
-                            organisations.write().retain(|existing| existing != &keyword);
+                            organisations.write().retain(|existing| existing != &organisation);
                         }
                     },
                     svg {
@@ -393,7 +407,7 @@ fn InputOrganisations(organizations: OrganizationsParam) -> Element {
                 autocapitalize: "false",
                 autocomplete: "false",
                 spellcheck: "false",
-                name: "keywords",
+                name: "organisations",
                 value: "{additional}",
                 oninput: move |event| {
                     additional.set(event.value());

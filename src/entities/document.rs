@@ -12,6 +12,9 @@ use crate::utils::language::Language;
 pub struct Languages(pub Vec<Language>);
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct Persons(pub Vec<String>);
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct Keywords(pub Vec<String>);
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
@@ -99,6 +102,10 @@ pub struct Model {
     /// The document languages.
     #[sea_orm(default_value = "[]")]
     pub languages: Languages,
+
+    /// The document persons.
+    #[sea_orm(default_value = "[]")]
+    pub persons: Persons,
 
     /// The document keywords.
     #[sea_orm(default_value = "[]")]
