@@ -218,7 +218,9 @@ fn InputDate(document: DocumentParam) -> Element {
 
 #[component]
 fn InputPersons(persons: PersonsParam) -> Element {
-    let mut persons = use_signal(move || persons.read().clone().into_iter().map(|(person, _)| person.name).collect::<Vec<_>>());
+    let mut persons = use_signal(move || {
+        persons.read().clone().into_iter().map(|(person, _)| person.name).collect::<Vec<_>>()
+    });
     let mut additional = use_signal(String::new);
 
     rsx! {
@@ -319,7 +321,14 @@ fn InputPersons(persons: PersonsParam) -> Element {
 
 #[component]
 fn InputOrganisations(organizations: OrganizationsParam) -> Element {
-    let mut organisations = use_signal(move || organizations.read().clone().into_iter().map(|(organization, _)| organization.name).collect::<Vec<_>>());
+    let mut organisations = use_signal(move || {
+        organizations
+            .read()
+            .clone()
+            .into_iter()
+            .map(|(organization, _)| organization.name)
+            .collect::<Vec<_>>()
+    });
     let mut additional = use_signal(String::new);
 
     rsx! {
