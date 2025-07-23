@@ -66,7 +66,7 @@ pub fn Navbar() -> Element {
         }
 
         main {
-            class: "p-2",
+            class: "p-3",
             Outlet::<Route> {}
         }
     }

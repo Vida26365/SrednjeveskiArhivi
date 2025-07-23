@@ -67,15 +67,17 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                 div {
                     class: "panes",
                     div {
-                        class: "pane px-3 pt-2 pb-4",
+                        class: "pane ps-3 pe-4 pt-3 pb-4",
+                        "data-default-size": 0.2,
                         PaneInput { document, location, locations, organizations, persons }
                     }
                     div {
-                        class: "pane px-3 pt-2 pb-4",
+                        class: "pane px-4 pt-3 pb-4",
                         PaneText { document }
                     }
                     div {
                         class: "pane",
+                        "data-default-size": 0.3855,
                         PanePdf { document }
                     }
                 }
