@@ -5,18 +5,18 @@ use sea_orm::EntityTrait;
 use crate::components::alerts::AlertError;
 use crate::components::mentions::{MentionFirst, MentionLast};
 use crate::database::get_database;
-use crate::entities::{Document, Organization};
+use crate::entities::{Document, Person};
 
 
 #[component]
 pub fn PersonList() -> Element {
-    let organizations: Resource<Result<_>> = use_resource(async || {
+    let persons: Resource<Result<_>> = use_resource(async || {
         let database = get_database().await;
-        Ok(Organization::find().find_with_related(Document).all(database).await?)
+        Ok(Person::find().find_with_related(Document).all(database).await?)
     });
 
-    match &*organizations.read_unchecked() {
-        Some(Ok(organizations)) => rsx! {
+    match &*persons.read_unchecked() {
+        Some(Ok(persons)) => rsx! {
             div {
                 div {
                     class: "overflow-x-auto overflow-y-auto",
@@ -32,7 +32,7 @@ pub fn PersonList() -> Element {
                             }
                         }
                         tbody {
-                            for (organization, documents) in organizations {
+                            for (organization, documents) in persons {
                                 tr {
                                     td { "{organization.name}" }
                                     td { "{documents.len()}" }

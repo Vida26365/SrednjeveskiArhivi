@@ -27,6 +27,7 @@ pub fn DocumentList() -> Element {
                                 th { "Naslov" }
                                 th { "Datum" }
                                 th { "Kraj" }
+                                th { "Osebe" }
                                 th { "Ključne besede" }
                                 th { "Stanje" }
                                 th { "Dejanja" }
@@ -38,6 +39,15 @@ pub fn DocumentList() -> Element {
                                     td { "{document.title}" }
                                     td { "{document.date.map_or(\"/\".to_string(), |date| date.to_string())}" }
                                     td { "{location.clone().map_or(\"/\".to_string(), |location| location.name)}" }
+                                    td {
+                                        class: "space-x-1 space-y-1",
+                                        for person in &document.persons.0 {
+                                            span {
+                                                class: "badge badge-soft",
+                                                "{person}"
+                                            }
+                                        }
+                                    }
                                     td {
                                         class: "space-x-1 space-y-1",
                                         for keyword in &document.keywords.0 {
