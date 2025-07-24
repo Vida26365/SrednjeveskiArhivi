@@ -10,7 +10,15 @@ use strum::IntoEnumIterator;
 use crate::database::get_database;
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::entities::{
-    person, DocumentActiveModel, DocumentModel, LocationAliasModel, LocationModel, OrganizationAliasModel, OrganizationModel, PersonAliasModel, PersonModel
+    person,
+    DocumentActiveModel,
+    DocumentModel,
+    LocationAliasModel,
+    LocationModel,
+    OrganizationAliasModel,
+    OrganizationModel,
+    PersonAliasModel,
+    PersonModel,
 };
 use crate::utils::date::{Calendar, Date};
 use crate::utils::language::Language;
@@ -230,11 +238,14 @@ fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
     //     // persons.read().clone().into_iter().map(|(person, _)| person.name).collect::<Vec<_>>()
     // });
     let mut persons = use_signal(move || {
-        persons.read().clone().into_iter().map(
-            |(person, alliases)| (person.name,
-                alliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>()
-            )
-        ).collect::<Vec<_>>()
+        persons
+            .read()
+            .clone()
+            .into_iter()
+            .map(|(person, alliases)| {
+                (person.name, alliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
+            })
+            .collect::<Vec<_>>()
     });
     let mut additional = use_signal(String::new);
 
