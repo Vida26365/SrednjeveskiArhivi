@@ -7,7 +7,7 @@ use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
 
-use crate::components::documents::input::InputPersons;
+use crate::components::documents::input::{InputKeywords, InputPersons};
 use crate::database::get_database;
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::entities::{
@@ -20,11 +20,9 @@ use crate::entities::{
     PersonAliasModel,
     PersonModel,
 };
-use crate::utils::date::{Calendar, Date};
 use crate::utils::language::Language;
 
 type DocumentParam = Signal<DocumentModel>;
-type LocationParam = Signal<Option<LocationModel>>;
 type LocationsParam = Signal<Vec<(LocationModel, Vec<LocationAliasModel>)>>;
 type OrganizationsParam = Signal<Vec<(OrganizationModel, Vec<OrganizationAliasModel>)>>;
 type PersonsParam = Signal<Vec<(PersonModel, Vec<PersonAliasModel>)>>;
@@ -43,15 +41,6 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     let values = event.values();
 
     document.title = Set(values["title"].as_value());
-
-    if values["date"].as_value().trim() == "" {
-        document.date = Set(None);
-    } else {
-        // TODO: Handle errors
-        let calendar = Calendar::from_variant_name(&values["calendar"].as_value()).unwrap();
-        let date = Date::parse(&values["date"].as_value(), &calendar).unwrap();
-        document.date = Set(Some(date));
-    }
 
     // TODO: Handle organizations
     // TODO: Handle locations
@@ -115,7 +104,6 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 #[component]
 pub fn PaneInput(
     document: DocumentParam,
-    location: LocationParam,
     locations: LocationsParam,
     organizations: OrganizationsParam,
     persons: PersonsParam,
@@ -129,10 +117,8 @@ pub fn PaneInput(
                 class: "space-y-4",
                 li { InputFilename { document } }
                 li { InputName { document } }
-                li { InputDate { document } }
                 li { InputPersons { document, persons } }
                 li { InputOrganisations { organizations } }
-                li { InputLocations { location, locations } }
                 li { InputKeywords { document } }
                 li { InputLanguages { document } }
                 li { InputReview { document } }
@@ -186,47 +172,6 @@ fn InputName(document: DocumentParam) -> Element {
             name: "title",
             id: "title",
             value: "{document.read().title}",
-        }
-    }
-}
-
-#[component]
-fn InputDate(document: DocumentParam) -> Element {
-    rsx! {
-        label {
-            class: "flex pb-2 font-semibold",
-            for: "date",
-            "Datum"
-        }
-        input {
-            class: "input mb-2 w-full",
-            aria_autocomplete: "none",
-            autocapitalize: "false",
-            autocomplete: "false",
-            spellcheck: "false",
-            name: "date",
-            id: "date",
-            value: "{document.read().date.map_or(\"\".to_string(), |date| date.to_string())}",
-        }
-        fieldset {
-            class: "space-y-2",
-            for calendar in Calendar::iter() {
-                div {
-                    input {
-                        class: "radio",
-                        type: "radio",
-                        name: "calendar",
-                        id: "calendar-{calendar.as_variant_name()}",
-                        value: "{calendar.as_variant_name()}",
-                        checked: "{document.read().date.map_or(false, |date| date.calendar() == calendar)}",
-                    }
-                    label {
-                        class: "ps-2",
-                        for: "calendar-{calendar.as_variant_name()}",
-                        "{capitalize(&calendar.to_string())}"
-                    }
-                }
-            }
         }
     }
 }
@@ -314,129 +259,6 @@ fn InputOrganisations(organizations: OrganizationsParam) -> Element {
                     if event.key() == Enter {
                         event.prevent_default();
                         organisations.write().push(additional.read().clone());
-                        additional.set(String::new());
-                    }
-                }
-            }
-            button {
-                class: "cursor-pointer text-base-content/50 hover:text-base-content",
-                onclick: move |event| {
-                    event.prevent_default();
-                    additional.set(String::new());
-                },
-                svg {
-                    class: "size-4 shrink-0",
-                    fill: "none",
-                    stroke: "currentColor",
-                    stroke_linecap: "round",
-                    stroke_linejoin: "round",
-                    stroke_width: "2",
-                    view_box: "0 0 24 24",
-                    { Shape::Trash.path() }
-                }
-            }
-        }
-    }
-}
-
-#[component]
-fn InputLocations(location: LocationParam, locations: LocationsParam) -> Element {
-    rsx! {
-        label {
-            class: "flex pb-2 font-semibold",
-            for: "main-location",
-            "Lokacija"
-        }
-        input {
-            class: "input w-full",
-            aria_autocomplete: "none",
-            autocapitalize: "false",
-            autocomplete: "false",
-            spellcheck: "false",
-            name: "main-location",
-            id: "main-location",
-            value: "{location.read().clone().map_or(\"\".to_string(), |location| location.name)}",
-        }
-        // TODO: Ostale lokacije
-    }
-}
-
-#[component]
-fn InputKeywords(document: DocumentParam) -> Element {
-    let mut keywords = use_signal(move || document.read().keywords.0.clone());
-    let mut additional = use_signal(String::new);
-
-    rsx! {
-        label {
-            class: "flex pb-2 font-semibold",
-            "Ključne besede"
-        }
-
-        for keyword in keywords.read().iter().cloned() {
-            div {
-                class: "input w-full mb-2",
-                input {
-                    aria_autocomplete: "none",
-                    autocapitalize: "false",
-                    autocomplete: "false",
-                    spellcheck: "false",
-                    name: "keywords",
-                    value: "{keyword}",
-                    oninput: {
-                        let keyword = keyword.clone();
-                        move |event: Event<FormData>| {
-                            let mut keywords = keywords.write();
-                            match keywords.iter().position(|existing| existing == &keyword) {
-                                Some(pos) => keywords[pos] = event.value(),
-                                None => keywords.push(event.value()),
-                            }
-                        }
-                    },
-                    onkeypress: move |event| {
-                        if event.key() == Enter {
-                            event.prevent_default();
-                        }
-                    }
-                }
-                button {
-                    class: "cursor-pointer text-base-content/50 hover:text-base-content",
-                    onclick: {
-                        let keyword = keyword.clone();
-                        move |event: Event<MouseData>| {
-                            event.prevent_default();
-                            keywords.write().retain(|existing| existing != &keyword);
-                        }
-                    },
-                    svg {
-                        class: "size-4 shrink-0",
-                        fill: "none",
-                        stroke: "currentColor",
-                        stroke_linecap: "round",
-                        stroke_linejoin: "round",
-                        stroke_width: "2",
-                        view_box: "0 0 24 24",
-                        { Shape::Trash.path() }
-                    }
-                }
-            }
-        }
-
-        div {
-            class: "input w-full",
-            input {
-                aria_autocomplete: "none",
-                autocapitalize: "false",
-                autocomplete: "false",
-                spellcheck: "false",
-                name: "keywords",
-                value: "{additional}",
-                oninput: move |event| {
-                    additional.set(event.value());
-                },
-                onkeypress: move |event| {
-                    if event.key() == Enter {
-                        event.prevent_default();
-                        keywords.write().push(additional.read().clone());
                         additional.set(String::new());
                     }
                 }

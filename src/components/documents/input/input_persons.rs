@@ -33,7 +33,7 @@ pub fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
             class: "flex pb-2 font-semibold",
             "Osebe"
         }
-        for (oseba, mut aliases) in persons.read().iter().cloned() {
+        for (oseba, aliases) in persons.read().iter().cloned() {
             div {
                 div {
                     class: "flex gap-2",

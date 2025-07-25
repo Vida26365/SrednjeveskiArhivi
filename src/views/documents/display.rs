@@ -69,11 +69,11 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                     class: "panes",
                     div {
                         class: "pane px-3 pt-2 pb-4",
-                        PaneInput { document, location, locations, organizations, persons }
+                        PaneInput { document, locations, organizations, persons }
                     }
                     div {
                         class: "pane px-3 pt-2 pb-4",
-                        PaneText { document }
+                        PaneText { document, location }
                     }
                     div {
                         class: "pane",
