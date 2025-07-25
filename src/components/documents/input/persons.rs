@@ -1,5 +1,5 @@
 use dioxus::events::Key::Enter;
-use dioxus::logger::tracing::{debug, info};
+use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
 use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
