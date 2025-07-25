@@ -7,6 +7,7 @@ use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
 
+use crate::components::documents::input::InputPersons;
 use crate::database::get_database;
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::entities::{
@@ -21,14 +22,12 @@ use crate::entities::{
 };
 use crate::utils::date::{Calendar, Date};
 use crate::utils::language::Language;
-use crate::components::documents::input::InputPersons;
 
 type DocumentParam = Signal<DocumentModel>;
 type LocationParam = Signal<Option<LocationModel>>;
 type LocationsParam = Signal<Vec<(LocationModel, Vec<LocationAliasModel>)>>;
 type OrganizationsParam = Signal<Vec<(OrganizationModel, Vec<OrganizationAliasModel>)>>;
 type PersonsParam = Signal<Vec<(PersonModel, Vec<PersonAliasModel>)>>;
-
 
 fn capitalize(str: &str) -> String {
     let mut chars = str.chars();
