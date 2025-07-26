@@ -135,7 +135,7 @@ pub fn PaneInput(
 
 #[component]
 fn InputLocations(locations: LocationsParam) -> Element {
-    let mut locations = use_signal(move || {
+    let locations = use_signal(move || {
         locations
             .read()
             .clone()
