@@ -10,12 +10,12 @@ use crate::entities::{
     PersonModel,
 };
 
-mod input;
 mod pdf;
+mod properties;
 mod text;
 
-pub use input::PaneInput;
 pub use pdf::PanePdf;
+pub use properties::PaneProperties;
 pub use text::PaneText;
 
 pub type DocumentSignal = ReadSignal<DocumentModel>;

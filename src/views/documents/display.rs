@@ -4,7 +4,7 @@ use sea_orm::{EntityTrait, ModelTrait};
 use uuid::Uuid;
 
 use crate::components::alerts::AlertError;
-use crate::components::documents::display::{PaneInput, PanePdf, PaneText};
+use crate::components::documents::display::{PanePdf, PaneProperties, PaneText};
 use crate::components::skeleton::Skeleton;
 use crate::database::get_database;
 use crate::entities::document::DocumentToPrimaryLocation;
@@ -64,7 +64,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                 "data-default-size": 0.2,
                 match &*document.read_unchecked() {
                     Some(Ok(Some((document, _, locations, organizations, persons)))) => rsx! {
-                        PaneInput {
+                        PaneProperties {
                             document: document.clone(),
                             locations: locations.clone(),
                             organizations: organizations.clone(),

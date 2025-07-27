@@ -8,13 +8,21 @@ use crate::database::get_database;
 use crate::entities::DocumentActiveModel;
 use crate::utils::date::{Calendar, Date};
 
+mod date;
+mod location;
+
+use date::InputDate;
+use location::InputLocation;
+
 async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     debug!("Event: {event:?}");
 
     let values = event.values();
+
     document.summary = Set(values["summary"].as_value());
     document.metadata = Set(values["metadata"].as_value());
     document.content = Set(values["content"].as_value());
+
     if values["date"].as_value().trim() == "" {
         document.date = Set(None);
     } else {
@@ -23,7 +31,8 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
         let date = Date::parse(&values["date"].as_value(), &calendar).unwrap();
         document.date = Set(Some(date));
     }
-    // TOdo: Handle location
+
+    // TODO: Handle location
 
     debug!("Parsed: {document:?}");
 
@@ -47,9 +56,9 @@ pub fn PaneText(
                 submit(document.read().clone().into(), event).await;
             },
             div {
-                class: "flex gap-8",
+                class: "flex gap-4 mb-4",
+                InputLocation { location }
                 InputDate { document }
-                InputLocations { location }
             }
             div {
                 class: "mb-4",
@@ -106,63 +115,9 @@ pub fn PaneText(
                 }
             }
             button {
-                class: "btn btn-soft btn-primary rounded-box",
+                class: "btn btn-soft btn-primary rounded-box mb-1",
                 "Shrani"
             }
         }
-    }
-}
-
-#[component]
-fn InputLocations(location: PrimaryLocationSignal) -> Element {
-    rsx! {
-        input {
-            class: "input w-full",
-            placeholder: "Lokacija",
-            aria_autocomplete: "none",
-            autocapitalize: "false",
-            autocomplete: "false",
-            spellcheck: "false",
-            name: "main-location",
-            id: "main-location",
-            value: "{location.read().clone().map_or(\"\".to_string(), |location| location.name)}",
-        }
-    }
-}
-
-#[component]
-fn InputDate(document: DocumentSignal) -> Element {
-    rsx! {
-        input {
-            class: "input mb-2 w-full",
-            placeholder: "Datum",
-            aria_autocomplete: "none",
-            autocapitalize: "false",
-            autocomplete: "false",
-            spellcheck: "false",
-            name: "date",
-            id: "date",
-            value: "{document.read().date.map_or(\"\".to_string(), |date| date.to_string())}",
-        }
-        // fieldset {
-        //     class: "space-y-2",
-        //     for calendar in Calendar::iter() {
-        //         div {
-        //             input {
-        //                 class: "radio",
-        //                 type: "radio",
-        //                 name: "calendar",
-        //                 id: "calendar-{calendar.as_variant_name()}",
-        //                 value: "{calendar.as_variant_name()}",
-        //                 checked: "{document.read().date.map_or(false, |date| date.calendar() == calendar)}",
-        //             }
-        //             label {
-        //                 class: "ps-2",
-        //                 for: "calendar-{calendar.as_variant_name()}",
-        //                 "{capitalize(&calendar.to_string())}"
-        //             }
-        //         }
-        //     }
-        // }
     }
 }
