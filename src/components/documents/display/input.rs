@@ -7,26 +7,18 @@ use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
 
+use crate::components::documents::display::{
+    DocumentSignal,
+    LocationsSignal,
+    OrganizationsSignal,
+    PersonsSignal,
+    PrimaryLocationSignal,
+};
 use crate::database::get_database;
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
-use crate::entities::{
-    DocumentActiveModel,
-    DocumentModel,
-    LocationAliasModel,
-    LocationModel,
-    OrganizationAliasModel,
-    OrganizationModel,
-    PersonAliasModel,
-    PersonModel,
-};
+use crate::entities::DocumentActiveModel;
 use crate::utils::date::{Calendar, Date};
 use crate::utils::language::Language;
-
-type DocumentParam = Signal<DocumentModel>;
-type LocationParam = Signal<Option<LocationModel>>;
-type LocationsParam = Signal<Vec<(LocationModel, Vec<LocationAliasModel>)>>;
-type OrganizationsParam = Signal<Vec<(OrganizationModel, Vec<OrganizationAliasModel>)>>;
-type PersonsParam = Signal<Vec<(PersonModel, Vec<PersonAliasModel>)>>;
 
 fn capitalize(str: &str) -> String {
     let mut chars = str.chars();
@@ -113,11 +105,11 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 
 #[component]
 pub fn PaneInput(
-    document: DocumentParam,
-    location: LocationParam,
-    locations: LocationsParam,
-    organizations: OrganizationsParam,
-    persons: PersonsParam,
+    #[props(into)] document: DocumentSignal,
+    #[props(into)] location: PrimaryLocationSignal,
+    #[props(into)] locations: LocationsSignal,
+    #[props(into)] organizations: OrganizationsSignal,
+    #[props(into)] persons: PersonsSignal,
 ) -> Element {
     rsx! {
         form {
@@ -147,7 +139,7 @@ pub fn PaneInput(
 }
 
 #[component]
-fn InputFilename(document: DocumentParam) -> Element {
+fn InputFilename(document: DocumentSignal) -> Element {
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
@@ -169,7 +161,7 @@ fn InputFilename(document: DocumentParam) -> Element {
 }
 
 #[component]
-fn InputName(document: DocumentParam) -> Element {
+fn InputName(document: DocumentSignal) -> Element {
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
@@ -190,7 +182,7 @@ fn InputName(document: DocumentParam) -> Element {
 }
 
 #[component]
-fn InputDate(document: DocumentParam) -> Element {
+fn InputDate(document: DocumentSignal) -> Element {
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
@@ -232,7 +224,7 @@ fn InputDate(document: DocumentParam) -> Element {
 }
 
 #[component]
-fn InputPersons(persons: PersonsParam) -> Element {
+fn InputPersons(persons: PersonsSignal) -> Element {
     let mut persons = use_signal(move || {
         persons.read().clone().into_iter().map(|(person, _)| person.name).collect::<Vec<_>>()
     });
@@ -335,7 +327,7 @@ fn InputPersons(persons: PersonsParam) -> Element {
 }
 
 #[component]
-fn InputOrganisations(organizations: OrganizationsParam) -> Element {
+fn InputOrganisations(organizations: OrganizationsSignal) -> Element {
     let mut organisations = use_signal(move || {
         organizations
             .read()
@@ -443,7 +435,7 @@ fn InputOrganisations(organizations: OrganizationsParam) -> Element {
 }
 
 #[component]
-fn InputLocations(location: LocationParam, locations: LocationsParam) -> Element {
+fn InputLocations(location: PrimaryLocationSignal, locations: LocationsSignal) -> Element {
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
@@ -465,7 +457,7 @@ fn InputLocations(location: LocationParam, locations: LocationsParam) -> Element
 }
 
 #[component]
-fn InputKeywords(document: DocumentParam) -> Element {
+fn InputKeywords(document: DocumentSignal) -> Element {
     let mut keywords = use_signal(move || document.read().keywords.0.clone());
     let mut additional = use_signal(String::new);
 
@@ -566,7 +558,7 @@ fn InputKeywords(document: DocumentParam) -> Element {
 }
 
 #[component]
-fn InputLanguages(document: DocumentParam) -> Element {
+fn InputLanguages(document: DocumentSignal) -> Element {
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
@@ -597,7 +589,7 @@ fn InputLanguages(document: DocumentParam) -> Element {
 }
 
 #[component]
-fn InputReview(document: DocumentParam) -> Element {
+fn InputReview(document: DocumentSignal) -> Element {
     rsx! {
         label {
             class: "flex pb-2 font-semibold",

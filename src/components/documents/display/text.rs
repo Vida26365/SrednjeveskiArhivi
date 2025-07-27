@@ -3,8 +3,9 @@ use dioxus::prelude::*;
 use sea_orm::ActiveModelTrait;
 use sea_orm::ActiveValue::Set;
 
+use crate::components::documents::display::DocumentSignal;
 use crate::database::get_database;
-use crate::entities::{DocumentActiveModel, DocumentModel};
+use crate::entities::DocumentActiveModel;
 
 async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     debug!("Event: {event:?}");
@@ -23,7 +24,7 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 }
 
 #[component]
-pub fn PaneText(document: Signal<DocumentModel>) -> Element {
+pub fn PaneText(#[props(into)] document: DocumentSignal) -> Element {
     rsx! {
         link { rel: "stylesheet", href: asset!("/assets/styles/autoresize.css") }
         script { src: asset!("/assets/scripts/autoresize.js") }

@@ -45,7 +45,8 @@
   let isResizing = false
 
   const resizableGrid = (elParent) => {
-    const isVertical = elParent.classList.contains('panes-v')
+    const isDisabled = elParent.classList.contains('panes-disabled')
+    const isVertical = elParent.classList.contains('panes-vertical')
     const elsPanes = [...elParent.querySelectorAll(':scope > .pane')]
 
     const minSizes = elsPanes.map(elPane => isVertical ? 0 : getMinWidth(elPane))
@@ -139,7 +140,7 @@
 
     elsPanes.slice(0, -1).forEach((elPane, i) => {
       elPane.append(createElement('div', { className: 'gutter' }))
-      elPane.addEventListener('pointerdown', pointerDown)
+      if (!isDisabled) elPane.addEventListener('pointerdown', pointerDown)
     })
 
     const observer = new ResizeObserver(windowResized)
