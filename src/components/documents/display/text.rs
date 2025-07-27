@@ -3,12 +3,10 @@ use dioxus::prelude::*;
 use sea_orm::ActiveModelTrait;
 use sea_orm::ActiveValue::Set;
 
+use crate::components::documents::display::{DocumentSignal, PrimaryLocationSignal};
 use crate::database::get_database;
-use crate::entities::{DocumentActiveModel, DocumentModel, LocationModel};
+use crate::entities::DocumentActiveModel;
 use crate::utils::date::{Calendar, Date};
-
-type LocationParam = Signal<Option<LocationModel>>;
-type DocumentParam = Signal<DocumentModel>;
 
 async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     debug!("Event: {event:?}");
@@ -36,7 +34,10 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 }
 
 #[component]
-pub fn PaneText(document: Signal<DocumentModel>, location: LocationParam) -> Element {
+pub fn PaneText(
+    #[props(into)] document: DocumentSignal,
+    #[props(into)] location: PrimaryLocationSignal,
+) -> Element {
     rsx! {
         link { rel: "stylesheet", href: asset!("/assets/styles/autoresize.css") }
         script { src: asset!("/assets/scripts/autoresize.js") }
@@ -113,7 +114,7 @@ pub fn PaneText(document: Signal<DocumentModel>, location: LocationParam) -> Ele
 }
 
 #[component]
-fn InputLocations(location: LocationParam) -> Element {
+fn InputLocations(location: PrimaryLocationSignal) -> Element {
     rsx! {
         input {
             class: "input w-full",
@@ -130,7 +131,7 @@ fn InputLocations(location: LocationParam) -> Element {
 }
 
 #[component]
-fn InputDate(document: DocumentParam) -> Element {
+fn InputDate(document: DocumentSignal) -> Element {
     rsx! {
         input {
             class: "input mb-2 w-full",
@@ -147,7 +148,6 @@ fn InputDate(document: DocumentParam) -> Element {
         //     class: "space-y-2",
         //     for calendar in Calendar::iter() {
         //         div {
-        //             class: "whitespace-nowrap",
         //             input {
         //                 class: "radio",
         //                 type: "radio",

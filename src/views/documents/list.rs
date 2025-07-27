@@ -3,10 +3,11 @@ use dioxus::prelude::*;
 use sea_orm::EntityTrait;
 
 use crate::components::alerts::AlertError;
+use crate::components::documents::list::{PaneFilters, PaneTable};
+use crate::components::skeleton::Skeleton;
 use crate::database::get_database;
-use crate::entities::document::{DocumentToPrimaryLocation, ReviewStatus};
+use crate::entities::document::DocumentToPrimaryLocation;
 use crate::entities::Document;
-use crate::Route;
 
 #[component]
 pub fn DocumentList() -> Element {
@@ -15,93 +16,34 @@ pub fn DocumentList() -> Element {
         Ok(Document::find().find_also_linked(DocumentToPrimaryLocation).all(database).await?)
     });
 
-    match &*documents.read_unchecked() {
-        Some(Ok(documents)) => rsx! {
+    rsx! {
+        link { rel: "stylesheet", href: asset!("/assets/styles/grid.css") }
+        script { src: asset!("/assets/scripts/grid.js") }
+
+        div {
+            class: "panes",
             div {
-                div {
-                    class: "overflow-x-auto overflow-y-auto",
-                    table {
-                        class: "table w-full",
-                        thead {
-                            tr {
-                                th { "Naslov" }
-                                th { "Datum" }
-                                th { "Kraj" }
-                                th { "Osebe" }
-                                th { "Ključne besede" }
-                                th { "Stanje" }
-                                th { "Dejanja" }
-                            }
+                class: "pane ps-3 pe-4 py-3",
+                "data-default-size": 0.2,
+                PaneFilters {}
+            }
+            div {
+                class: "pane ps-4 pe-3 py-3",
+                match &*documents.read_unchecked() {
+                    Some(Ok(documents)) => rsx! {
+                        PaneTable { documents: documents.clone() }
+                    },
+                    Some(Err(error)) => rsx! {
+                        AlertError {
+                            title: "Napaka pri nalaganju dokumentov",
+                            details: format!("{error:?}"),
                         }
-                        tbody {
-                            for (document, location) in documents {
-                                tr {
-                                    td { "{document.title}" }
-                                    td { "{document.date.map_or(\"/\".to_string(), |date| date.to_string())}" }
-                                    td { "{location.clone().map_or(\"/\".to_string(), |location| location.name)}" }
-                                    td {
-                                        class: "space-x-1 space-y-1",
-                                        for person in &document.persons.0 {
-                                            span {
-                                                class: "badge badge-soft",
-                                                "{person}"
-                                            }
-                                        }
-                                    }
-                                    td {
-                                        class: "space-x-1 space-y-1",
-                                        for keyword in &document.keywords.0 {
-                                            span {
-                                                class: "badge badge-soft",
-                                                "{keyword}"
-                                            }
-                                        }
-                                    }
-                                    td {
-                                        class: "text-nowrap",
-                                        match document.review {
-                                            ReviewStatus::NotReviewed => rsx! {
-                                                span {
-                                                    class: "badge badge-soft badge-warning",
-                                                    "{ReviewStatus::NotReviewed}"
-                                                }
-                                            },
-                                            ReviewStatus::UnderReview => rsx! {
-                                                span {
-                                                    class: "badge badge-soft badge-info",
-                                                    "{ReviewStatus::UnderReview}"
-                                                }
-                                            },
-                                            ReviewStatus::Reviewed => rsx! {
-                                                span {
-                                                    class: "badge badge-soft badge-success",
-                                                    "{ReviewStatus::Reviewed}"
-                                                }
-                                            },
-                                        }
-                                    }
-                                    td {
-                                        Link {
-                                            to: Route::DocumentDisplay { id: document.id },
-                                            class: "btn btn-soft btn-primary rounded-box",
-                                            "Poglej"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    },
+                    None => rsx! {
+                        Skeleton {}
+                    },
                 }
             }
-        },
-        Some(Err(error)) => rsx! {
-            AlertError {
-                title: "Napaka pri nalaganju dokumentov".to_string(),
-                details: format!("{error:?}"),
-            }
-        },
-        None => rsx! {
-            "Nalaganje dokumentov ..."
-        },
+        }
     }
 }

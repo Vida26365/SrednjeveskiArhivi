@@ -3,22 +3,27 @@ use dioxus::prelude::*;
 use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
 
-use crate::entities::DocumentModel;
-
-type DocumentParam = Signal<DocumentModel>;
+use crate::components::documents::display::OrganizationsSignal;
 
 #[component]
-pub fn InputKeywords(document: DocumentParam) -> Element {
-    let mut keywords = use_signal(move || document.read().keywords.0.clone());
+pub fn InputOrganisations(organizations: OrganizationsSignal) -> Element {
+    let mut organisations = use_signal(move || {
+        organizations
+            .read()
+            .clone()
+            .into_iter()
+            .map(|(organization, _)| organization.name)
+            .collect::<Vec<_>>()
+    });
     let mut additional = use_signal(String::new);
 
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
-            "Ključne besede"
+            "Organizacije"
         }
 
-        for keyword in keywords.read().iter().cloned() {
+        for organizacija in organisations.read().iter().cloned() {
             div {
                 class: "input w-full mb-2",
                 input {
@@ -26,15 +31,15 @@ pub fn InputKeywords(document: DocumentParam) -> Element {
                     autocapitalize: "false",
                     autocomplete: "false",
                     spellcheck: "false",
-                    name: "keywords",
-                    value: "{keyword}",
+                    name: "organisations",
+                    value: "{organizacija}",
                     oninput: {
-                        let keyword = keyword.clone();
+                        let organisation = organizacija.clone();
                         move |event: Event<FormData>| {
-                            let mut keywords = keywords.write();
-                            match keywords.iter().position(|existing| existing == &keyword) {
-                                Some(pos) => keywords[pos] = event.value(),
-                                None => keywords.push(event.value()),
+                            let mut organisations = organisations.write();
+                            match organisations.iter().position(|existing| existing == &organisation) {
+                                Some(pos) => organisations[pos] = event.value(),
+                                None => organisations.push(event.value()),
                             }
                         }
                     },
@@ -47,10 +52,10 @@ pub fn InputKeywords(document: DocumentParam) -> Element {
                 button {
                     class: "cursor-pointer text-base-content/50 hover:text-base-content",
                     onclick: {
-                        let keyword = keyword.clone();
+                        let organisation = organizacija.clone();
                         move |event: Event<MouseData>| {
                             event.prevent_default();
-                            keywords.write().retain(|existing| existing != &keyword);
+                            organisations.write().retain(|existing| existing != &organisation);
                         }
                     },
                     svg {
@@ -74,7 +79,7 @@ pub fn InputKeywords(document: DocumentParam) -> Element {
                 autocapitalize: "false",
                 autocomplete: "false",
                 spellcheck: "false",
-                name: "keywords",
+                name: "organisations",
                 value: "{additional}",
                 oninput: move |event| {
                     additional.set(event.value());
@@ -82,7 +87,7 @@ pub fn InputKeywords(document: DocumentParam) -> Element {
                 onkeypress: move |event| {
                     if event.key() == Enter {
                         event.prevent_default();
-                        keywords.write().push(additional.read().clone());
+                        organisations.write().push(additional.read().clone());
                         additional.set(String::new());
                     }
                 }

@@ -1,30 +1,24 @@
 use dioxus::logger::tracing::{debug, info};
 use dioxus::prelude::*;
-use dioxus_heroicons::outline::Shape;
-use dioxus_heroicons::IconShape;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
 
-use crate::components::documents::input::{InputKeywords, InputOrganisations, InputPersons};
+use crate::components::documents::display::input::{
+    InputKeywords,
+    InputOrganisations,
+    InputPersons,
+};
+use crate::components::documents::display::{
+    DocumentSignal,
+    LocationsSignal,
+    OrganizationsSignal,
+    PersonsSignal,
+};
 use crate::database::get_database;
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
-use crate::entities::{
-    DocumentActiveModel,
-    DocumentModel,
-    LocationAliasModel,
-    LocationModel,
-    OrganizationAliasModel,
-    OrganizationModel,
-    PersonAliasModel,
-    PersonModel,
-};
+use crate::entities::DocumentActiveModel;
 use crate::utils::language::Language;
-
-type DocumentParam = Signal<DocumentModel>;
-type LocationsParam = Signal<Vec<(LocationModel, Vec<LocationAliasModel>)>>;
-type OrganizationsParam = Signal<Vec<(OrganizationModel, Vec<OrganizationAliasModel>)>>;
-type PersonsParam = Signal<Vec<(PersonModel, Vec<PersonAliasModel>)>>;
 
 fn capitalize(str: &str) -> String {
     let mut chars = str.chars();
@@ -102,10 +96,10 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 
 #[component]
 pub fn PaneInput(
-    document: DocumentParam,
-    locations: LocationsParam,
-    organizations: OrganizationsParam,
-    persons: PersonsParam,
+    #[props(into)] document: DocumentSignal,
+    #[props(into)] locations: LocationsSignal,
+    #[props(into)] organizations: OrganizationsSignal,
+    #[props(into)] persons: PersonsSignal,
 ) -> Element {
     rsx! {
         form {
@@ -134,7 +128,7 @@ pub fn PaneInput(
 }
 
 #[component]
-fn InputLocations(locations: LocationsParam) -> Element {
+fn InputLocations(locations: LocationsSignal) -> Element {
     let locations = use_signal(move || {
         locations
             .read()
@@ -170,7 +164,7 @@ fn InputLocations(locations: LocationsParam) -> Element {
 }
 
 #[component]
-fn InputFilename(document: DocumentParam) -> Element {
+fn InputFilename(document: DocumentSignal) -> Element {
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
@@ -192,7 +186,7 @@ fn InputFilename(document: DocumentParam) -> Element {
 }
 
 #[component]
-fn InputName(document: DocumentParam) -> Element {
+fn InputName(document: DocumentSignal) -> Element {
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
@@ -213,7 +207,7 @@ fn InputName(document: DocumentParam) -> Element {
 }
 
 #[component]
-fn InputLanguages(document: DocumentParam) -> Element {
+fn InputLanguages(document: DocumentSignal) -> Element {
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
@@ -244,7 +238,7 @@ fn InputLanguages(document: DocumentParam) -> Element {
 }
 
 #[component]
-fn InputReview(document: DocumentParam) -> Element {
+fn InputReview(document: DocumentSignal) -> Element {
     rsx! {
         label {
             class: "flex pb-2 font-semibold",

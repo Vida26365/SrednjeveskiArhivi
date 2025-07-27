@@ -1,7 +1,10 @@
 use dioxus::prelude::*;
 
 #[component]
-pub fn AlertWarning(title: String, details: String) -> Element {
+pub fn AlertWarning(
+    #[props(into)] title: String,
+    #[props(into, default = "")] details: String,
+) -> Element {
     rsx! {
         div {
             class: "alert alert-soft alert-warning",

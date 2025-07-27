@@ -34,8 +34,8 @@ pub fn Navbar() -> Element {
                 Link {
                     class: "btn btn-primary btn-ghost aria-[current='page']:btn-soft btn-circle",
                     to: Route::DocumentUpload {},
-                    title: "Nalaganje",
-                    alt: "Nalaganje",
+                    title: "Dodajanje",
+                    alt: "Dodajanje",
                     svg {
                         class: "size-6",
                         fill: "none",

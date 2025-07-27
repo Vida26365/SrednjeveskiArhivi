@@ -3,29 +3,20 @@ use dioxus::prelude::*;
 use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
 
-use crate::entities::{OrganizationAliasModel, OrganizationModel};
-
-type OrganizationsParam = Signal<Vec<(OrganizationModel, Vec<OrganizationAliasModel>)>>;
+use crate::components::documents::display::DocumentSignal;
 
 #[component]
-pub fn InputOrganisations(organizations: OrganizationsParam) -> Element {
-    let mut organisations = use_signal(move || {
-        organizations
-            .read()
-            .clone()
-            .into_iter()
-            .map(|(organization, _)| organization.name)
-            .collect::<Vec<_>>()
-    });
+pub fn InputKeywords(document: DocumentSignal) -> Element {
+    let mut keywords = use_signal(move || document.read().keywords.0.clone());
     let mut additional = use_signal(String::new);
 
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
-            "Organizacije"
+            "Ključne besede"
         }
 
-        for organizacija in organisations.read().iter().cloned() {
+        for keyword in keywords.read().iter().cloned() {
             div {
                 class: "input w-full mb-2",
                 input {
@@ -33,15 +24,15 @@ pub fn InputOrganisations(organizations: OrganizationsParam) -> Element {
                     autocapitalize: "false",
                     autocomplete: "false",
                     spellcheck: "false",
-                    name: "organisations",
-                    value: "{organizacija}",
+                    name: "keywords",
+                    value: "{keyword}",
                     oninput: {
-                        let organisation = organizacija.clone();
+                        let keyword = keyword.clone();
                         move |event: Event<FormData>| {
-                            let mut organisations = organisations.write();
-                            match organisations.iter().position(|existing| existing == &organisation) {
-                                Some(pos) => organisations[pos] = event.value(),
-                                None => organisations.push(event.value()),
+                            let mut keywords = keywords.write();
+                            match keywords.iter().position(|existing| existing == &keyword) {
+                                Some(pos) => keywords[pos] = event.value(),
+                                None => keywords.push(event.value()),
                             }
                         }
                     },
@@ -54,10 +45,10 @@ pub fn InputOrganisations(organizations: OrganizationsParam) -> Element {
                 button {
                     class: "cursor-pointer text-base-content/50 hover:text-base-content",
                     onclick: {
-                        let organisation = organizacija.clone();
+                        let keyword = keyword.clone();
                         move |event: Event<MouseData>| {
                             event.prevent_default();
-                            organisations.write().retain(|existing| existing != &organisation);
+                            keywords.write().retain(|existing| existing != &keyword);
                         }
                     },
                     svg {
@@ -81,7 +72,7 @@ pub fn InputOrganisations(organizations: OrganizationsParam) -> Element {
                 autocapitalize: "false",
                 autocomplete: "false",
                 spellcheck: "false",
-                name: "organisations",
+                name: "keywords",
                 value: "{additional}",
                 oninput: move |event| {
                     additional.set(event.value());
@@ -89,7 +80,7 @@ pub fn InputOrganisations(organizations: OrganizationsParam) -> Element {
                 onkeypress: move |event| {
                     if event.key() == Enter {
                         event.prevent_default();
-                        organisations.write().push(additional.read().clone());
+                        keywords.write().push(additional.read().clone());
                         additional.set(String::new());
                     }
                 }

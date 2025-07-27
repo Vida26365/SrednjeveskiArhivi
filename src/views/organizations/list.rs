@@ -46,7 +46,7 @@ pub fn OrganizationList() -> Element {
         },
         Some(Err(error)) => rsx! {
             AlertError {
-                title: "Napaka pri nalaganju organizacij".to_string(),
+                title: "Napaka pri nalaganju organizacij",
                 details: format!("{error:?}"),
             }
         },
