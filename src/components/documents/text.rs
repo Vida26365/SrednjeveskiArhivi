@@ -147,6 +147,7 @@ fn InputDate(document: DocumentParam) -> Element {
         //     class: "space-y-2",
         //     for calendar in Calendar::iter() {
         //         div {
+        //             class: "whitespace-nowrap",
         //             input {
         //                 class: "radio",
         //                 type: "radio",

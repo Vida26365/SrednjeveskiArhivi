@@ -5,7 +5,6 @@ use uuid::Uuid;
 
 use crate::components::alerts::AlertError;
 use crate::components::documents::{PaneInput, PanePdf, PaneText};
-// use crate::components::documents::input::PaneInput;
 use crate::database::get_database;
 use crate::entities::document::DocumentToPrimaryLocation;
 use crate::entities::{
@@ -68,15 +67,17 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                 div {
                     class: "panes",
                     div {
-                        class: "pane px-3 pt-2 pb-4",
+                        class: "pane ps-3 pe-4 pt-3 pb-4",
+                        "data-default-size": 0.2,
                         PaneInput { document, locations, organizations, persons }
                     }
                     div {
-                        class: "pane px-3 pt-2 pb-4",
+                        class: "pane px-4 pt-3 pb-4",
                         PaneText { document, location }
                     }
                     div {
                         class: "pane",
+                        "data-default-size": 0.3855,
                         PanePdf { document }
                     }
                 }

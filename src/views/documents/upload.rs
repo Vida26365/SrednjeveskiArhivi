@@ -94,7 +94,7 @@ pub fn DocumentUpload() -> Element {
             let document = document::ActiveModel {
                 id: ActiveValue::Set(id),
                 filename: ActiveValue::Set(file.name.clone()),
-                title: ActiveValue::Set(file.name.clone()),
+                title: ActiveValue::Set(file.name.trim_end_matches(".pdf").to_string()),
                 ..Default::default()
             };
 

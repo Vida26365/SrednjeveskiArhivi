@@ -223,6 +223,7 @@ fn InputLanguages(document: DocumentParam) -> Element {
             class: "space-y-2",
             for language in Language::iter() {
                 div {
+                    class: "whitespace-nowrap",
                     input {
                         class: "checkbox",
                         type: "checkbox",
@@ -253,6 +254,7 @@ fn InputReview(document: DocumentParam) -> Element {
             class: "space-y-2",
             for review in ReviewStatus::iter() {
                 div {
+                    class: "whitespace-nowrap",
                     input {
                         class: "radio",
                         type: "radio",
