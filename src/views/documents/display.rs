@@ -60,7 +60,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
         div {
             class: "panes",
             div {
-                class: "pane ps-3 pe-4 py-3",
+                class: "pane p-3",
                 "data-default-size": 0.2,
                 match &*document.read_unchecked() {
                     Some(Ok(Some((document, _, locations, organizations, persons)))) => rsx! {
@@ -77,7 +77,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                 }
             }
             div {
-                class: "pane px-4 py-3",
+                class: "pane p-3",
                 match &*document.read_unchecked() {
                     Some(Ok(Some((document, location, _, _, _)))) => rsx! {
                         PaneText {
@@ -102,7 +102,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                 }
             }
             div {
-                class: "pane ps-1",
+                class: "pane",
                 "data-default-size": 0.3855,
                 match &*document.read_unchecked() {
                     Some(Ok(Some((document, _, _, _, _)))) => rsx! {
@@ -112,7 +112,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                     },
                     _ => rsx! {
                         div {
-                            class: "size-full ps-3 pe-3 py-3",
+                            class: "size-full p-3",
                             Skeleton {}
                         }
                     },

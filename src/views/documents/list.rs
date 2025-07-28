@@ -23,12 +23,12 @@ pub fn DocumentList() -> Element {
         div {
             class: "panes",
             div {
-                class: "pane ps-3 pe-4 py-3",
+                class: "pane p-3",
                 "data-default-size": 0.2,
                 PaneFilters {}
             }
             div {
-                class: "pane ps-4 pe-3 py-3",
+                class: "pane p-3",
                 match &*documents.read_unchecked() {
                     Some(Ok(documents)) => rsx! {
                         PaneTable { documents: documents.clone() }

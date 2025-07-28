@@ -1,14 +1,14 @@
 {
   const createElement = (tag, props = {}) => Object.assign(document.createElement(tag), props)
 
-  const getDefaultFractions = (elsPanes) => {
+  const getDefaultFractions = (panes) => {
     let fr = []
 
     let reservedSize = 0
     let setCount = 0
     let unsetCount = 0
 
-    elsPanes.forEach(el => {
+    panes.forEach(el => {
       const spec = parseFloat(el.dataset.defaultSize)
       if (!isNaN(spec)) {
         fr.push(spec)
@@ -25,33 +25,18 @@
     return fr.map(val => (val === null ? defaultSize : val))
   }
 
-  const getMinWidth = (elem) => {
-    const origMinWidth = elem.style.minWidth
-    const origWidth = elem.style.width
-
-    elem.style.minWidth = 'min-content'
-    elem.style.width = 0
-
-    const calcMinWidth = elem.getBoundingClientRect().width
-
-    elem.style.minWidth = origMinWidth
-    elem.style.width = origWidth
-
-    return calcMinWidth
-  }
-
-  const minFraction = 0.01
+  const minFraction = 0.0
+  const minSize = 26
 
   let isResizing = false
 
-  const resizableGrid = (elParent) => {
-    const isDisabled = elParent.classList.contains('panes-disabled')
-    const isVertical = elParent.classList.contains('panes-vertical')
-    const elsPanes = [...elParent.querySelectorAll(':scope > .pane')]
+  const resizableGrid = (grid) => {
+    const isDisabled = grid.classList.contains('panes-disabled')
+    const isVertical = grid.classList.contains('panes-vertical')
 
-    const minSizes = elsPanes.map(elPane => isVertical ? 0 : getMinWidth(elPane))
+    const panes = [...grid.querySelectorAll(':scope > .pane')]
 
-    let fr = getDefaultFractions(elsPanes)
+    let fr = getDefaultFractions(panes)
     let frStart = 0
     let frNext = 0
 
@@ -59,20 +44,24 @@
     let currPaneIx = -1
 
     const frToCSS = () => {
-      elParent.style[isVertical ? 'grid-template-rows' : 'grid-template-columns'] = fr.join('fr ') + 'fr'
+      const vals = fr.flatMap((element, index) =>
+        index < fr.length - 1
+          ? [`${element}fr`, 'calc(var(--spacing) * 2)']
+          : [`${element}fr`],
+      )
+
+      grid.style[isVertical ? 'grid-template-rows' : 'grid-template-columns'] = vals.join(' ')
     }
 
     const pointerDown = (event) => {
-      if (isResizing || !event.target.closest('.gutter')) return
+      if (isResizing) return
       isResizing = true
 
-      currPaneEl = event.currentTarget
-      currPaneIx = elsPanes.indexOf(currPaneEl)
+      currPaneEl = event.currentTarget.previousElementSibling
+      currPaneIx = panes.indexOf(currPaneEl)
 
       currPaneEl.setPointerCapture(event.pointerId)
       event.preventDefault()
-
-      fr = elsPanes.map((elPane) => isVertical ? elPane.clientHeight / elParent.clientHeight : elPane.clientWidth / elParent.clientWidth)
 
       frStart = fr[currPaneIx]
       frNext = fr[currPaneIx + 1]
@@ -85,14 +74,14 @@
       event.preventDefault()
 
       const paneBCR = currPaneEl.getBoundingClientRect()
-      const parentSize = isVertical ? elParent.clientHeight : elParent.clientWidth
+      const parentSize = isVertical ? grid.clientHeight : grid.clientWidth
       const pointerPos = isVertical ? event.clientY - paneBCR.top : event.clientX - paneBCR.left
       const clampedPos = Math.max(0, Math.min(pointerPos, parentSize))
 
       const desiredCurrent = clampedPos / parentSize
 
-      const minCurrentFrac = isVertical ? minFraction : Math.max(minSizes[currPaneIx] / parentSize, minFraction)
-      const minNextFrac = isVertical ? minFraction : Math.max(minSizes[currPaneIx + 1] / parentSize, minFraction)
+      const minCurrentFrac = Math.max(minSize / parentSize, minFraction)
+      const minNextFrac = Math.max(minSize / parentSize, minFraction)
 
       let newCurrent = Math.max(desiredCurrent, minCurrentFrac)
       let newNext = frNext + (frStart - newCurrent)
@@ -122,29 +111,11 @@
       isResizing = false
     }
 
-    const windowResized = () => {
-      const parentSize = isVertical ? elParent.clientHeight : elParent.clientWidth
-
-      fr = elsPanes.map((elPane, i) => {
-        const minSize = isVertical ? 0 : minSizes[i]
-        const currentSize = (isVertical ? elPane.clientHeight : elPane.clientWidth)
-
-        return Math.max(currentSize / parentSize, Math.max(minSize / parentSize, minFraction))
-      })
-
-      const total = fr.reduce((a, b) => a + b, 0)
-      fr = fr.map(val => val / total)
-
-      frToCSS()
-    }
-
-    elsPanes.slice(0, -1).forEach((elPane, i) => {
-      elPane.append(createElement('div', { className: 'gutter' }))
-      if (!isDisabled) elPane.addEventListener('pointerdown', pointerDown)
+    panes.slice(0, -1).forEach((pane, _) => {
+      let gutter = createElement('div', { className: 'gutter' })
+      if (!isDisabled) gutter.addEventListener('pointerdown', pointerDown)
+      pane.after(gutter)
     })
-
-    const observer = new ResizeObserver(windowResized)
-    observer.observe(elParent)
 
     frToCSS()
   }
