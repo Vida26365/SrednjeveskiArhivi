@@ -4,7 +4,7 @@ use std::fs;
 
 use dioxus::desktop::tao::window::Icon;
 use dioxus::desktop::wry::http::{Response, StatusCode};
-use dioxus::desktop::{use_asset_handler, WindowBuilder};
+use dioxus::desktop::{WindowBuilder, use_asset_handler};
 use dioxus::logger::tracing::{error, info};
 use dioxus::prelude::*;
 use uuid::Uuid;

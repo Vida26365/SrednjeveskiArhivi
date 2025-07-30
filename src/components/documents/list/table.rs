@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
+use crate::Route;
 use crate::components::documents::list::DocumentsSignal;
 use crate::entities::document::ReviewStatus;
-use crate::Route;
 
 #[component]
 pub fn PaneTable(#[props(into)] documents: DocumentsSignal) -> Element {

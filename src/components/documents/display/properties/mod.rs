@@ -9,8 +9,8 @@ use crate::components::documents::display::{
     PersonsSignal,
 };
 use crate::database::get_database;
-use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::entities::DocumentActiveModel;
+use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::utils::language::Language;
 
 mod basic;
@@ -45,7 +45,7 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                     .filter(|person| !person.is_empty())
                     .map(String::from)
                     .collect(),
-            ));
+            ))
         }
         None => document.persons = Set(Persons(vec![])),
     }

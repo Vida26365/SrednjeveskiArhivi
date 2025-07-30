@@ -2,7 +2,7 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 use pdf2image::PDF;
-use rusty_tesseract::{image_to_string, Args as TesseractArgs, Image as TesseractImage};
+use rusty_tesseract::{Args as TesseractArgs, Image as TesseractImage, image_to_string};
 
 pub fn extract(path: &Path, languages: &[&str]) -> Result<String> {
     // Load and render the document as PDF

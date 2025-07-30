@@ -1,8 +1,8 @@
 use dioxus::events::Key::Enter;
 use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
-use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
+use dioxus_heroicons::outline::Shape;
 
 use crate::components::documents::display::{DocumentSignal, PersonsSignal};
 
