@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use strum::IntoEnumIterator;
+use sea_orm::Iterable;
 
 use crate::components::documents::display::DocumentSignal;
 use crate::utils::date::Calendar;
@@ -9,7 +9,7 @@ use crate::utils::text::capitalize;
 pub fn InputDate(document: DocumentSignal) -> Element {
     rsx! {
         input {
-            class: "input w-full",
+            class: "input w-full validator-invalid",
             placeholder: "Datum",
             aria_autocomplete: "none",
             autocapitalize: "false",
@@ -17,6 +17,8 @@ pub fn InputDate(document: DocumentSignal) -> Element {
             spellcheck: "false",
             name: "date",
             id: "date",
+            pattern: "\\d+\\. ?\\d+\\. ?\\d+",
+            title: "Datum v obliki dd. mm. yyyy",
             value: "{document.read().date.map_or(\"\".to_string(), |date| date.to_string())}",
         }
         select {

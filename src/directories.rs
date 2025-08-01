@@ -24,9 +24,9 @@ impl AppDirectories {
                 if #[cfg(platform_windows)] {
                     base
                 } else if #[cfg(any(platform_linux, platform_bsd))] {
-                    base.join("..").join("lib").join("SrednjeveskiArhivi")
+                    base.parent().join("lib").join("SrednjeveskiArhivi")
                 } else if #[cfg(platform_macos)] {
-                    base.join("..").join("Resources")
+                    base.parent().join("Resources")
                 } else {
                     compile_error!("Unknown operating system")
                 }

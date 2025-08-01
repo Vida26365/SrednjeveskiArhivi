@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
 use sea_orm::Iterable;
-use strum::IntoEnumIterator;
 
 use crate::components::documents::display::DocumentSignal;
 use crate::entities::document::ReviewStatus;
