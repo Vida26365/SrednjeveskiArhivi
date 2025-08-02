@@ -25,6 +25,7 @@ pub fn PaneTable(#[props(into)] documents: DocumentsSignal) -> Element {
                     tbody {
                         for (document, location) in documents.read().iter() {
                             tr {
+                                key: document.id,
                                 td { "{document.title}" }
                                 td { "{document.date.map_or(\"/\".to_string(), |date| date.to_string())}" }
                                 td { "{location.clone().map_or(\"/\".to_string(), |location| location.name)}" }

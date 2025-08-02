@@ -34,6 +34,7 @@ pub fn PersonList() -> Element {
                         tbody {
                             for (organization, documents) in persons {
                                 tr {
+                                    key: organization.id,
                                     td { "{organization.name}" }
                                     td { "{documents.len()}" }
                                     td { MentionFirst { documents: documents.clone() } }

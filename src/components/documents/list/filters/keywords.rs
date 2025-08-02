@@ -3,11 +3,9 @@ use dioxus::prelude::*;
 use dioxus_heroicons::IconShape;
 use dioxus_heroicons::outline::Shape;
 
-use crate::components::documents::display::DocumentSignal;
-
 #[component]
-pub fn InputKeywords(document: DocumentSignal) -> Element {
-    let mut keywords = use_signal(move || document.read().keywords.0.clone());
+pub fn FilterKeywords() -> Element {
+    let mut keywords: Signal<Vec<String>> = use_signal(Vec::new);
     let mut additional = use_signal(String::new);
 
     rsx! {
@@ -106,6 +104,18 @@ pub fn InputKeywords(document: DocumentSignal) -> Element {
                         { Shape::Trash.path() }
                     }
                 }
+            }
+
+            label {
+                class: "label",
+                "Unija"
+                input {
+                    class: "toggle toggle-xs",
+                    type: "checkbox",
+                    name: "keywords-condition",
+                    id: "keywords-condition",
+                }
+                "Presek"
             }
         }
     }

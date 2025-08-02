@@ -186,6 +186,7 @@ pub fn DocumentUpload() -> Element {
 
         for file in uploaded.read().iter().cloned().rev() {
             div {
+                key: file.path,
                 class: "flex items-center justify-between p-3 mb-2 rounded-box bg-alt-100",
                 div {
                     class: "flex items-center",

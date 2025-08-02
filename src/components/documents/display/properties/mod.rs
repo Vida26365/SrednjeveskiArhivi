@@ -101,10 +101,10 @@ pub fn PaneProperties(
     rsx! {
         form {
             onsubmit: move |event| async move {
-                submit(document.read().clone().into(),event).await;
+                submit(document.read().clone().into(), event).await;
             },
             ul {
-                class: "space-y-4",
+                class: "space-y-4 pb-1",
                 li { InputFilename { document } }
                 li { InputName { document } }
                 li { InputPersons { document, persons } }
@@ -115,7 +115,7 @@ pub fn PaneProperties(
                 li { InputReview { document } }
                 li {
                     button {
-                        class: "btn btn-soft btn-primary rounded-box mb-1",
+                        class: "btn btn-soft btn-primary rounded-box",
                         "Shrani"
                     }
                 }

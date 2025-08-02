@@ -57,3 +57,18 @@
     to { opacity: 0; }
   }
 }
+
+@utility validator-valid {
+  &:user-valid,
+  &:has(:user-valid) {
+    @apply validator;
+  }
+}
+
+@utility validator-invalid {
+  &:user-invalid,
+  &:has(:user-invalid),
+  &[aria-invalid]:not([aria-invalid="false"]) {
+    @apply validator;
+  }
+}
