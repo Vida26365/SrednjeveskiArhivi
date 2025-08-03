@@ -14,10 +14,10 @@ trait PathClean {
 
 impl PathClean for Path {
     fn clean(&self) -> PathBuf {
-        let mut components = self.components().peekable();
+        let components = self.components().peekable();
         let mut result = PathBuf::new();
 
-        while let Some(component) = components.next() {
+        for component in components {
             match component {
                 std::path::Component::CurDir => {}
                 std::path::Component::ParentDir => {
@@ -92,7 +92,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_path_clean_windows() {
+    #[cfg(windows)]
+    fn test_path_clean() {
         assert_eq!(
             Path::new("C:\\Users\\User\\Something").clean(),
             PathBuf::from("C:\\Users\\User\\Something")
@@ -108,7 +109,8 @@ mod tests {
     }
 
     #[test]
-    fn test_path_clean_unix() {
+    #[cfg(unix)]
+    fn test_path_clean() {
         assert_eq!(
             Path::new("/home/user/something").clean(),
             PathBuf::from("/home/user/something")
