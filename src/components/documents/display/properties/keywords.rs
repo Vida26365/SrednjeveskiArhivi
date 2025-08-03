@@ -21,7 +21,6 @@ pub fn InputKeywords(document: DocumentSignal) -> Element {
 
             for keyword in keywords.read().iter().cloned() {
                 div {
-                    key: keyword,
                     class: "input w-full",
                     input {
                         aria_autocomplete: "none",
