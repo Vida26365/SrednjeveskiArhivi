@@ -2,7 +2,14 @@ use dioxus::logger::tracing::debug;
 use dioxus::prelude::*;
 use sea_orm::sea_query::ConditionType;
 
-use crate::components::documents::list::{DocumentFilters, FiltersSignal};
+use crate::components::documents::list::{
+    DocumentFilters,
+    DocumentSort,
+    DocumentSortColumn,
+    DocumentSortOrder,
+    FiltersSignal,
+    SortSignal,
+};
 use crate::entities::document::ReviewStatus;
 use crate::utils::date::{Calendar, Date};
 use crate::utils::language::Language;
@@ -11,17 +18,34 @@ mod date;
 mod keywords;
 mod languages;
 mod review;
+mod sort;
 
 use date::FilterDate;
 use keywords::FilterKeywords;
 use languages::FilterLanguages;
 use review::FilterReview;
+use sort::Sorter;
 
-async fn submit(mut filters: FiltersSignal, event: Event<FormData>) {
+async fn submit(mut sort: SortSignal, mut filters: FiltersSignal, event: Event<FormData>) {
     debug!("Event: {event:?}");
 
+    let sort: &mut DocumentSort = &mut sort.write();
     let filters: &mut DocumentFilters = &mut filters.write();
     let values = event.values();
+
+    match values["sort-column"].as_value().as_str() {
+        "title" => sort.column = DocumentSortColumn::Title,
+        "date" => sort.column = DocumentSortColumn::Date,
+        "location" => sort.column = DocumentSortColumn::Location,
+        "review" => sort.column = DocumentSortColumn::Review,
+        _ => {}
+    }
+
+    match values["sort-order"].as_value().as_str() {
+        "ascending" => sort.order = DocumentSortOrder::Ascending,
+        "descending" => sort.order = DocumentSortOrder::Descending,
+        _ => {}
+    }
 
     // TODO: Handle errors
     let calendar = Calendar::from_variant_name(&values["calendar"].as_value()).unwrap();
@@ -91,14 +115,18 @@ async fn submit(mut filters: FiltersSignal, event: Event<FormData>) {
 }
 
 #[component]
-pub fn PaneFilters(#[props(into)] filters: FiltersSignal) -> Element {
+pub fn PaneFilters(
+    #[props(into)] sort: SortSignal,
+    #[props(into)] filters: FiltersSignal,
+) -> Element {
     rsx! {
         form {
             onsubmit: move |event| async move {
-                submit(filters, event).await;
+                submit(sort, filters, event).await;
             },
             ul {
                 class: "space-y-4 pb-1",
+                li { Sorter {} }
                 li { FilterDate {} }
                 li { FilterKeywords {} }
                 li { FilterLanguages {} }
