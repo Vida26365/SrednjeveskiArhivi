@@ -17,17 +17,19 @@ from openai.types.chat.chat_completion_user_message_param import ChatCompletionU
 from config.config import (
     DIRECTORY_OUTPUT_RAW,
     DIRECTORY_OUTPUT_SEGMENTED,
+    DIRECTORY_OUTPUT_METADATA,
     DIRECTORY_SOURCE,
     MODEL_OCR,
     MODEL_SEGMENTATION,
+    MODEL_METADATA,
     OPENAI_API_KEY,
     OPENAI_BASE_URL,
     PARAMS_OCR,
     PARAMS_SEGMENTATION,
+    PARAMS_METADATA,
 )
-from config.models import Document
-from config.prompts import PROMPT_OCR, PROMPT_SEGMENTATION
-
+from config.models import Document, Metadata
+from config.prompts import PROMPT_OCR, PROMPT_SEGMENTATION, PROMPT_METADATA
 
 CLIENT = OpenAI(base_url=OPENAI_BASE_URL, api_key=OPENAI_API_KEY)
 
@@ -55,27 +57,11 @@ def escape_linebreaks(text):
     return re.sub(r"\"(.*?)(?<!\\)\"", replacer, text, flags=re.DOTALL)
 
 
-def ocr_image(image):
-    messages = [
-        ChatCompletionUserMessageParam(
-            role="user",
-            content=[
-                ChatCompletionContentPartImageParam(
-                    type="image_url",
-                    image_url=ImageURL(url=encode_image(image)),
-                )
-            ],
-        ),
-        ChatCompletionSystemMessageParam(
-            role="system",
-            content=PROMPT_OCR,
-        ),
-    ]
-
+def chat_completions_text(model, params, messages):
     completion = CLIENT.chat.completions.create(
-        model=MODEL_OCR,
+        model=model,
         messages=messages,
-        extra_body=PARAMS_OCR,
+        extra_body=params,
     )
 
     if completion.choices[0].finish_reason != "stop":
@@ -84,17 +70,12 @@ def ocr_image(image):
     return completion.choices[0].message.content
 
 
-def segment_text(text):
-    messages = [
-        ChatCompletionSystemMessageParam(role="system", content=PROMPT_SEGMENTATION),
-        ChatCompletionUserMessageParam(role="user", content=text),
-    ]
-
+def chat_completions_json(model, params, response, messages):
     completion = CLIENT.beta.chat.completions.parse(
-        model=MODEL_SEGMENTATION,
+        model=model,
         messages=messages,
-        response_format=Document,
-        extra_body=PARAMS_SEGMENTATION,
+        response_format=response,
+        extra_body=params,
     )
 
     if completion.choices[0].finish_reason != "stop":
@@ -132,18 +113,72 @@ def segment_text(text):
         return content
 
 
+def ocr_image(image):
+    messages = [
+        ChatCompletionUserMessageParam(
+            role="user",
+            content=[
+                ChatCompletionContentPartImageParam(
+                    type="image_url",
+                    image_url=ImageURL(url=encode_image(image)),
+                )
+            ],
+        ),
+        ChatCompletionSystemMessageParam(
+            role="system",
+            content=PROMPT_OCR,
+        ),
+    ]
+
+    return chat_completions_text(
+        model=MODEL_OCR,
+        params=PARAMS_OCR,
+        messages=messages,
+    )
+
+
+def segment_text(text):
+    messages = [
+        ChatCompletionSystemMessageParam(role="system", content=PROMPT_SEGMENTATION),
+        ChatCompletionUserMessageParam(role="user", content=text),
+    ]
+
+    return chat_completions_json(
+        model=MODEL_SEGMENTATION,
+        params=PARAMS_SEGMENTATION,
+        response=Document,
+        messages=messages,
+    )
+
+
+def extract_metadata(text):
+    messages = [
+        ChatCompletionSystemMessageParam(role="system", content=PROMPT_METADATA),
+        ChatCompletionUserMessageParam(role="user", content=text),
+    ]
+
+    return chat_completions_json(
+        model=MODEL_METADATA,
+        params=PARAMS_METADATA,
+        response=Metadata,
+        messages=messages,
+    )
+
+
 def process_document(filename):
     # Skip non-PDF files
     if not filename.lower().endswith(".pdf"):
         logging.info("  Skipping non-PDF document")
         return
 
+    basename = filename.rsplit(".", 1)[0]
     source = os.path.join(DIRECTORY_SOURCE, filename)
-    output_raw = os.path.join(DIRECTORY_OUTPUT_RAW, filename.rsplit(".", 1)[0] + ".txt")
-    output_segmented = os.path.join(DIRECTORY_OUTPUT_SEGMENTED, filename.rsplit(".", 1)[0] + ".json")
+    output_raw = os.path.join(DIRECTORY_OUTPUT_RAW, basename + ".raw.txt")
+    output_segmented = os.path.join(DIRECTORY_OUTPUT_SEGMENTED, basename + ".segmented.json")
+    output_metadata = os.path.join(DIRECTORY_OUTPUT_METADATA, basename + ".metadata.json")
 
     # Skip already processed files
-    if os.path.exists(output_raw) and os.path.exists(output_segmented):
+    if os.path.exists(output_raw) and os.path.exists(output_segmented) and os.path.exists(output_metadata):
         logging.info("  Skipping already processed document")
         return
 
@@ -177,6 +212,15 @@ def process_document(filename):
     with open(output_segmented, "w", encoding="utf-8") as file:
         file.write(segmented)
 
+    # Extract the metadata
+    logging.info("  Extracting metadata")
+    metadata = extract_metadata(segmented)
+
+    # Save the extracted metadata
+    logging.info("  Saving metadata")
+    with open(output_metadata, "w", encoding="utf-8") as file:
+        file.write(metadata)
+
     logging.info(f"  Took {time.time() - start:.2f}s")
 
 
@@ -194,6 +238,7 @@ def main():
     os.makedirs(DIRECTORY_SOURCE, exist_ok=True)
     os.makedirs(DIRECTORY_OUTPUT_RAW, exist_ok=True)
     os.makedirs(DIRECTORY_OUTPUT_SEGMENTED, exist_ok=True)
+    os.makedirs(DIRECTORY_OUTPUT_METADATA, exist_ok=True)
 
     documents = os.listdir(DIRECTORY_SOURCE)
 
