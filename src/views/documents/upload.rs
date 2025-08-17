@@ -2,32 +2,32 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
-use dioxus::html::{FileEngine, HasFileData};
+use dioxus::html::FileEngine;
 use dioxus::logger::tracing::error;
 use dioxus::prelude::*;
 use dioxus_heroicons::IconShape;
 use dioxus_heroicons::outline::Shape;
-use sea_orm::ActiveValue;
 use sea_orm::entity::prelude::*;
+use sea_orm::{Set, TransactionTrait};
 
 use crate::components::alerts::{AlertError, AlertSuccess};
+use crate::components::files::FileUpload;
 use crate::database::get_database;
 use crate::directories::DIRECTORIES;
 use crate::entities::document;
-use crate::views::documents::upload::UploadState::Idle;
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct FileDetails {
-    path: PathBuf,
-    name: String,
-    size: String,
-}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum UploadState {
     Idle,
     Success,
     Error(String),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct FileDetails {
+    path: PathBuf,
+    name: String,
+    size: String,
 }
 
 fn filesize(size: u64) -> String {
@@ -49,9 +49,9 @@ fn filesize(size: u64) -> String {
 
 #[component]
 pub fn DocumentUpload() -> Element {
-    let mut uploaded = use_signal(Vec::<FileDetails>::new);
+    let mut state = use_signal(|| UploadState::Idle);
 
-    let mut state = use_signal(|| Idle);
+    let mut uploaded = use_signal(Vec::<FileDetails>::new);
 
     let upload = move |engine: Arc<dyn FileEngine>| {
         for path in engine.files() {
@@ -62,7 +62,7 @@ pub fn DocumentUpload() -> Element {
                 continue;
             }
 
-            if !path.exists() {
+            if !path.is_file() {
                 error!("File does not exist: {}", path.display());
                 continue;
             }
@@ -79,141 +79,122 @@ pub fn DocumentUpload() -> Element {
             };
 
             uploaded.write().push(file);
-            state.set(Idle);
+            state.set(UploadState::Idle);
         }
     };
 
     let mut remove = move |file: &FileDetails| {
         uploaded.write().retain(|existing| existing.path != file.path);
+        state.set(UploadState::Idle);
     };
 
     let save = async move || -> Result<()> {
+        let storage = DIRECTORIES.userdata.join("documents");
+        tokio::fs::create_dir_all(&storage).await.context("Failed to create storage")?;
+
+        let database = get_database().await;
+        let txn = database.begin().await?;
+
         for file in uploaded.read().iter() {
             let id = Uuid::now_v7();
 
             let document = document::ActiveModel {
-                id: ActiveValue::Set(id),
-                filename: ActiveValue::Set(file.name.clone()),
-                title: ActiveValue::Set(file.name.trim_end_matches(".pdf").to_string()),
+                id: Set(id),
+                filename: Set(file.name.clone()),
+                title: Set(file.name.trim_end_matches(".pdf").to_string()),
                 ..Default::default()
             };
 
-            let storage = DIRECTORIES.userdata.join("documents");
             let path = storage.join(id.to_string()).with_extension("pdf");
 
-            tokio::fs::create_dir_all(&storage).await.context("Failed to create storage")?;
-            tokio::fs::copy(&file.path, &path).await.context("Failed to copy file")?;
+            tokio::fs::copy(&file.path, &path)
+                .await
+                .with_context(|| format!("Failed to copy file: {}", file.path.display()))?;
 
-            let database = get_database().await;
-            document.insert(database).await.context("Failed to insert document")?;
+            document
+                .insert(&txn)
+                .await
+                .with_context(|| format!("Failed to insert document: {}", file.path.display()))?;
         }
+
+        txn.commit().await?;
 
         Ok(())
     };
 
-    let mut hovered = use_signal(|| false);
-    let background = use_memo(move || if hovered() { "bg-alt-300" } else { "bg-alt-100" });
-
     rsx! {
-        label {
-            class: "flex flex-col items-center justify-center w-full h-64 mb-4 rounded-box cursor-pointer {background} hover:bg-alt-200",
-            for: "upload",
-            ondragover: move |event| { event.prevent_default(); hovered.set(true); },
-            ondragleave: move |event| { event.prevent_default(); hovered.set(false); },
-            ondrop: move |event| { event.prevent_default(); hovered.set(false); event.files().map(upload); },
-            svg {
-                class: "size-12 mb-4",
-                fill: "none",
-                stroke: "currentColor",
-                stroke_width: "1.5",
-                stroke_linecap: "round",
-                stroke_linejoin: "round",
-                view_box: "0 0 24 24",
-                { Shape::ArrowUpTray.path() }
-            }
-            p {
-                class: "mb-2 text-sm",
-                span { class: "font-semibold", "Kliknite za dodajanje" }
-                " ali povlecite in spustite"
-            }
-            input {
-                type: "file",
-                id: "upload",
-                class: "hidden",
+        div {
+            class: "space-y-4 pb-1 min-w-min",
+
+            FileUpload {
+                handler: upload,
                 accept: ".pdf",
                 multiple: true,
-                onchange: move |event| { event.files().map(upload); },
             }
-        }
 
-        button {
-            class: "btn btn-soft btn-primary w-full mb-4 rounded-box",
-            disabled: uploaded.read().is_empty(),
-            onclick: move |_| async move {
-                match save().await {
-                    Ok(_) => {
-                        uploaded.write().clear();
-                        state.set(UploadState::Success);
+            button {
+                class: "btn btn-soft btn-primary w-full rounded-box",
+                disabled: uploaded.read().is_empty(),
+                onclick: move |_| async move {
+                    match save().await {
+                        Ok(_) => {
+                            uploaded.write().clear();
+                            state.set(UploadState::Success);
+                        }
+                        Err(error) => {
+                            state.set(UploadState::Error(format!("{error:?}")));
+                        }
                     }
-                    Err(error) => {
-                        state.set(UploadState::Error(format!("{error:?}")));
-                    }
-                }
-            },
-            "Dodaj dokumente"
-        }
+                },
+                "Dodaj dokumente"
+            }
 
-        match state() {
-            UploadState::Idle => rsx! {},
-            UploadState::Success => rsx! {
-                div {
-                    class: "mb-4",
+            match state() {
+                UploadState::Idle => rsx! {},
+                UploadState::Success => rsx! {
                     AlertSuccess {
                         title: "Dokumenti uspešno dodani",
                     }
-                }
-            },
-            UploadState::Error(error) => rsx! {
-                div {
-                    class: "mb-4",
+                },
+                UploadState::Error(error) => rsx! {
                     AlertError {
                         title: "Napaka pri dodajanju dokumentov",
                         details: error,
                     }
-                }
-            },
-        }
+                },
+            }
 
-        for file in uploaded.read().iter().cloned().rev() {
             div {
-                class: "flex items-center justify-between p-3 mb-2 rounded-box bg-alt-100",
-                div {
-                    class: "flex items-center",
+                class: "space-y-2",
+                for file in uploaded.read().iter().cloned().rev() {
                     div {
-                        p {
-                            class: "text-sm font-semibold inline-block truncate max-w-75",
-                            "{file.name}"
+                        class: "flex justify-between gap-3 p-3 rounded-box bg-alt-100",
+                        div {
+                            class: "flex",
+                            div {
+                                p {
+                                    class: "text-sm font-semibold inline-block truncate max-w-75",
+                                    "{file.name}"
+                                }
+                                p {
+                                    class: "text-xs text-base-content/50",
+                                    "{file.size}"
+                                }
+                            }
                         }
-                        p {
-                            class: "text-xs text-base-content/50",
-                            "{file.size}"
-                        }
-                    }
-                }
-                div {
-                    class: "flex items-center",
-                    button {
-                        class: "cursor-pointer text-base-content/50 hover:text-base-content",
-                        onclick: move |_| { remove(&file); },
-                        svg {
-                            class: "size-4 shrink-0",
-                            fill: "none",
-                            stroke: "currentColor",
-                            stroke_linecap: "round",
-                            stroke_linejoin: "round",
-                            stroke_width: "2",
-                            view_box: "0 0 24 24",
-                            { Shape::Trash.path() }
+                        button {
+                            class: "cursor-pointer text-base-content/50 hover:text-base-content",
+                            onclick: move |_| { remove(&file); },
+                            svg {
+                                class: "size-4 shrink-0",
+                                fill: "none",
+                                stroke: "currentColor",
+                                stroke_linecap: "round",
+                                stroke_linejoin: "round",
+                                stroke_width: "2",
+                                view_box: "0 0 24 24",
+                                { Shape::Trash.path() }
+                            }
                         }
                     }
                 }
