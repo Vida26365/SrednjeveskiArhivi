@@ -104,7 +104,7 @@ pub fn PaneProperties(
                 submit(document.read().clone().into(), event).await;
             },
             ul {
-                class: "space-y-4 pb-1",
+                class: "space-y-4 pb-1 min-w-fit",
                 li { InputFilename { document } }
                 li { InputName { document } }
                 li { InputPersons { document, persons } }

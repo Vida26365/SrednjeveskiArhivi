@@ -12,11 +12,9 @@ use uuid::Uuid;
 use crate::components::navbar::Navbar;
 use crate::database::get_database;
 use crate::directories::DIRECTORIES;
-use crate::views::documents::display::DocumentDisplay;
-use crate::views::documents::list::DocumentList;
-use crate::views::documents::upload::DocumentUpload;
-use crate::views::organizations::list::OrganizationList;
-// use crate::views::persons::list::PersonList;
+use crate::views::documents::{DocumentDisplay, DocumentList, DocumentUpload};
+use crate::views::organizations::OrganizationList;
+// use crate::views::persons::PersonList;
 
 mod components;
 mod database;
@@ -34,18 +32,25 @@ enum Route {
 
     #[route("/documents")]
     DocumentList {},
-
     #[route("/documents/upload")]
     DocumentUpload {},
-
     #[route("/documents/:id")]
     DocumentDisplay { id: Uuid },
 
-    #[route("/organizations")]
-    OrganizationList {},
-
     // #[route("/persons")]
     // PersonList {},
+    // #[route("/persons/:id")]
+    // PersonDisplay { id: Uuid },
+
+    #[route("/organizations")]
+    OrganizationList {},
+    // #[route("/organizations/:id")]
+    // OrganizationDisplay { id: Uuid },
+
+    // #[route("/locations")]
+    // LocationList {},
+    // #[route("/locations/:id")]
+    // LocationDisplay { id: Uuid },
 }
 
 fn main() {

@@ -125,7 +125,7 @@ pub fn PaneFilters(
                 submit(sort, filters, event).await;
             },
             ul {
-                class: "space-y-4 pb-1",
+                class: "space-y-4 pb-1 min-w-fit",
                 li { Sorter {} }
                 li { FilterDate {} }
                 li { FilterKeywords {} }
