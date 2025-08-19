@@ -51,7 +51,7 @@ pub fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
                                 move |event: Event<FormData>| {
                                     let mut persons = persons.write();
                                     match persons.clone().into_iter().map(|(oseba, _)| oseba).position(|existing| existing == oseba) {
-                                        Some(pos) => persons[pos] = (event.value(), Vec::new()), //EEEEEEmmm kaj?
+                                        Some(pos) => persons[pos] = (event.value(), aliases.clone()), //EEEEEEmmm kaj?
                                         None => persons.push((event.value(), Vec::new())),
                                     }
                                 }
@@ -87,12 +87,14 @@ pub fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
                     div {
                         button {
                             class: "cursor-pointer text-base-content/50 hover:text-base-content",
-                            onclick: move |event| {
-                                event.prevent_default();
-                                // persons.write().push((additional.read().clone(), Vec::new()));
-                                // aliases.push(String::from("value"));
-                                persons.write().iter_mut().for_each(|(person, aliases)| {
-                                    if person == &oseba {
+                            onclick:
+                                // let oseba_clone = oseba.clone();
+                                move |event| {
+                                    event.prevent_default();
+                                    // persons.write().push((additional.read().clone(), Vec::new()));
+                                    // aliases.push(String::from("value"));
+                                    persons.write().iter_mut().for_each(|(person, aliases)| {
+                                        if *person == oseba {
                                         aliases.push(String::new());
                                     }
                                 });
@@ -100,7 +102,6 @@ pub fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
                                 println!("Persons: {persons:?}");
                             },
                             "+"
-
                         }
                     }
                 }
@@ -116,6 +117,23 @@ pub fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
                                 spellcheck: "false",
                                 name: "{oseba}",
                                 value: "{vzdevek}",
+                                oninput: {
+                                let vzdevek = vzdevek.clone();
+                                let oseba_clone = oseba.clone();
+                                move |event: Event<FormData>| {
+                                    let mut persons = persons.write();
+                                    match persons.clone().into_iter().position(|personvec| personvec.0 == oseba_clone) {
+                                        Some(pos) => {
+                                            match persons[pos].1.iter().position(|alias| alias == &vzdevek) {
+                                                Some(alias_pos) => persons[pos].1[alias_pos] = event.value(), // Update existing alias
+                                                None => persons[pos].1.push(event.value()), // Add new alias
+                                            }
+                                        }
+                                        // persons[pos] = (event.value(), Vec::new()), //EEEEEEmmm kaj?
+                                        None => persons.push((event.value(), Vec::new())),
+                                    }
+                                }
+                            },
                             }
                         }
                     }

@@ -151,18 +151,21 @@ fn InputLocations(locations: LocationsParam) -> Element {
             "Lokacije"
         }
         for location in locations.read().iter() {
-            // TODO
-        }
-        div {
-            class: "flex gap-2",
             div {
-                class: "input w-full",
-                input {
-                    aria_autocomplete: "none",
-                    autocapitalize: "false",
-                    autocomplete: "false",
-                    spellcheck: "false",
-                    name: "locations",
+                div {
+                    class: "flex gap-2",
+                    div {
+                        class: "input w-fill mb-2",
+                        input {
+                            aria_autocomplete: "none",
+                            autocapitalize: "false",
+                            autocomplete: "false",
+                            spellcheck: "false",
+                            name: "locations",
+                            // value: "{location}",
+                            // TODO: Kako točno bojo podane lokacije ????????
+                        }
+                    }
                 }
             }
         }
