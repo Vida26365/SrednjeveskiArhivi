@@ -1,14 +1,12 @@
 use dioxus::events::Key::Enter;
 use dioxus::prelude::*;
-use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
+use dioxus_heroicons::outline::Shape;
 
-use crate::entities::{OrganizationAliasModel, OrganizationModel};
-
-type OrganizationsParam = Signal<Vec<(OrganizationModel, Vec<OrganizationAliasModel>)>>;
+use crate::components::documents::display::OrganizationsSignal;
 
 #[component]
-pub fn InputOrganisations(organizations: OrganizationsParam) -> Element {
+pub fn InputOrganisations(organizations: OrganizationsSignal) -> Element {
     let mut organisations = use_signal(move || {
         organizations
             .read()

@@ -1,15 +1,13 @@
 use dioxus::events::Key::Enter;
 use dioxus::logger::tracing::info;
 use dioxus::prelude::*;
-use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
+use dioxus_heroicons::outline::Shape;
 
-use crate::entities::{DocumentModel, PersonAliasModel, PersonModel};
-type DocumentParam = Signal<DocumentModel>;
-type PersonsParam = Signal<Vec<(PersonModel, Vec<PersonAliasModel>)>>;
+use crate::components::documents::display::{DocumentSignal, PersonsSignal};
 
 #[component]
-pub fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
+pub fn InputPersons(document: DocumentSignal, persons: PersonsSignal) -> Element {
     // let mut persons = use_signal(move || {
     //     document.read().persons.0.clone()
     //     // persons.read().clone().into_iter().map(|(person, _)| person.name).collect::<Vec<_>>()

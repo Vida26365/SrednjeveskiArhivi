@@ -33,6 +33,7 @@ pub fn OrganizationList() -> Element {
                         tbody {
                             for (organization, documents) in organizations {
                                 tr {
+                                    key: organization.id,
                                     td { "{organization.name}" }
                                     td { "{documents.len()}" }
                                     td { MentionFirst { documents: documents.clone() } }
@@ -46,7 +47,7 @@ pub fn OrganizationList() -> Element {
         },
         Some(Err(error)) => rsx! {
             AlertError {
-                title: "Napaka pri nalaganju organizacij".to_string(),
+                title: "Napaka pri nalaganju organizacij",
                 details: format!("{error:?}"),
             }
         },

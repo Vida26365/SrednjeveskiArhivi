@@ -5,10 +5,10 @@ use anyhow::{Context, Result};
 use dioxus::html::{FileEngine, HasFileData};
 use dioxus::logger::tracing::error;
 use dioxus::prelude::*;
-use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
-use sea_orm::entity::prelude::*;
+use dioxus_heroicons::outline::Shape;
 use sea_orm::ActiveValue;
+use sea_orm::entity::prelude::*;
 
 use crate::components::alerts::{AlertError, AlertSuccess};
 use crate::database::get_database;
@@ -94,7 +94,7 @@ pub fn DocumentUpload() -> Element {
             let document = document::ActiveModel {
                 id: ActiveValue::Set(id),
                 filename: ActiveValue::Set(file.name.clone()),
-                title: ActiveValue::Set(file.name.clone()),
+                title: ActiveValue::Set(file.name.trim_end_matches(".pdf").to_string()),
                 ..Default::default()
             };
 
@@ -133,7 +133,7 @@ pub fn DocumentUpload() -> Element {
             }
             p {
                 class: "mb-2 text-sm",
-                span { class: "font-semibold", "Kliknite za nalaganje" }
+                span { class: "font-semibold", "Kliknite za dodajanje" }
                 " ali povlecite in spustite"
             }
             input {
@@ -160,7 +160,7 @@ pub fn DocumentUpload() -> Element {
                     }
                 }
             },
-            "Naloži dokumente"
+            "Dodaj dokumente"
         }
 
         match state() {
@@ -169,8 +169,7 @@ pub fn DocumentUpload() -> Element {
                 div {
                     class: "mb-4",
                     AlertSuccess {
-                        title: "Dokumenti uspešno naloženi".to_string(),
-                        details: "".to_string(),
+                        title: "Dokumenti uspešno dodani",
                     }
                 }
             },
@@ -178,7 +177,7 @@ pub fn DocumentUpload() -> Element {
                 div {
                     class: "mb-4",
                     AlertError {
-                        title: "Napaka pri nalaganju dokumentov".to_string(),
+                        title: "Napaka pri dodajanju dokumentov",
                         details: error,
                     }
                 }

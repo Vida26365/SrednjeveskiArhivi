@@ -9,16 +9,16 @@
   "license": "MIT",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "npm@10.8.1",
+  "packageManager": "npm@11.4.2",
   "scripts": {
     "build": "tailwindcss -i tailwind.css -o assets/styles/tailwind.css",
     "watch": "tailwindcss -i tailwind.css -o assets/styles/tailwind.css --watch"
   },
   "dependencies": {
-    "daisyui": "^5.0.4",
-    "tailwindcss": "^4.0.14"
+    "daisyui": "^5.0.50",
+    "tailwindcss": "^4.1.11"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.0.14"
+    "@tailwindcss/cli": "^4.1.11"
   }
 }

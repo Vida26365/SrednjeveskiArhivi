@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
-use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
+use dioxus_heroicons::outline::Shape;
 
 use crate::Route;
 
@@ -34,8 +34,8 @@ pub fn Navbar() -> Element {
                 Link {
                     class: "btn btn-primary btn-ghost aria-[current='page']:btn-soft btn-circle",
                     to: Route::DocumentUpload {},
-                    title: "Nalaganje",
-                    alt: "Nalaganje",
+                    title: "Dodajanje",
+                    alt: "Dodajanje",
                     svg {
                         class: "size-6",
                         fill: "none",
@@ -66,7 +66,7 @@ pub fn Navbar() -> Element {
         }
 
         main {
-            class: "p-2",
+            class: "p-3",
             Outlet::<Route> {}
         }
     }

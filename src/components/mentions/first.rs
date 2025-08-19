@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
-use crate::entities::DocumentModel;
 use crate::Route;
+use crate::entities::DocumentModel;
 
 #[component]
 pub fn MentionFirst(documents: Vec<DocumentModel>) -> Element {

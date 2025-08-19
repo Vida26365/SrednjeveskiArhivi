@@ -1,20 +1,18 @@
 .panes {
   display: grid;
-  margin: calc(var(--spacing) * -2);
+  margin: calc(var(--spacing) * -3);
   height: calc(100vh - 64px);
 }
 
 .pane {
   position: relative;
+  overflow-x: clip;
+  overflow-y: auto;
 }
 
 .gutter {
   background-color: var(--color-base-300);
-  position: absolute;
+  position: relative;
   cursor: col-resize;
-  width: calc(var(--spacing) * 2);
-  right: calc(var(--spacing) * -1);
-  top: 0;
-  bottom: 0;
   z-index: 3;
 }

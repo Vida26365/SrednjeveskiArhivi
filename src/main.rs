@@ -1,7 +1,10 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use std::fs;
 
+use dioxus::desktop::tao::window::Icon;
 use dioxus::desktop::wry::http::{Response, StatusCode};
-use dioxus::desktop::{use_asset_handler, WindowBuilder};
+use dioxus::desktop::{WindowBuilder, use_asset_handler};
 use dioxus::logger::tracing::{error, info};
 use dioxus::prelude::*;
 use uuid::Uuid;
@@ -48,10 +51,11 @@ enum Route {
 fn main() {
     dioxus::logger::initialize_default();
 
+    let icon = Icon::from_rgba(Vec::from(include_bytes!("../assets/images/icon.rgba")), 128, 128);
+
     let window = WindowBuilder::new()
         .with_title("Srednjeveški Arhivi")
-        // .with_taskbar_icon(TODO)
-        // .with_window_icon(TODO)
+        .with_window_icon(icon.ok())
         .with_always_on_top(false);
 
     let config = dioxus::desktop::Config::new()

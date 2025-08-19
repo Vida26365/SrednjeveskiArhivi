@@ -1,13 +1,42 @@
 {
   const createElement = (tag, props = {}) => Object.assign(document.createElement(tag), props)
 
+  const getDefaultFractions = (panes) => {
+    let fr = []
+
+    let reservedSize = 0
+    let setCount = 0
+    let unsetCount = 0
+
+    panes.forEach(el => {
+      const spec = parseFloat(el.dataset.defaultSize)
+      if (!isNaN(spec)) {
+        fr.push(spec)
+        reservedSize += spec
+        setCount++
+      } else {
+        fr.push(null)
+        unsetCount++
+      }
+    })
+
+    const availableSize = 1 - reservedSize
+    const defaultSize = unsetCount ? availableSize / unsetCount : 0
+    return fr.map(val => (val === null ? defaultSize : val))
+  }
+
+  const minFraction = 0.0
+  const minSize = 26
+
   let isResizing = false
 
-  const resizableGrid = (elParent) => {
-    const isVertical = elParent.classList.contains('panes-v')
-    const elsPanes = elParent.querySelectorAll(':scope > .pane')
+  const resizableGrid = (grid) => {
+    const isDisabled = grid.classList.contains('panes-disabled')
+    const isVertical = grid.classList.contains('panes-vertical')
 
-    let fr = [...elsPanes].map(() => 1 / elsPanes.length)
+    const panes = [...grid.querySelectorAll(':scope > .pane')]
+
+    let fr = getDefaultFractions(panes)
     let frStart = 0
     let frNext = 0
 
@@ -15,20 +44,24 @@
     let currPaneIx = -1
 
     const frToCSS = () => {
-      elParent.style[isVertical ? 'grid-template-rows' : 'grid-template-columns'] = fr.join('fr ') + 'fr'
+      const vals = fr.flatMap((element, index) =>
+        index < fr.length - 1
+          ? [`${element}fr`, 'calc(var(--spacing) * 2)']
+          : [`${element}fr`],
+      )
+
+      grid.style[isVertical ? 'grid-template-rows' : 'grid-template-columns'] = vals.join(' ')
     }
 
     const pointerDown = (event) => {
-      if (isResizing || !event.target.closest('.gutter')) return
+      if (isResizing) return
       isResizing = true
 
-      currPaneEl = event.currentTarget
-      currPaneIx = [...elsPanes].indexOf(currPaneEl)
+      currPaneEl = event.currentTarget.previousElementSibling
+      currPaneIx = panes.indexOf(currPaneEl)
 
       currPaneEl.setPointerCapture(event.pointerId)
       event.preventDefault()
-
-      fr = [...elsPanes].map((elPane) => isVertical ? elPane.clientHeight / elParent.clientHeight : elPane.clientWidth / elParent.clientWidth)
 
       frStart = fr[currPaneIx]
       frNext = fr[currPaneIx + 1]
@@ -41,18 +74,29 @@
       event.preventDefault()
 
       const paneBCR = currPaneEl.getBoundingClientRect()
-      const parentSize = isVertical ? elParent.clientHeight : elParent.clientWidth
+      const parentSize = isVertical ? grid.clientHeight : grid.clientWidth
+      const pointerPos = isVertical ? event.clientY - paneBCR.top : event.clientX - paneBCR.left
+      const clampedPos = Math.max(0, Math.min(pointerPos, parentSize))
 
-      const pointer = {
-        x: Math.max(0, Math.min(event.clientX - paneBCR.left, elParent.clientWidth)),
-        y: Math.max(0, Math.min(event.clientY - paneBCR.top, elParent.clientHeight)),
+      const desiredCurrent = clampedPos / parentSize
+
+      const minCurrentFrac = Math.max(minSize / parentSize, minFraction)
+      const minNextFrac = Math.max(minSize / parentSize, minFraction)
+
+      let newCurrent = Math.max(desiredCurrent, minCurrentFrac)
+      let newNext = frNext + (frStart - newCurrent)
+
+      if (newNext < minNextFrac) {
+        newNext = minNextFrac
+        newCurrent = frStart + frNext - newNext
+        newCurrent = Math.max(newCurrent, minCurrentFrac)
       }
 
-      const frRel = Math.max(0.1, pointer[isVertical ? 'y' : 'x'] / parentSize)
-      const frDiff = frStart - frRel
+      fr[currPaneIx] = newCurrent
+      fr[currPaneIx + 1] = newNext
 
-      fr[currPaneIx] = frRel
-      fr[currPaneIx + 1] = Math.max(0.1, frNext + frDiff)
+      const total = fr.reduce((a, b) => a + b, 0)
+      fr = fr.map(val => val / total)
 
       frToCSS()
     }
@@ -67,12 +111,11 @@
       isResizing = false
     }
 
-    {
-      [...elsPanes].slice(0, -1).forEach((elPane, i) => {
-        elPane.append(createElement('div', { className: 'gutter' }))
-        elPane.addEventListener('pointerdown', pointerDown)
-      })
-    }
+    panes.slice(0, -1).forEach((pane, _) => {
+      let gutter = createElement('div', { className: 'gutter' })
+      if (!isDisabled) gutter.addEventListener('pointerdown', pointerDown)
+      pane.after(gutter)
+    })
 
     frToCSS()
   }
