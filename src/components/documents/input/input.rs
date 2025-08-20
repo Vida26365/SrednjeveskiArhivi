@@ -35,7 +35,7 @@ fn capitalize(str: &str) -> String {
 }
 
 async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
-    debug!("Event: {event:?}");
+    debug!("Event: {event:#?}");
 
     let values = event.values();
 
@@ -92,7 +92,7 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
         None => document.review = Set(ReviewStatus::NotReviewed),
     }
 
-    debug!("Parsed: {document:?}");
+    debug!("Parsed: {document:#?}");
 
     let database = get_database().await;
     document.update(database).await.unwrap(); // TODO: Handle errors
