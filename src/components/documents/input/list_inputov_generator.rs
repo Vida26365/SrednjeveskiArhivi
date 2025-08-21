@@ -144,7 +144,7 @@ fn SubinputListOziromaKaaj(name: String, variacije: Signal<Vec<String>>, glavno_
 }
 
 #[component]
-pub fn LastInputOziromaVaskiPosebnez(name: String, persons: Signal<Vec<(String, Vec<String>)>>) -> Element {
+pub fn LastInputOziromaVaskiPosebnez(name: String, string_vec_list: Signal<Vec<(String, Vec<String>)>>) -> Element {
     let mut additional = use_signal(String::new);
     let mut dodatne_variacije = use_signal(Vec::new);
 
@@ -159,7 +159,7 @@ pub fn LastInputOziromaVaskiPosebnez(name: String, persons: Signal<Vec<(String, 
                         autocapitalize: "false",
                         autocomplete: "false",
                         spellcheck: "false",
-                        name: "persons",
+                        name: "{name}",
                         value: "{additional}",
                         oninput: move |event| {
                             additional.set(event.value());
@@ -167,7 +167,7 @@ pub fn LastInputOziromaVaskiPosebnez(name: String, persons: Signal<Vec<(String, 
                         onkeypress: move |event| {
                             if event.key() == Enter {
                                 event.prevent_default();
-                                persons.write().push((additional.read().clone(), dodatne_variacije.read().clone()));
+                                string_vec_list.write().push((additional.read().clone(), dodatne_variacije.read().clone()));
                                 additional.set(String::new());
                                 dodatne_variacije.set(Vec::new());
                             }

@@ -6,7 +6,7 @@ use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
 
-use crate::components::documents::input::{InputKeywords, InputOrganisations, SublistInputList, LastInputOziromaVaskiPosebnez};
+use crate::components::documents::input::{InputKeywords, SublistInputList, LastInputOziromaVaskiPosebnez};
 use crate::database::get_database;
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::entities::{
@@ -117,7 +117,7 @@ pub fn PaneInput(
                 li { InputFilename { document } }
                 li { InputName { document } }
                 li { InputPersons { document, persons } }
-                li { InputOrganisations { organizations } }
+                li { InputOrganizations { organizations } }
                 li { InputLocations { locations } }
                 li { InputKeywords { document } }
                 li { InputLanguages { document } }
@@ -137,17 +137,13 @@ pub fn PaneInput(
 
 #[component]
 fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
-    // let mut persons = use_signal(move || {
-    //     document.read().persons.0.clone()
-    //     // persons.read().clone().into_iter().map(|(person, _)| person.name).collect::<Vec<_>>()
-    // });
     let persons = use_signal(move || {
         persons
             .read()
             .clone()
             .into_iter()
-            .map(|(person, alliases)| {
-                (person.name, alliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
+            .map(|(person, aliases)| {
+                (person.name, aliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
             })
             .collect::<Vec<_>>()
     });
@@ -163,7 +159,36 @@ fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
         }
         LastInputOziromaVaskiPosebnez {
             name: "persons".to_string(),
-            persons: persons
+            string_vec_list: persons
+        }
+    }
+}
+
+#[component]
+fn InputOrganizations( organizations: OrganizationsParam) -> Element {
+    let organizations = use_signal(move || {
+        organizations
+            .read()
+            .clone()
+            .into_iter()
+            .map(|(organization, aliases)| {
+                (organization.name, aliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
+            })
+            .collect::<Vec<_>>()
+    });
+
+    rsx! {
+        label {
+            class: "flex pb-2 font-semibold",
+            "Organizacije"
+        }
+        SublistInputList {
+            name: "organisations".to_string(),
+            string_vec_list: organizations
+        }
+        LastInputOziromaVaskiPosebnez {
+            name: "organisations".to_string(),
+            string_vec_list: organizations
         }
     }
 }
@@ -175,31 +200,24 @@ fn InputLocations(locations: LocationsParam) -> Element {
             .read()
             .clone()
             .into_iter()
-            .map(|(_, lokacije)| {
-                lokacije.iter().map(|lokacija| lokacija.name.clone()).collect::<Vec<_>>()
+            .map(|(location, aliases)| {
+                (location.name, aliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
             })
             .collect::<Vec<_>>()
     });
+
     rsx! {
         label {
             class: "flex pb-2 font-semibold",
             "Lokacije"
         }
-        for location in locations.read().iter() {
-            // TODO
+        SublistInputList {
+            name: "locations".to_string(),
+            string_vec_list: locations
         }
-        div {
-            class: "flex gap-2",
-            div {
-                class: "input w-full",
-                input {
-                    aria_autocomplete: "none",
-                    autocapitalize: "false",
-                    autocomplete: "false",
-                    spellcheck: "false",
-                    name: "locations",
-                }
-            }
+        LastInputOziromaVaskiPosebnez {
+            name: "locations".to_string(),
+            string_vec_list: locations
         }
     }
 }
