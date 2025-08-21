@@ -1,8 +1,8 @@
 pub mod input;
 pub mod keywords;
 pub mod organisations;
-pub mod persons;
+pub mod list_inputov_generator;
 
 pub use keywords::InputKeywords;
 pub use organisations::InputOrganisations;
-pub use persons::InputPersons;
+pub use list_inputov_generator::{SubListInput, VaskiPosebnez};

@@ -6,7 +6,7 @@ use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
 
-use crate::components::documents::input::{InputKeywords, InputOrganisations, InputPersons};
+use crate::components::documents::input::{InputKeywords, InputOrganisations, SubListInput, VaskiPosebnez};
 use crate::database::get_database;
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::entities::{
@@ -129,6 +129,41 @@ pub fn PaneInput(
                     }
                 }
             }
+        }
+    }
+}
+
+
+
+#[component]
+fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
+    // let mut persons = use_signal(move || {
+    //     document.read().persons.0.clone()
+    //     // persons.read().clone().into_iter().map(|(person, _)| person.name).collect::<Vec<_>>()
+    // });
+    let persons = use_signal(move || {
+        persons
+            .read()
+            .clone()
+            .into_iter()
+            .map(|(person, alliases)| {
+                (person.name, alliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
+            })
+            .collect::<Vec<_>>()
+    });
+
+    rsx! {
+        label {
+            class: "flex pb-2 font-semibold",
+            "Osebe"
+        }
+        SubListInput {
+            name: "persons".to_string(),
+            string_vec_list: persons
+        }
+        VaskiPosebnez {
+            name: "persons".to_string(),
+            persons: persons
         }
     }
 }

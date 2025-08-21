@@ -3,44 +3,13 @@ use dioxus::prelude::*;
 use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
 
-use crate::entities::{DocumentModel, PersonAliasModel, PersonModel};
-type DocumentParam = Signal<DocumentModel>;
-type PersonsParam = Signal<Vec<(PersonModel, Vec<PersonAliasModel>)>>;
 
 #[component]
-pub fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
-    // let mut persons = use_signal(move || {
-    //     document.read().persons.0.clone()
-    //     // persons.read().clone().into_iter().map(|(person, _)| person.name).collect::<Vec<_>>()
-    // });
-    let persons = use_signal(move || {
-        persons
-            .read()
-            .clone()
-            .into_iter()
-            .map(|(person, alliases)| {
-                (person.name, alliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
-            })
-            .collect::<Vec<_>>()
-    });
-
-    // let mut alliases: Signal<Vec<Vec<String>>> = use_signal(Vec::new);
-
-    rsx! {
-        label {
-            class: "flex pb-2 font-semibold",
-            "Osebe"
-        }
-        SubListInput { string_vec_list: persons }
-        VaskiPosebnez { persons: persons }
-    }
-}
-
-#[component]
-fn SubListInput(string_vec_list: Signal<Vec<(String, Vec<String>)>>) -> Element {
+pub fn SubListInput(name: String, string_vec_list: Signal<Vec<(String, Vec<String>)>>) -> Element {
     rsx!(for (index, (glavno_ime, variacije)) in string_vec_list.read().iter().cloned().enumerate()
     {
         VmesnaKomponentaKerjeRustKrneki {
+            name: name.clone(),
             variacije,
             glavno_ime: glavno_ime.clone(),
             string_vec_list: string_vec_list.clone(),
@@ -51,6 +20,7 @@ fn SubListInput(string_vec_list: Signal<Vec<(String, Vec<String>)>>) -> Element 
 
 #[component]
 fn VmesnaKomponentaKerjeRustKrneki(
+    name: String,
     variacije: Vec<String>,
     glavno_ime: String,
     string_vec_list: Signal<Vec<(String, Vec<String>)>>,
@@ -68,7 +38,7 @@ fn VmesnaKomponentaKerjeRustKrneki(
                         autocapitalize: "false",
                         autocomplete: "false",
                         spellcheck: "false",
-                        name: "persons",
+                        name: "{name}",
                         value: "{glavno_ime}",
                         oninput: move |event| {
                             let mut string_vec_list = string_vec_list.write();
@@ -116,6 +86,7 @@ fn VmesnaKomponentaKerjeRustKrneki(
             div {
                 margin_left: "15%",
                 Kaaj {
+                    name: name.clone(),
                     variacije: variacije,
                     glavno_ime: glavno_ime.clone()
                 }
@@ -126,7 +97,7 @@ fn VmesnaKomponentaKerjeRustKrneki(
 }
 
 #[component]
-fn Kaaj(variacije: Signal<Vec<String>>, glavno_ime: String) -> Element {
+fn Kaaj(name: String, variacije: Signal<Vec<String>>, glavno_ime: String) -> Element {
     rsx!(
         for (index, vzdevek) in variacije.read().iter().cloned().enumerate() {
             div {
@@ -136,7 +107,7 @@ fn Kaaj(variacije: Signal<Vec<String>>, glavno_ime: String) -> Element {
                     autocapitalize: "false",
                     autocomplete: "false",
                     spellcheck: "false",
-                    name: "persons/{glavno_ime}",
+                    name: "{name}/{glavno_ime}",
                     value: "{vzdevek}",
 
                     oninput: move |event| {
@@ -173,7 +144,7 @@ fn Kaaj(variacije: Signal<Vec<String>>, glavno_ime: String) -> Element {
 }
 
 #[component]
-fn VaskiPosebnez(persons: Signal<Vec<(String, Vec<String>)>>) -> Element {
+pub fn VaskiPosebnez(name: String, persons: Signal<Vec<(String, Vec<String>)>>) -> Element {
     let mut additional = use_signal(String::new);
     let mut dodatne_variacije = use_signal(Vec::new);
 
@@ -231,6 +202,7 @@ fn VaskiPosebnez(persons: Signal<Vec<(String, Vec<String>)>>) -> Element {
                 }
             }
             Kaaj {
+                name: name.clone(),
                 variacije: dodatne_variacije,
                 glavno_ime: additional.read()
             }
