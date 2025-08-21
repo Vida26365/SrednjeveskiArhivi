@@ -6,7 +6,7 @@ use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
 
-use crate::components::documents::input::{InputKeywords, InputOrganisations, SubListInput, VaskiPosebnez};
+use crate::components::documents::input::{InputKeywords, InputOrganisations, SublistInputList, LastInputOziromaVaskiPosebnez};
 use crate::database::get_database;
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::entities::{
@@ -157,11 +157,11 @@ fn InputPersons(document: DocumentParam, persons: PersonsParam) -> Element {
             class: "flex pb-2 font-semibold",
             "Osebe"
         }
-        SubListInput {
+        SublistInputList {
             name: "persons".to_string(),
             string_vec_list: persons
         }
-        VaskiPosebnez {
+        LastInputOziromaVaskiPosebnez {
             name: "persons".to_string(),
             persons: persons
         }

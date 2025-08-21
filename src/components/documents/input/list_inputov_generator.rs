@@ -5,10 +5,10 @@ use dioxus_heroicons::IconShape;
 
 
 #[component]
-pub fn SubListInput(name: String, string_vec_list: Signal<Vec<(String, Vec<String>)>>) -> Element {
+pub fn SublistInputList(name: String, string_vec_list: Signal<Vec<(String, Vec<String>)>>) -> Element {
     rsx!(for (index, (glavno_ime, variacije)) in string_vec_list.read().iter().cloned().enumerate()
     {
-        VmesnaKomponentaKerjeRustKrneki {
+        VmesnaKomponentaZaForZankoKerjeRustKrneki {
             name: name.clone(),
             variacije,
             glavno_ime: glavno_ime.clone(),
@@ -19,7 +19,7 @@ pub fn SubListInput(name: String, string_vec_list: Signal<Vec<(String, Vec<Strin
 }
 
 #[component]
-fn VmesnaKomponentaKerjeRustKrneki(
+fn VmesnaKomponentaZaForZankoKerjeRustKrneki(
     name: String,
     variacije: Vec<String>,
     glavno_ime: String,
@@ -85,7 +85,7 @@ fn VmesnaKomponentaKerjeRustKrneki(
             }
             div {
                 margin_left: "15%",
-                Kaaj {
+                SubinputListOziromaKaaj {
                     name: name.clone(),
                     variacije: variacije,
                     glavno_ime: glavno_ime.clone()
@@ -97,7 +97,7 @@ fn VmesnaKomponentaKerjeRustKrneki(
 }
 
 #[component]
-fn Kaaj(name: String, variacije: Signal<Vec<String>>, glavno_ime: String) -> Element {
+fn SubinputListOziromaKaaj(name: String, variacije: Signal<Vec<String>>, glavno_ime: String) -> Element {
     rsx!(
         for (index, vzdevek) in variacije.read().iter().cloned().enumerate() {
             div {
@@ -144,7 +144,7 @@ fn Kaaj(name: String, variacije: Signal<Vec<String>>, glavno_ime: String) -> Ele
 }
 
 #[component]
-pub fn VaskiPosebnez(name: String, persons: Signal<Vec<(String, Vec<String>)>>) -> Element {
+pub fn LastInputOziromaVaskiPosebnez(name: String, persons: Signal<Vec<(String, Vec<String>)>>) -> Element {
     let mut additional = use_signal(String::new);
     let mut dodatne_variacije = use_signal(Vec::new);
 
@@ -201,10 +201,12 @@ pub fn VaskiPosebnez(name: String, persons: Signal<Vec<(String, Vec<String>)>>) 
                     }
                 }
             }
-            Kaaj {
-                name: name.clone(),
-                variacije: dodatne_variacije,
-                glavno_ime: additional.read()
+            div {
+                SubinputListOziromaKaaj {
+                    name: name.clone(),
+                    variacije: dodatne_variacije,
+                    glavno_ime: additional.read()
+                }
             }
         }
     )

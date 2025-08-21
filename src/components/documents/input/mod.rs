@@ -5,4 +5,4 @@ pub mod list_inputov_generator;
 
 pub use keywords::InputKeywords;
 pub use organisations::InputOrganisations;
-pub use list_inputov_generator::{SubListInput, VaskiPosebnez};
+pub use list_inputov_generator::{SublistInputList, LastInputOziromaVaskiPosebnez};
