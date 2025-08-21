@@ -2,22 +2,17 @@ use dioxus::logger::tracing::{debug, info};
 use dioxus::prelude::*;
 use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
+use sea_orm::sqlx::database;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, Iterable};
 use strum::IntoEnumIterator;
+use uuid::Uuid;
 
 use crate::components::documents::input::{InputKeywords, SublistInputList, LastInputOziromaVaskiPosebnez};
 use crate::database::get_database;
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::entities::{
-    DocumentActiveModel,
-    DocumentModel,
-    LocationAliasModel,
-    LocationModel,
-    OrganizationAliasModel,
-    OrganizationModel,
-    PersonAliasModel,
-    PersonModel,
+    person, DocumentActiveModel, DocumentModel, LocationAliasModel, LocationModel, OrganizationAliasModel, OrganizationModel, PersonActiveModel, PersonAliasModel, PersonModel
 };
 use crate::utils::language::Language;
 
@@ -36,6 +31,8 @@ fn capitalize(str: &str) -> String {
 
 async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     debug!("Event: {event:#?}");
+    let database = get_database().await;
+
 
     let values = event.values();
 
@@ -45,16 +42,25 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     // TODO: Handle locations
 
     match values.get("persons") {
-        Some(persons) => {
-            document.persons = Set(Persons(
-                persons
-                    .as_slice()
-                    .iter()
-                    .map(|person| person.trim())
-                    .filter(|person| !person.is_empty())
-                    .map(String::from)
-                    .collect(),
-            ));
+        Some(osebe) => {
+            // document.persons = Set(Persons(
+            //     osebe
+            //         .as_slice()
+            //         .iter()
+            //         .map(|person| person.trim())
+            //         .filter(|person| !person.is_empty())
+            //         .map(String::from)
+            //         .collect(),
+            // ));
+
+            for oseba in osebe.as_slice() {
+                let person = PersonActiveModel {
+                    id: Set(Uuid::now_v7()),
+                    name: Set(oseba.trim().to_string()),
+                    description: Set(String::new()),
+                };
+                let person = person.insert(database).await.unwrap();
+            }
         }
         None => document.persons = Set(Persons(vec![])),
     }
@@ -94,7 +100,7 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 
     debug!("Parsed: {document:#?}");
 
-    let database = get_database().await;
+    // let persons_database =
     document.update(database).await.unwrap(); // TODO: Handle errors
 
     info!("Submitted!"); // TODO: Show success message
@@ -110,7 +116,7 @@ pub fn PaneInput(
     rsx! {
         form {
             onsubmit: move |event| async move {
-                submit(document.read().clone().into(),event).await;
+                submit(document.read().clone().into(), event).await;
             },
             ul {
                 class: "space-y-4",
