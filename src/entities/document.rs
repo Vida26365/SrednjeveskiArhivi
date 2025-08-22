@@ -103,9 +103,9 @@ pub struct Model {
     #[sea_orm(default_value = "[]")]
     pub languages: Languages,
 
-    /// The document persons.
-    #[sea_orm(default_value = "[]")]
-    pub persons: Persons,
+    // /// The document persons.
+    // #[sea_orm(default_value = "[]")]
+    // pub persons: Persons,
 
     /// The document keywords.
     #[sea_orm(default_value = "[]")]

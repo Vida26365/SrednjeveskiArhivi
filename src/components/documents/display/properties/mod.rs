@@ -1,6 +1,7 @@
 use dioxus::logger::tracing::{debug, info};
 use dioxus::prelude::*;
 use sea_orm::{ActiveModelTrait, Set};
+use uuid::Uuid;
 
 use crate::components::documents::display::{
     DocumentSignal,
@@ -9,7 +10,7 @@ use crate::components::documents::display::{
     PersonsSignal,
 };
 use crate::database::get_database;
-use crate::entities::DocumentActiveModel;
+use crate::entities::{DocumentActiveModel, DocumentPersonActiveModel, PersonActiveModel, PersonAliasActiveModel};
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::utils::language::Language;
 
@@ -22,6 +23,8 @@ use keywords::InputKeywords;
 // pub use list_inputov_generator::{SublistInputList, LastInputOziromaVaskiPosebnez};
 
 async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
+    let database = get_database().await;
+
     debug!("Event: {event:?}");
 
     let values = event.values();
@@ -31,19 +34,37 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     // TODO: Handle organizations
     // TODO: Handle locations
 
-    match values.get("persons") {
-        Some(persons) => {
-            document.persons = Set(Persons(
-                persons
-                    .as_slice()
-                    .iter()
-                    .map(|person| person.trim())
-                    .filter(|person| !person.is_empty())
-                    .map(String::from)
-                    .collect(),
-            ))
+      match values.get("persons") {
+        Some(osebe) => {
+            for oseba in osebe.as_slice() {
+                let person = PersonActiveModel {
+                    id: Set(Uuid::now_v7()),
+                    name: Set(oseba.trim().to_string()),
+                    description: Set(String::new()),
+                };
+                let person = person.insert(database).await.unwrap();
+                let document_person = DocumentPersonActiveModel {
+                    document: Set(document.clone().id.unwrap()),
+                    person: Set(person.id),
+                };
+                document_person.insert(database).await.unwrap();
+                match values.get(&format!("oseba/{oseba}")) {
+                    Some(variacije) => {
+                        for variacija in variacije.as_slice() {
+                            let alias = PersonAliasActiveModel {
+                                id: Set(Uuid::now_v7()),
+                                person: Set(Some(person.id)),
+                                name: Set(variacija.trim().to_string()),
+                                description: Set(String::new()),
+                            };
+                            alias.insert(database).await.unwrap();
+                        }
+                    }
+                    None => {}
+                }
+            }
         }
-        None => document.persons = Set(Persons(vec![])),
+        None => {}
     }
 
     match values.get("keywords") {
@@ -81,7 +102,6 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 
     debug!("Parsed: {document:?}");
 
-    let database = get_database().await;
     document.update(database).await.unwrap(); // TODO: Handle errors
 
     info!("Submitted!"); // TODO: Show success message
