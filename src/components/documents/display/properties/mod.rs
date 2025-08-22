@@ -15,15 +15,11 @@ use crate::utils::language::Language;
 
 mod basic;
 mod keywords;
-mod locations;
-mod organisations;
-mod persons;
+mod list_inputov_generator;
 
-use basic::{InputFilename, InputLanguages, InputName, InputReview};
+use basic::{InputFilename, InputPersons, InputOrganizations, InputLocations, InputLanguages, InputName, InputReview};
 use keywords::InputKeywords;
-use locations::InputLocations;
-use organisations::InputOrganisations;
-use persons::InputPersons;
+// pub use list_inputov_generator::{SublistInputList, LastInputOziromaVaskiPosebnez};
 
 async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     debug!("Event: {event:?}");
@@ -108,7 +104,7 @@ pub fn PaneProperties(
                 li { InputFilename { document } }
                 li { InputName { document } }
                 li { InputPersons { document, persons } }
-                li { InputOrganisations { organizations } }
+                li { InputOrganizations { organizations } }
                 li { InputLocations { locations } }
                 li { InputKeywords { document } }
                 li { InputLanguages { document } }

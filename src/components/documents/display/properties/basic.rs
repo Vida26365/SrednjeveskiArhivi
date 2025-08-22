@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
 use sea_orm::Iterable;
 
-use crate::components::documents::display::DocumentSignal;
+use crate::components::documents::display::{DocumentSignal, LocationsSignal, OrganizationsSignal, PersonsSignal};
+use crate::components::documents::display::properties::list_inputov_generator::{LastInputOziromaVaskiPosebnez, SublistInputList};
 use crate::entities::document::ReviewStatus;
 use crate::utils::language::Language;
 use crate::utils::text::capitalize;
@@ -45,6 +46,93 @@ pub fn InputName(document: DocumentSignal) -> Element {
             name: "title",
             id: "title",
             value: "{document.read().title}",
+        }
+    }
+}
+
+#[component]
+pub fn InputPersons(document: DocumentSignal, persons: PersonsSignal) -> Element {
+    let persons = use_signal(move || {
+        persons
+            .read()
+            .clone()
+            .into_iter()
+            .map(|(person, aliases)| {
+                (person.name, aliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
+            })
+            .collect::<Vec<_>>()
+    });
+
+    rsx! {
+        label {
+            class: "flex pb-2 font-semibold",
+            "Osebe"
+        }
+        SublistInputList {
+            name: "persons".to_string(),
+            string_vec_list: persons
+        }
+        LastInputOziromaVaskiPosebnez {
+            name: "persons".to_string(),
+            string_vec_list: persons
+        }
+    }
+}
+
+#[component]
+pub fn InputOrganizations( organizations: OrganizationsSignal) -> Element {
+    let organizations = use_signal(move || {
+        organizations
+            .read()
+            .clone()
+            .into_iter()
+            .map(|(organization, aliases)| {
+                (organization.name, aliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
+            })
+            .collect::<Vec<_>>()
+    });
+
+    rsx! {
+        label {
+            class: "flex pb-2 font-semibold",
+            "Organizacije"
+        }
+        SublistInputList {
+            name: "organisations".to_string(),
+            string_vec_list: organizations
+        }
+        LastInputOziromaVaskiPosebnez {
+            name: "organisations".to_string(),
+            string_vec_list: organizations
+        }
+    }
+}
+
+#[component]
+pub fn InputLocations(locations: LocationsSignal) -> Element {
+    let locations = use_signal(move || {
+        locations
+            .read()
+            .clone()
+            .into_iter()
+            .map(|(location, aliases)| {
+                (location.name, aliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
+            })
+            .collect::<Vec<_>>()
+    });
+
+    rsx! {
+        label {
+            class: "flex pb-2 font-semibold",
+            "Lokacije"
+        }
+        SublistInputList {
+            name: "locations".to_string(),
+            string_vec_list: locations
+        }
+        LastInputOziromaVaskiPosebnez {
+            name: "locations".to_string(),
+            string_vec_list: locations
         }
     }
 }
