@@ -1,6 +1,6 @@
 use dioxus::logger::tracing::{debug, info};
 use dioxus::prelude::*;
-use sea_orm::{ActiveModelTrait, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 use uuid::Uuid;
 
 use crate::components::documents::display::{
@@ -10,7 +10,7 @@ use crate::components::documents::display::{
     PersonsSignal,
 };
 use crate::database::get_database;
-use crate::entities::{DocumentActiveModel, DocumentPersonActiveModel, PersonActiveModel, PersonAliasActiveModel};
+use crate::entities::{DocumentActiveModel, DocumentPerson, DocumentPersonActiveModel, DocumentPersonColumn, PersonActiveModel, PersonAliasActiveModel};
 use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
 use crate::utils::language::Language;
 
@@ -33,6 +33,11 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 
     // TODO: Handle organizations
     // TODO: Handle locations
+    DocumentPerson::delete_many().filter(DocumentPersonColumn::Document.eq(document.clone().id.unwrap())).exec(database).await.unwrap();
+        // .filter(DocumentPersonColumn::Document.eq(document.id))
+        // .exec(database)
+        // .await
+        // .unwrap();
 
       match values.get("persons") {
         Some(osebe) => {
