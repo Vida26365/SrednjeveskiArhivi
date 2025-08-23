@@ -11,7 +11,7 @@ use crate::components::documents::display::{
 };
 use crate::database::get_database;
 use crate::entities::{DocumentActiveModel, DocumentPerson, DocumentPersonActiveModel, DocumentPersonColumn, PersonActiveModel, PersonAliasActiveModel};
-use crate::entities::document::{Keywords, Languages, Persons, ReviewStatus};
+use crate::entities::document::{Keywords, Languages, ReviewStatus};
 use crate::utils::language::Language;
 
 mod basic;
@@ -25,7 +25,7 @@ use keywords::InputKeywords;
 async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
     let database = get_database().await;
 
-    debug!("Event: {event:?}");
+    debug!("Event: {event:#?}");
 
     let values = event.values();
 
@@ -41,7 +41,7 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 
       match values.get("persons") {
         Some(osebe) => {
-            for oseba in osebe.as_slice() {
+            for oseba in osebe.as_slice().iter().filter(|o| !o.trim().is_empty()) {
                 let person = PersonActiveModel {
                     id: Set(Uuid::now_v7()),
                     name: Set(oseba.trim().to_string()),
@@ -53,9 +53,9 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                     person: Set(person.id),
                 };
                 document_person.insert(database).await.unwrap();
-                match values.get(&format!("oseba/{oseba}")) {
+                match values.get(&format!("persons/{oseba}")) {
                     Some(variacije) => {
-                        for variacija in variacije.as_slice() {
+                        for variacija in variacije.as_slice().iter().filter(|o| !o.trim().is_empty()) {
                             let alias = PersonAliasActiveModel {
                                 id: Set(Uuid::now_v7()),
                                 person: Set(Some(person.id)),
