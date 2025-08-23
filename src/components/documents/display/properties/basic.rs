@@ -98,11 +98,11 @@ pub fn InputOrganizations( organizations: OrganizationsSignal) -> Element {
             "Organizacije"
         }
         SublistInputList {
-            name: "organisations".to_string(),
+            name: "organizations".to_string(),
             string_vec_list: organizations
         }
         LastInputOziromaVaskiPosebnez {
-            name: "organisations".to_string(),
+            name: "organizations".to_string(),
             string_vec_list: organizations
         }
     }
