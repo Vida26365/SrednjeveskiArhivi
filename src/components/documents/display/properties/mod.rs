@@ -10,15 +10,40 @@ use crate::components::documents::display::{
     PersonsSignal,
 };
 use crate::database::get_database;
-use crate::entities::{DocumentActiveModel, DocumentLocation, DocumentLocationActiveModel, DocumentLocationColumn, DocumentOrganization, DocumentOrganizationActiveModel, DocumentOrganizationColumn, DocumentPerson, DocumentPersonActiveModel, DocumentPersonColumn, LocationActiveModel, LocationAliasActiveModel, OrganizationActiveModel, OrganizationAliasActiveModel, PersonActiveModel, PersonAliasActiveModel};
 use crate::entities::document::{Keywords, Languages, ReviewStatus};
+use crate::entities::{
+    DocumentActiveModel,
+    DocumentLocation,
+    DocumentLocationActiveModel,
+    DocumentLocationColumn,
+    DocumentOrganization,
+    DocumentOrganizationActiveModel,
+    DocumentOrganizationColumn,
+    DocumentPerson,
+    DocumentPersonActiveModel,
+    DocumentPersonColumn,
+    LocationActiveModel,
+    LocationAliasActiveModel,
+    OrganizationActiveModel,
+    OrganizationAliasActiveModel,
+    PersonActiveModel,
+    PersonAliasActiveModel,
+};
 use crate::utils::language::Language;
 
 mod basic;
 mod keywords;
 mod list_inputov_generator;
 
-use basic::{InputFilename, InputPersons, InputOrganizations, InputLocations, InputLanguages, InputName, InputReview};
+use basic::{
+    InputFilename,
+    InputLanguages,
+    InputLocations,
+    InputName,
+    InputOrganizations,
+    InputPersons,
+    InputReview,
+};
 use keywords::InputKeywords;
 // pub use list_inputov_generator::{SublistInputList, LastInputOziromaVaskiPosebnez};
 
@@ -31,13 +56,23 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 
     document.title = Set(values["title"].as_value());
 
+    DocumentPerson::delete_many()
+        .filter(DocumentPersonColumn::Document.eq(document.clone().id.unwrap()))
+        .exec(database)
+        .await
+        .unwrap();
+    DocumentOrganization::delete_many()
+        .filter(DocumentOrganizationColumn::Document.eq(document.clone().id.unwrap()))
+        .exec(database)
+        .await
+        .unwrap();
+    DocumentLocation::delete_many()
+        .filter(DocumentLocationColumn::Document.eq(document.clone().id.unwrap()))
+        .exec(database)
+        .await
+        .unwrap();
 
-    DocumentPerson::delete_many().filter(DocumentPersonColumn::Document.eq(document.clone().id.unwrap())).exec(database).await.unwrap();
-    DocumentOrganization::delete_many().filter(DocumentOrganizationColumn::Document.eq(document.clone().id.unwrap())).exec(database).await.unwrap();
-    DocumentLocation::delete_many().filter(DocumentLocationColumn::Document.eq(document.clone().id.unwrap())).exec(database).await.unwrap();
-
-
-      match values.get("persons") {
+    match values.get("persons") {
         Some(osebe) => {
             for oseba in osebe.as_slice().iter().filter(|o| !o.trim().is_empty()) {
                 let person = PersonActiveModel {
@@ -53,7 +88,9 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                 document_person.insert(database).await.unwrap();
                 match values.get(&format!("persons/{oseba}")) {
                     Some(variacije) => {
-                        for variacija in variacije.as_slice().iter().filter(|o| !o.trim().is_empty()) {
+                        for variacija in
+                            variacije.as_slice().iter().filter(|o| !o.trim().is_empty())
+                        {
                             let alias = PersonAliasActiveModel {
                                 id: Set(Uuid::now_v7()),
                                 person: Set(Some(person.id)),
@@ -86,7 +123,9 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                 document_organization.insert(database).await.unwrap();
                 match values.get(&format!("organizations/{organizacija}")) {
                     Some(variacije) => {
-                        for variacija in variacije.as_slice().iter().filter(|o| !o.trim().is_empty()) {
+                        for variacija in
+                            variacije.as_slice().iter().filter(|o| !o.trim().is_empty())
+                        {
                             let alias = OrganizationAliasActiveModel {
                                 id: Set(Uuid::now_v7()),
                                 organization: Set(Some(organization.id)),
@@ -119,7 +158,9 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                 document_location.insert(database).await.unwrap();
                 match values.get(&format!("locations/{lokacija}")) {
                     Some(variacije) => {
-                        for variacija in variacije.as_slice().iter().filter(|o| !o.trim().is_empty()) {
+                        for variacija in
+                            variacije.as_slice().iter().filter(|o| !o.trim().is_empty())
+                        {
                             let alias = LocationAliasActiveModel {
                                 id: Set(Uuid::now_v7()),
                                 location: Set(Some(location.id)),

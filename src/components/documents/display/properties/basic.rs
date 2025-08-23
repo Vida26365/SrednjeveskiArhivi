@@ -1,8 +1,16 @@
 use dioxus::prelude::*;
 use sea_orm::Iterable;
 
-use crate::components::documents::display::{DocumentSignal, LocationsSignal, OrganizationsSignal, PersonsSignal};
-use crate::components::documents::display::properties::list_inputov_generator::{LastInputOziromaVaskiPosebnez, SublistInputList};
+use crate::components::documents::display::properties::list_inputov_generator::{
+    LastInputOziromaVaskiPosebnez,
+    SublistInputList,
+};
+use crate::components::documents::display::{
+    DocumentSignal,
+    LocationsSignal,
+    OrganizationsSignal,
+    PersonsSignal,
+};
 use crate::entities::document::ReviewStatus;
 use crate::utils::language::Language;
 use crate::utils::text::capitalize;
@@ -80,14 +88,17 @@ pub fn InputPersons(document: DocumentSignal, persons: PersonsSignal) -> Element
 }
 
 #[component]
-pub fn InputOrganizations( organizations: OrganizationsSignal) -> Element {
+pub fn InputOrganizations(organizations: OrganizationsSignal) -> Element {
     let organizations = use_signal(move || {
         organizations
             .read()
             .clone()
             .into_iter()
             .map(|(organization, aliases)| {
-                (organization.name, aliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>())
+                (
+                    organization.name,
+                    aliases.iter().map(|alias| alias.name.clone()).collect::<Vec<_>>(),
+                )
             })
             .collect::<Vec<_>>()
     });

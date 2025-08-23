@@ -1,11 +1,13 @@
 use dioxus::events::Key::Enter;
 use dioxus::prelude::*;
-use dioxus_heroicons::outline::Shape;
 use dioxus_heroicons::IconShape;
-
+use dioxus_heroicons::outline::Shape;
 
 #[component]
-pub fn SublistInputList(name: String, string_vec_list: Signal<Vec<(String, Vec<String>)>>) -> Element {
+pub fn SublistInputList(
+    name: String,
+    string_vec_list: Signal<Vec<(String, Vec<String>)>>,
+) -> Element {
     rsx!(for (index, (glavno_ime, variacije)) in string_vec_list.read().iter().cloned().enumerate()
     {
         VmesnaKomponentaZaForZankoKerjeRustKrneki {
@@ -97,7 +99,11 @@ fn VmesnaKomponentaZaForZankoKerjeRustKrneki(
 }
 
 #[component]
-fn SubinputListOziromaKaaj(name: String, variacije: Signal<Vec<String>>, glavno_ime: String) -> Element {
+fn SubinputListOziromaKaaj(
+    name: String,
+    variacije: Signal<Vec<String>>,
+    glavno_ime: String,
+) -> Element {
     rsx!(
         for (index, vzdevek) in variacije.read().iter().cloned().enumerate() {
             div {
@@ -144,7 +150,10 @@ fn SubinputListOziromaKaaj(name: String, variacije: Signal<Vec<String>>, glavno_
 }
 
 #[component]
-pub fn LastInputOziromaVaskiPosebnez(name: String, string_vec_list: Signal<Vec<(String, Vec<String>)>>) -> Element {
+pub fn LastInputOziromaVaskiPosebnez(
+    name: String,
+    string_vec_list: Signal<Vec<(String, Vec<String>)>>,
+) -> Element {
     let mut additional = use_signal(String::new);
     let mut dodatne_variacije = use_signal(Vec::new);
 
