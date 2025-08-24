@@ -88,7 +88,7 @@ pub fn DocumentUpload() -> Element {
         state.set(UploadState::Idle);
     };
 
-    let save = async move || -> Result<()> {
+    let mut save = async move || -> Result<()> {
         let storage = DIRECTORIES.userdata.join("documents");
         tokio::fs::create_dir_all(&storage).await.context("Failed to create storage")?;
 
@@ -119,6 +119,8 @@ pub fn DocumentUpload() -> Element {
 
         txn.commit().await?;
 
+        uploaded.write().clear();
+
         Ok(())
     };
 
@@ -137,13 +139,8 @@ pub fn DocumentUpload() -> Element {
                 disabled: uploaded.read().is_empty(),
                 onclick: move |_| async move {
                     match save().await {
-                        Ok(_) => {
-                            uploaded.write().clear();
-                            state.set(UploadState::Success);
-                        }
-                        Err(error) => {
-                            state.set(UploadState::Error(format!("{error:?}")));
-                        }
+                        Ok(_) => state.set(UploadState::Success),
+                        Err(error) => state.set(UploadState::Error(format!("{error:?}"))),
                     }
                 },
                 "Dodaj dokumente"

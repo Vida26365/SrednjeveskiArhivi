@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 
+use anyhow::{Context, Result, bail};
 use sea_orm::sea_query::StringLen;
 use sea_orm::{DeriveActiveEnum, DeriveValueType, EnumIter};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -65,31 +66,45 @@ pub enum Date {
 
 impl Date {
     /// Creates a new date for the specified year, month, and day in the given calendar.
-    pub fn new(year: i32, month: u8, day: u8, calendar: &Calendar) -> Result<Self, String> {
+    pub fn new(year: i32, month: u8, day: u8, calendar: &Calendar) -> Result<Self> {
         match calendar {
             Calendar::Gregorian => icu_calendar::Date::try_new_gregorian(year, month, day)
                 .map(Date::Gregorian)
-                .map_err(|error| format!("Invalid Gregorian date: {error}")),
+                .with_context(|| {
+                    format!(
+                        "Invalid Gregorian date range: {{ year: {year}, month: {month}, day: {day} }}"
+                    )
+                }),
             Calendar::Julian => icu_calendar::Date::try_new_julian(year, month, day)
                 .map(Date::Julian)
-                .map_err(|error| format!("Invalid Julian date: {error}")),
+                .with_context(|| {
+                    format!(
+                        "Invalid Julian date range: {{ year: {year}, month: {month}, day: {day} }}"
+                    )
+                }),
         }
     }
 
     /// Parses a date string in the format "DD. MM. YYYY" in the given calendar.
-    pub fn parse(str: &str, calendar: &Calendar) -> Result<Self, String> {
+    pub fn parse(str: &str, calendar: &Calendar) -> Result<Self> {
         let parts: Vec<&str> = str.split('.').collect();
 
         if parts.len() != 3 {
-            return Err(format!("Invalid date format: {str}"));
+            bail!("Invalid date format: {str}");
         }
 
-        let day =
-            parts[0].trim().parse::<u8>().map_err(|_| format!("Invalid day: {}", parts[0]))?;
-        let month =
-            parts[1].trim().parse::<u8>().map_err(|_| format!("Invalid month: {}", parts[1]))?;
-        let year =
-            parts[2].trim().parse::<i32>().map_err(|_| format!("Invalid year: {}", parts[2]))?;
+        let day = parts[0] // Parse day as u8
+            .trim()
+            .parse::<u8>()
+            .with_context(|| format!("Invalid day number: {}", parts[0]))?;
+        let month = parts[1] // Parse month as u8
+            .trim()
+            .parse::<u8>()
+            .with_context(|| format!("Invalid month number: {}", parts[1]))?;
+        let year = parts[2] // Parse year as i32
+            .trim()
+            .parse::<i32>()
+            .with_context(|| format!("Invalid year number: {}", parts[2]))?;
 
         Self::new(year, month, day, calendar)
     }
@@ -180,22 +195,29 @@ impl Date {
     ///
     /// The string should be in the format "YYYY-MM-DD-CALENDAR", where the year,
     /// month, and day are in the ISO calendar, and the calendar type is lowercase.
-    pub fn from_serialized(serialized: &str) -> Result<Self, String> {
+    pub fn from_serialized(serialized: &str) -> Result<Self> {
         let parts: Vec<&str> = serialized.split('-').collect();
 
         if parts.len() != 4 {
-            return Err(format!("Invalid date format: {serialized}"));
+            bail!("Invalid date format: {serialized}");
         }
 
-        let year = parts[0].parse::<i32>().map_err(|_| format!("Invalid year: {}", parts[0]))?;
-        let month = parts[1].parse::<u8>().map_err(|_| format!("Invalid month: {}", parts[1]))?;
-        let day = parts[2].parse::<u8>().map_err(|_| format!("Invalid day: {}", parts[2]))?;
+        let year = parts[0] // Parse year as i32
+            .parse::<i32>()
+            .with_context(|| format!("Invalid year number: {}", parts[0]))?;
+        let month = parts[1] // Parse month as u8
+            .parse::<u8>()
+            .with_context(|| format!("Invalid month number: {}", parts[1]))?;
+        let day = parts[2] // Parse day as u8
+            .parse::<u8>()
+            .with_context(|| format!("Invalid day number: {}", parts[2]))?;
 
         let calendar = Calendar::from_variant_name(parts[3])
-            .ok_or_else(|| format!("Invalid calendar: {}", parts[3]))?;
+            .with_context(|| format!("Invalid calendar variant: {}", parts[3]))?;
 
-        let date = icu_calendar::Date::try_new_iso(year, month, day)
-            .map_err(|error| format!("Invalid ISO date: {error}"))?;
+        let date = icu_calendar::Date::try_new_iso(year, month, day).with_context(|| {
+            format!("Invalid ISO date range: {{ year: {year}, month: {month}, day: {day} }}")
+        })?;
 
         Ok(Self::from_iso(&date, &calendar))
     }
@@ -268,86 +290,98 @@ mod tests {
     }
 
     #[test]
-    fn test_date_creation() {
-        let gregorian = Date::new(2025, 2, 24, &Calendar::Gregorian).unwrap();
+    fn test_date_creation() -> Result<()> {
+        let gregorian = Date::new(2025, 2, 24, &Calendar::Gregorian)?;
         assert_eq!(gregorian.calendar(), Calendar::Gregorian);
         assert_eq!(gregorian.year(), 2025);
         assert_eq!(gregorian.month(), 2);
         assert_eq!(gregorian.day(), 24);
 
-        let julian = Date::new(2025, 2, 24, &Calendar::Julian).unwrap();
+        let julian = Date::new(2025, 2, 24, &Calendar::Julian)?;
         assert_eq!(julian.calendar(), Calendar::Julian);
         assert_eq!(julian.year(), 2025);
         assert_eq!(julian.month(), 2);
         assert_eq!(julian.day(), 24);
+
+        Ok(())
     }
 
     #[test]
-    fn test_date_parsing() {
-        let expected = Date::new(2000, 1, 20, &Calendar::Gregorian).unwrap();
-        assert_eq!(expected, Date::parse("20. 1. 2000", &Calendar::Gregorian).unwrap());
-        assert_eq!(expected, Date::parse("20.1.2000", &Calendar::Gregorian).unwrap());
-        assert_eq!(expected, Date::parse("020.   0001.2000", &Calendar::Gregorian).unwrap());
+    fn test_date_parsing() -> Result<()> {
+        let expected = Date::new(2000, 1, 20, &Calendar::Gregorian)?;
+        assert_eq!(expected, Date::parse("20. 1. 2000", &Calendar::Gregorian)?);
+        assert_eq!(expected, Date::parse("20.1.2000", &Calendar::Gregorian)?);
+        assert_eq!(expected, Date::parse("020.   0001.2000", &Calendar::Gregorian)?);
 
-        let expected = Date::new(2000, 2, 29, &Calendar::Julian).unwrap();
-        assert_eq!(expected, Date::parse("29. 2. 2000", &Calendar::Julian).unwrap());
-        assert_eq!(expected, Date::parse("29.2.2000", &Calendar::Julian).unwrap());
-        assert_eq!(expected, Date::parse("029.   0002.2000", &Calendar::Julian).unwrap());
+        let expected = Date::new(2000, 2, 29, &Calendar::Julian)?;
+        assert_eq!(expected, Date::parse("29. 2. 2000", &Calendar::Julian)?);
+        assert_eq!(expected, Date::parse("29.2.2000", &Calendar::Julian)?);
+        assert_eq!(expected, Date::parse("029.   0002.2000", &Calendar::Julian)?);
 
         assert!(Date::parse("2020-01-01", &Calendar::Gregorian).is_err());
         assert!(Date::parse("30. 2. 2000", &Calendar::Gregorian).is_err());
         assert!(Date::parse("DD. MM. YYYY", &Calendar::Gregorian).is_err());
+
+        Ok(())
     }
 
     #[test]
-    fn test_date_display() {
-        let date = Date::new(1271, 11, 17, &Calendar::Gregorian).unwrap();
+    fn test_date_display() -> Result<()> {
+        let date = Date::new(1271, 11, 17, &Calendar::Gregorian)?;
         assert_eq!(date.to_string(), "17. 11. 1271");
 
-        let date = Date::new(1271, 11, 17, &Calendar::Julian).unwrap();
+        let date = Date::new(1271, 11, 17, &Calendar::Julian)?;
         assert_eq!(date.to_string(), "17. 11. 1271");
+
+        Ok(())
     }
 
     #[test]
-    fn test_date_serialization() {
-        let date = Date::new(2025, 10, 5, &Calendar::Gregorian).unwrap();
-        assert_eq!(serde_json::to_string(&date).unwrap(), "\"2025-10-05-gregorian\"");
+    fn test_date_serialization() -> Result<()> {
+        let date = Date::new(2025, 10, 5, &Calendar::Gregorian)?;
+        assert_eq!(serde_json::to_string(&date)?, "\"2025-10-05-gregorian\"");
         assert_eq!(date.to_serialized(), "2025-10-05-gregorian");
 
-        let date = Date::new(2025, 10, 5, &Calendar::Julian).unwrap();
-        assert_eq!(serde_json::to_string(&date).unwrap(), "\"2025-10-18-julian\"");
+        let date = Date::new(2025, 10, 5, &Calendar::Julian)?;
+        assert_eq!(serde_json::to_string(&date)?, "\"2025-10-18-julian\"");
         assert_eq!(date.to_serialized(), "2025-10-18-julian");
+
+        Ok(())
     }
 
     #[test]
-    fn test_date_deserialization() {
-        let date: Date = serde_json::from_str("\"2025-10-05-gregorian\"").unwrap();
+    fn test_date_deserialization() -> Result<()> {
+        let date: Date = serde_json::from_str("\"2025-10-05-gregorian\"")?;
         assert_eq!(date.calendar(), Calendar::Gregorian);
         assert_eq!(date.year(), 2025);
         assert_eq!(date.month(), 10);
         assert_eq!(date.day(), 5);
 
-        let date: Date = serde_json::from_str("\"2025-10-05-julian\"").unwrap();
+        let date: Date = serde_json::from_str("\"2025-10-05-julian\"")?;
         assert_eq!(date.calendar(), Calendar::Julian);
         assert_eq!(date.year(), 2025);
         assert_eq!(date.month(), 9);
         assert_eq!(date.day(), 22);
 
         assert!(Date::from_serialized("invalid-date").is_err());
+
+        Ok(())
     }
 
     #[test]
-    fn test_date_comparison() {
-        let date1 = Date::new(1243, 4, 13, &Calendar::Julian).unwrap();
-        let date2 = Date::new(1243, 4, 13, &Calendar::Gregorian).unwrap();
+    fn test_date_comparison() -> Result<()> {
+        let date1 = Date::new(1243, 4, 13, &Calendar::Julian)?;
+        let date2 = Date::new(1243, 4, 13, &Calendar::Gregorian)?;
         assert!(date1 > date2);
 
-        let date1 = Date::new(1582, 10, 5, &Calendar::Julian).unwrap();
-        let date2 = Date::new(1582, 10, 15, &Calendar::Gregorian).unwrap();
+        let date1 = Date::new(1582, 10, 5, &Calendar::Julian)?;
+        let date2 = Date::new(1582, 10, 15, &Calendar::Gregorian)?;
         assert_eq!(date1, date2);
 
-        let date1 = Date::new(2025, 8, 1, &Calendar::Gregorian).unwrap();
-        let date2 = Date::new(2025, 8, 1, &Calendar::Julian).unwrap();
+        let date1 = Date::new(2025, 8, 1, &Calendar::Gregorian)?;
+        let date2 = Date::new(2025, 8, 1, &Calendar::Julian)?;
         assert_ne!(date1, date2);
+
+        Ok(())
     }
 }

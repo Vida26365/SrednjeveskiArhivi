@@ -20,7 +20,7 @@ use crate::entities::{
 
 #[component]
 pub fn DocumentDisplay(id: Uuid) -> Element {
-    let document: Resource<Result<_>> = use_resource(move || async move {
+    let mut document: Resource<Result<_>> = use_resource(move || async move {
         let database = get_database().await;
 
         match Document::find_by_id(id).one(database).await? {
@@ -53,6 +53,10 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
         }
     });
 
+    let refresh = move || {
+        document.restart();
+    };
+
     rsx! {
         link { rel: "stylesheet", href: asset!("/assets/styles/grid.css") }
         script { src: asset!("/assets/scripts/grid.js") }
@@ -69,6 +73,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                             locations: locations.clone(),
                             organizations: organizations.clone(),
                             persons: persons.clone(),
+                            refresh,
                         }
                     },
                     _ => rsx! {
@@ -83,6 +88,7 @@ pub fn DocumentDisplay(id: Uuid) -> Element {
                         PaneText {
                             document: document.clone(),
                             location: location.clone(),
+                            refresh,
                         }
                     },
                     Some(Ok(None)) => rsx! {
