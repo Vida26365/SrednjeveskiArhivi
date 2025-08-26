@@ -93,3 +93,38 @@ Example output:
 NOTE: The document might be written in multiple languages. The segments might not be contiguous.
 
 IMPORTANT: Do NOT alter the content in any way. Respond ONLY with a valid JSON object of segments."""
+
+
+PROMPT_METADATA = """You are an assistant that takes a text, and extracts metadata from it.
+
+You must follow the following rules:
+
+1. Extract the metadata:
+   - Extract the requested metadata from the text
+   - Do not use any other metadata
+
+2. Format the output:
+   - Respond with a JSON object containing the metadata
+   - Properly escape any special characters and newlines in strings
+   - Do not include any additional text or explanation
+   - Do not enclose the response in triple backticks
+
+You must extract the following metadata:
+
+- `date`: The date from the document header. Must be in the format `YYYY-MM-DD`. Must only be extracted from the first line. May be `null` if not present.
+- `location`: The location from the document header. Must be exactly the same as in the source, without any punctuation. Must only be extracted from the first line. May be `null` if not present.
+- `languages`: A list of languages used in the document content. Must be a list of two-letter language codes.
+- `keywords`: A list of up to 5 main keywords in Slovene from the document content. Normalize keywords into the same form. Do not reference persons, organizations, or locations.
+
+Output format:
+
+```json
+{
+  "date": "YYYY-MM-DD",
+  "location": "location",
+  "languages": ["lang1", "lang2"],
+  "keywords": ["keyword1", "keyword2"]
+}
+```
+
+IMPORTANT: Respond ONLY with a valid JSON object of metadata."""

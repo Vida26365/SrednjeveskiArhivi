@@ -1,7 +1,9 @@
+use anyhow::{Context, Result, bail};
 use dioxus::logger::tracing::debug;
 use dioxus::prelude::*;
 use sea_orm::sea_query::ConditionType;
 
+use crate::components::alerts::AlertError;
 use crate::components::documents::list::{
     DocumentFilters,
     DocumentSort,
@@ -26,7 +28,11 @@ use languages::FilterLanguages;
 use review::FilterReview;
 use sort::Sorter;
 
-async fn submit(mut sort: SortSignal, mut filters: FiltersSignal, event: Event<FormData>) {
+async fn submit(
+    mut sort: SortSignal,
+    mut filters: FiltersSignal,
+    event: Event<FormData>,
+) -> Result<()> {
     debug!("Event: {event:?}");
 
     let sort: &mut DocumentSort = &mut sort.write();
@@ -38,31 +44,34 @@ async fn submit(mut sort: SortSignal, mut filters: FiltersSignal, event: Event<F
         "date" => sort.column = DocumentSortColumn::Date,
         "location" => sort.column = DocumentSortColumn::Location,
         "review" => sort.column = DocumentSortColumn::Review,
-        _ => {}
+        unknown => bail!("Invalid sort column option: {unknown}"),
     }
 
     match values["sort-order"].as_value().as_str() {
         "ascending" => sort.order = DocumentSortOrder::Ascending,
         "descending" => sort.order = DocumentSortOrder::Descending,
-        _ => {}
+        unknown => bail!("Invalid sort order option: {unknown}"),
     }
 
-    // TODO: Handle errors
-    let calendar = Calendar::from_variant_name(&values["calendar"].as_value()).unwrap();
+    let calendar = &values["calendar"].as_value();
+    let calendar = Calendar::from_variant_name(calendar)
+        .with_context(|| format!("Invalid calendar variant: {calendar}"))?;
 
     if values["start-date"].as_value().trim() == "" {
         filters.date.0 = None;
     } else {
-        // TODO: Handle errors
-        let date = Date::parse(&values["start-date"].as_value(), &calendar).unwrap();
+        let date = &values["start-date"].as_value();
+        let date = Date::parse(date, &calendar)
+            .with_context(|| format!("Invalid start date string: {date}"))?;
         filters.date.0 = Some(date);
     }
 
     if values["end-date"].as_value().trim() == "" {
         filters.date.1 = None;
     } else {
-        // TODO: Handle errors
-        let date = Date::parse(&values["end-date"].as_value(), &calendar).unwrap();
+        let date = &values["end-date"].as_value();
+        let date = Date::parse(date, &calendar)
+            .with_context(|| format!("Invalid end date string: {date}"))?;
         filters.date.1 = Some(date);
     }
 
@@ -112,6 +121,8 @@ async fn submit(mut sort: SortSignal, mut filters: FiltersSignal, event: Event<F
     }
 
     debug!("Parsed: {filters:?}");
+
+    Ok(())
 }
 
 #[component]
@@ -119,13 +130,23 @@ pub fn PaneFilters(
     #[props(into)] sort: SortSignal,
     #[props(into)] filters: FiltersSignal,
 ) -> Element {
+    let mut state: Signal<Option<Element>> = use_signal(|| None);
+
     rsx! {
         form {
             onsubmit: move |event| async move {
-                submit(sort, filters, event).await;
+                match submit(sort, filters, event).await {
+                    Ok(_) => state.set(None),
+                    Err(error) => state.set(Some(rsx! {
+                        AlertError {
+                            title: "Napaka pri uveljavljanju filtrov",
+                            details: format!("{error:?}"),
+                        }
+                    })),
+                }
             },
             ul {
-                class: "space-y-4 pb-1",
+                class: "space-y-4 pb-1 min-w-fit",
                 li { Sorter {} }
                 li { FilterDate {} }
                 li { FilterKeywords {} }
@@ -134,8 +155,13 @@ pub fn PaneFilters(
                 li {
                     button {
                         class: "btn btn-soft btn-primary rounded-box",
+                        type: "submit",
                         "Uveljavi"
                     }
+                }
+                match state() {
+                    Some(element) => rsx! { li { { element } } },
+                    None => rsx! {},
                 }
             }
         }

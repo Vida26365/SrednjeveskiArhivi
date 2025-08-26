@@ -1,7 +1,7 @@
 .panes {
   display: grid;
   margin: calc(var(--spacing) * -3);
-  height: calc(100vh - 64px);
+  height: calc(100% + var(--spacing) * 6);
 }
 
 .pane {

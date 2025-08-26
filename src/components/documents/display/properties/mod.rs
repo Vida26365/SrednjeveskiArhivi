@@ -1,8 +1,10 @@
+use anyhow::{Context, Result};
 use dioxus::logger::tracing::{debug, info};
 use dioxus::prelude::*;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 use uuid::Uuid;
 
+use crate::components::alerts::{AlertError, AlertSuccess};
 use crate::components::documents::display::{
     DocumentSignal,
     LocationsSignal,
@@ -16,6 +18,7 @@ use crate::entities::{
     DocumentLocation,
     DocumentLocationActiveModel,
     DocumentLocationColumn,
+    DocumentModel,
     DocumentOrganization,
     DocumentOrganizationActiveModel,
     DocumentOrganizationColumn,
@@ -45,32 +48,31 @@ use basic::{
     InputReview,
 };
 use keywords::InputKeywords;
-// pub use list_inputov_generator::{SublistInputList, LastInputOziromaVaskiPosebnez};
 
-async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
-    let database = get_database().await;
-
+async fn submit(document: &DocumentModel, event: Event<FormData>) -> Result<()> {
     debug!("Event: {event:#?}");
 
+    let database = get_database().await;
     let values = event.values();
 
-    document.title = Set(values["title"].as_value());
+    let mut modified: DocumentActiveModel = document.clone().into();
 
+    modified.title = Set(values["title"].as_value());
+
+    // Delete old document <-> entity mappings
+    // TODO: Keep existing ones in the future
     DocumentPerson::delete_many()
-        .filter(DocumentPersonColumn::Document.eq(document.clone().id.unwrap()))
+        .filter(DocumentPersonColumn::Document.eq(document.id))
         .exec(database)
-        .await
-        .unwrap();
+        .await?;
     DocumentOrganization::delete_many()
-        .filter(DocumentOrganizationColumn::Document.eq(document.clone().id.unwrap()))
+        .filter(DocumentOrganizationColumn::Document.eq(document.id))
         .exec(database)
-        .await
-        .unwrap();
+        .await?;
     DocumentLocation::delete_many()
-        .filter(DocumentLocationColumn::Document.eq(document.clone().id.unwrap()))
+        .filter(DocumentLocationColumn::Document.eq(document.id))
         .exec(database)
-        .await
-        .unwrap();
+        .await?;
 
     match values.get("persons") {
         Some(osebe) => {
@@ -80,12 +82,12 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                     name: Set(oseba.trim().to_string()),
                     description: Set(String::new()),
                 };
-                let person = person.insert(database).await.unwrap();
+                let person = person.insert(database).await.context("Failed to insert person")?;
                 let document_person = DocumentPersonActiveModel {
-                    document: Set(document.clone().id.unwrap()),
+                    document: Set(document.id),
                     person: Set(person.id),
                 };
-                document_person.insert(database).await.unwrap();
+                document_person.insert(database).await.context("Failed to insert person link")?;
                 match values.get(&format!("persons/{oseba}")) {
                     Some(variacije) => {
                         for variacija in
@@ -97,7 +99,10 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                                 name: Set(variacija.trim().to_string()),
                                 description: Set(String::new()),
                             };
-                            alias.insert(database).await.unwrap();
+                            alias
+                                .insert(database)
+                                .await
+                                .context("Failed to insert person alias")?;
                         }
                     }
                     None => {}
@@ -115,12 +120,16 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                     name: Set(organizacija.trim().to_string()),
                     description: Set(String::new()),
                 };
-                let organization = org_model.insert(database).await.unwrap();
+                let organization =
+                    org_model.insert(database).await.context("Failed to insert organization")?;
                 let document_organization = DocumentOrganizationActiveModel {
-                    document: Set(document.clone().id.unwrap()),
+                    document: Set(document.id),
                     organization: Set(organization.id),
                 };
-                document_organization.insert(database).await.unwrap();
+                document_organization
+                    .insert(database)
+                    .await
+                    .context("Failed to insert organization link")?;
                 match values.get(&format!("organizations/{organizacija}")) {
                     Some(variacije) => {
                         for variacija in
@@ -132,7 +141,10 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                                 name: Set(variacija.trim().to_string()),
                                 description: Set(String::new()),
                             };
-                            alias.insert(database).await.unwrap();
+                            alias
+                                .insert(database)
+                                .await
+                                .context("Failed to insert organization alias")?;
                         }
                     }
                     None => {}
@@ -150,12 +162,16 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                     name: Set(lokacija.trim().to_string()),
                     description: Set(String::new()),
                 };
-                let location = location.insert(database).await.unwrap();
+                let location =
+                    location.insert(database).await.context("Failed to insert location")?;
                 let document_location = DocumentLocationActiveModel {
-                    document: Set(document.clone().id.unwrap()),
+                    document: Set(document.id),
                     location: Set(location.id),
                 };
-                document_location.insert(database).await.unwrap();
+                document_location
+                    .insert(database)
+                    .await
+                    .context("Failed to insert location link")?;
                 match values.get(&format!("locations/{lokacija}")) {
                     Some(variacije) => {
                         for variacija in
@@ -167,7 +183,10 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                                 name: Set(variacija.trim().to_string()),
                                 description: Set(String::new()),
                             };
-                            alias.insert(database).await.unwrap();
+                            alias
+                                .insert(database)
+                                .await
+                                .context("Failed to insert location alias")?;
                         }
                     }
                     None => {}
@@ -179,7 +198,7 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
 
     match values.get("keywords") {
         Some(keywords) => {
-            document.keywords = Set(Keywords(
+            modified.keywords = Set(Keywords(
                 keywords
                     .as_slice()
                     .iter()
@@ -189,12 +208,12 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                     .collect(),
             ))
         }
-        None => document.keywords = Set(Keywords(vec![])),
+        None => modified.keywords = Set(Keywords(vec![])),
     }
 
     match values.get("languages") {
         Some(languages) => {
-            document.languages = Set(Languages(
+            modified.languages = Set(Languages(
                 languages
                     .as_slice()
                     .iter()
@@ -202,19 +221,21 @@ async fn submit(mut document: DocumentActiveModel, event: Event<FormData>) {
                     .collect(),
             ))
         }
-        None => document.languages = Set(Languages(vec![])),
+        None => modified.languages = Set(Languages(vec![])),
     }
 
     match ReviewStatus::from_variant_name(&values["review"].as_value()) {
-        Some(review) => document.review = Set(review),
-        None => document.review = Set(ReviewStatus::NotReviewed),
+        Some(review) => modified.review = Set(review),
+        None => modified.review = Set(ReviewStatus::NotReviewed),
     }
 
-    debug!("Parsed: {document:?}");
+    debug!("Parsed: {modified:?}");
 
-    document.update(database).await.unwrap(); // TODO: Handle errors
+    modified.update(database).await.context("Failed to update document")?;
 
-    info!("Submitted!"); // TODO: Show success message
+    info!("Submitted!");
+
+    Ok(())
 }
 
 #[component]
@@ -223,14 +244,30 @@ pub fn PaneProperties(
     #[props(into)] locations: LocationsSignal,
     #[props(into)] organizations: OrganizationsSignal,
     #[props(into)] persons: PersonsSignal,
+    refresh: Callback<()>,
 ) -> Element {
+    let mut state: Signal<Option<Element>> = use_signal(|| None);
+
     rsx! {
         form {
             onsubmit: move |event| async move {
-                submit(document.read().clone().into(), event).await;
+                match submit(&document.read(), event).await {
+                    Ok(_) => state.set(Some(rsx! {
+                        AlertSuccess {
+                            title: "Dokument uspešno shranjen",
+                        }
+                    })),
+                    Err(error) => state.set(Some(rsx! {
+                        AlertError {
+                            title: "Napaka pri shranjevanju dokumenta",
+                            details: format!("{error:?}"),
+                        }
+                    })),
+                }
+                refresh.call(());
             },
             ul {
-                class: "space-y-4 pb-1",
+                class: "space-y-4 pb-1 min-w-fit",
                 li { InputFilename { document } }
                 li { InputName { document } }
                 li { InputPersons { document, persons } }
@@ -242,8 +279,13 @@ pub fn PaneProperties(
                 li {
                     button {
                         class: "btn btn-soft btn-primary rounded-box",
+                        type: "submit",
                         "Shrani"
                     }
+                }
+                match state() {
+                    Some(element) => rsx! { li { { element } } },
+                    None => rsx! {},
                 }
             }
         }

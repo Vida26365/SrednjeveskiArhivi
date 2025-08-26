@@ -17,7 +17,7 @@ pub fn FilterKeywords() -> Element {
         fieldset {
             class: "space-y-2",
 
-            for keyword in keywords.read().iter().cloned() {
+            for (ix, keyword) in keywords.read().iter().enumerate() {
                 div {
                     class: "input w-full",
                     input {
@@ -27,15 +27,9 @@ pub fn FilterKeywords() -> Element {
                         spellcheck: "false",
                         name: "keywords",
                         value: "{keyword}",
-                        oninput: {
-                            let keyword = keyword.clone();
-                            move |event: Event<FormData>| {
-                                let mut keywords = keywords.write();
-                                match keywords.iter().position(|existing| existing == &keyword) {
-                                    Some(pos) => keywords[pos] = event.value(),
-                                    None => keywords.push(event.value()),
-                                }
-                            }
+                        oninput: move |event| {
+                            let mut keywords = keywords.write();
+                            keywords[ix] = event.value();
                         },
                         onkeypress: move |event| {
                             if event.key() == Enter {
@@ -45,12 +39,9 @@ pub fn FilterKeywords() -> Element {
                     }
                     button {
                         class: "cursor-pointer text-base-content/50 hover:text-base-content",
-                        onclick: {
-                            let keyword = keyword.clone();
-                            move |event: Event<MouseData>| {
-                                event.prevent_default();
-                                keywords.write().retain(|existing| existing != &keyword);
-                            }
+                        onclick: move |event| {
+                            event.prevent_default();
+                            keywords.write().remove(ix);
                         },
                         svg {
                             class: "size-4 shrink-0",
