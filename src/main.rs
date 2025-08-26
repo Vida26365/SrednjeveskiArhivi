@@ -13,6 +13,7 @@ use crate::components::navbar::Navbar;
 use crate::database::get_database;
 use crate::directories::DIRECTORIES;
 use crate::views::documents::{DocumentDisplay, DocumentList, DocumentUpload};
+use crate::views::ocr::{OcrBuiltin, OcrExternalExport, OcrExternalImport};
 use crate::views::organizations::OrganizationList;
 // use crate::views::persons::PersonList;
 
@@ -51,6 +52,13 @@ enum Route {
     // LocationList {},
     // #[route("/locations/:id")]
     // LocationDisplay { id: Uuid },
+
+    #[route("/ocr/builtin")]
+    OcrBuiltin {},
+    #[route("/ocr/external/export")]
+    OcrExternalExport {},
+    #[route("/ocr/external/import")]
+    OcrExternalImport {},
 }
 
 fn main() {
