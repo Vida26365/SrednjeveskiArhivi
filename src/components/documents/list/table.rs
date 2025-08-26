@@ -27,7 +27,7 @@ pub fn PaneTable(#[props(into)] documents: DocumentsSignal) -> Element {
                             key: document.id,
                             td { "{document.title}" }
                             td { "{document.date.map_or(\"/\".to_string(), |date| date.to_string())}" }
-                            td { "{document.location.clone().map_or(\"/\".to_string(), |location| location.name)}" }
+                            td { "{document.location.as_ref().map_or(\"/\", |location| &location.name)}" }
                             td {
                                 span {
                                     class: "flex flex-wrap gap-1",

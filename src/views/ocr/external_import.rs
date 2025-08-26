@@ -249,6 +249,7 @@ fn OcrExternalImportInner(
 
             button {
                 class: "btn btn-soft btn-primary w-full mb-4 rounded-box",
+                type: "submit",
                 disabled: segmented.read().is_empty() && metadata.read().is_empty(),
                 onclick: move |_| async move {
                     match save().await {
@@ -342,6 +343,7 @@ fn ImportedList(
                         }
                         button {
                             class: "cursor-pointer text-base-content/50 hover:text-base-content",
+                            type: "button",
                             onclick: move |_| { on_remove.call(document.id); },
                             svg {
                                 class: "size-4 shrink-0",

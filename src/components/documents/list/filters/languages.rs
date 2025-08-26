@@ -1,16 +1,14 @@
 use dioxus::prelude::*;
 use sea_orm::Iterable;
 
+use crate::components::inputs::{InputLabel, InputSwitch};
 use crate::utils::language::Language;
 use crate::utils::text::capitalize;
 
 #[component]
 pub fn FilterLanguages() -> Element {
     rsx! {
-        label {
-            class: "flex pb-2 font-semibold",
-            "Jeziki"
-        }
+        InputLabel { title: "Jeziki" }
         fieldset {
             class: "space-y-2",
             for language in Language::iter() {
@@ -30,17 +28,7 @@ pub fn FilterLanguages() -> Element {
                     }
                 }
             }
-            label {
-                class: "label",
-                "Unija"
-                input {
-                    class: "toggle toggle-xs",
-                    type: "checkbox",
-                    name: "languages-condition",
-                    id: "languages-condition",
-                }
-                "Presek"
-            }
         }
+        InputSwitch { id: "languages-condition", label_off: "Unija", label_on: "Presek" }
     }
 }

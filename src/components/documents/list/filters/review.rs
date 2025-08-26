@@ -1,15 +1,13 @@
 use dioxus::prelude::*;
 use sea_orm::Iterable;
 
+use crate::components::inputs::InputLabel;
 use crate::entities::document::ReviewStatus;
 
 #[component]
 pub fn FilterReview() -> Element {
     rsx! {
-        label {
-            class: "flex pb-2 font-semibold",
-            "Stanje"
-        }
+        InputLabel { title: "Stanje" }
         fieldset {
             class: "space-y-2",
             for review in ReviewStatus::iter() {

@@ -34,12 +34,11 @@ use crate::entities::{
 };
 use crate::utils::language::Language;
 
-mod basic;
-mod keywords;
-mod list_inputov_generator;
+mod inputs;
 
-use basic::{
-    InputFilename,
+use inputs::{
+    InputId,
+    InputKeywords,
     InputLanguages,
     InputLocations,
     InputName,
@@ -47,7 +46,6 @@ use basic::{
     InputPersons,
     InputReview,
 };
-use keywords::InputKeywords;
 
 async fn submit(document: &DocumentModel, event: Event<FormData>) -> Result<()> {
     debug!("Event: {event:#?}");
@@ -267,8 +265,8 @@ pub fn PaneProperties(
                 refresh.call(());
             },
             ul {
-                class: "space-y-4 pb-1 min-w-fit",
-                li { InputFilename { document } }
+                class: "space-y-4 [&>li]:space-y-2 pb-1 min-w-fit",
+                li { InputId { document } }
                 li { InputName { document } }
                 li { InputPersons { document, persons } }
                 li { InputOrganizations { organizations } }

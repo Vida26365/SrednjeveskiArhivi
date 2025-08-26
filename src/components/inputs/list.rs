@@ -3,23 +3,20 @@ use dioxus::prelude::*;
 use dioxus_heroicons::IconShape;
 use dioxus_heroicons::outline::Shape;
 
-use crate::components::documents::display::DocumentSignal;
-
 #[component]
-pub fn InputKeywords(document: DocumentSignal) -> Element {
-    let mut keywords = use_signal(move || document.read().keywords.0.clone());
+pub fn InputList(
+    id: &'static str,
+    #[props(into, default = vec![])] values: Vec<String>,
+) -> Element {
+    let mut values = use_signal(|| values);
     let mut additional = use_signal(String::new);
 
     rsx! {
-        label {
-            class: "flex pb-2 font-semibold",
-            "Ključne besede"
-        }
-
         fieldset {
             class: "space-y-2",
+            id: "{id}",
 
-            for (ix, keyword) in keywords.read().iter().enumerate() {
+            for (index, value) in values.read().iter().enumerate() {
                 div {
                     class: "input w-full",
                     input {
@@ -27,11 +24,11 @@ pub fn InputKeywords(document: DocumentSignal) -> Element {
                         autocapitalize: "false",
                         autocomplete: "false",
                         spellcheck: "false",
-                        name: "keywords",
-                        value: "{keyword}",
+                        name: "{id}",
+                        value: "{value}",
                         oninput: move |event| {
-                            let mut keywords = keywords.write();
-                            keywords[ix] = event.value();
+                            let mut values = values.write();
+                            values[index] = event.value();
                         },
                         onkeypress: move |event| {
                             if event.key() == Enter {
@@ -41,9 +38,9 @@ pub fn InputKeywords(document: DocumentSignal) -> Element {
                     }
                     button {
                         class: "cursor-pointer text-base-content/50 hover:text-base-content",
-                        onclick: move |event| {
-                            event.prevent_default();
-                            keywords.write().remove(ix);
+                        type: "button",
+                        onclick: move |_| {
+                            values.write().remove(index);
                         },
                         svg {
                             class: "size-4 shrink-0",
@@ -66,7 +63,7 @@ pub fn InputKeywords(document: DocumentSignal) -> Element {
                     autocapitalize: "false",
                     autocomplete: "false",
                     spellcheck: "false",
-                    name: "keywords",
+                    name: "{id}",
                     value: "{additional}",
                     oninput: move |event| {
                         additional.set(event.value());
@@ -74,15 +71,15 @@ pub fn InputKeywords(document: DocumentSignal) -> Element {
                     onkeypress: move |event| {
                         if event.key() == Enter {
                             event.prevent_default();
-                            keywords.write().push(additional.read().clone());
+                            values.write().push(additional.read().clone());
                             additional.set(String::new());
                         }
                     }
                 }
                 button {
                     class: "cursor-pointer text-base-content/50 hover:text-base-content",
-                    onclick: move |event| {
-                        event.prevent_default();
+                    type: "button",
+                    onclick: move |_| {
                         additional.set(String::new());
                     },
                     svg {

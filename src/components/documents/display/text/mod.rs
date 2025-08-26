@@ -6,6 +6,7 @@ use sea_orm::ActiveValue::Set;
 
 use crate::components::alerts::{AlertError, AlertInfo, AlertSuccess};
 use crate::components::documents::display::{DocumentSignal, PrimaryLocationSignal};
+use crate::components::inputs::{InputLabel, InputTextarea};
 use crate::database::get_database;
 use crate::directories::DIRECTORIES;
 use crate::entities::{DocumentActiveModel, DocumentModel};
@@ -68,6 +69,7 @@ async fn extract(document: &DocumentModel) -> Result<()> {
         .context("Failed to extract text")?;
 
     let mut modified: DocumentActiveModel = document.clone().into();
+
     modified.summary = Set("".to_string());
     modified.metadata = Set("".to_string());
     modified.content = Set(text);
@@ -109,62 +111,23 @@ pub fn PaneText(
                 refresh.call(());
             },
             ul {
-                class: "space-y-4 pb-1 min-w-fit",
+                class: "space-y-4 [&>li]:space-y-2 pb-1 min-w-fit",
                 li {
                     class: "flex gap-2",
                     InputLocation { location }
                     InputDate { document }
                 }
                 li {
-                    label {
-                        class: "flex pb-2 font-semibold",
-                        for: "summary",
-                        "Povzetek"
-                    }
-                    textarea {
-                        class: "textarea autoresize w-full",
-                        aria_autocomplete: "none",
-                        autocapitalize: "false",
-                        autocomplete: "false",
-                        spellcheck: "false",
-                        name: "summary",
-                        id: "summary",
-                        value: "{document.read().summary}",
-                    }
+                    InputLabel { title: "Povzetek", target: "summary" }
+                    InputTextarea { id: "summary", value: "{document.read().summary}" }
                 }
                 li {
-                    label {
-                        class: "flex pb-2 font-semibold",
-                        for: "metadata",
-                        "Metapodatki"
-                    }
-                    textarea {
-                        class: "textarea autoresize w-full",
-                        aria_autocomplete: "none",
-                        autocapitalize: "false",
-                        autocomplete: "false",
-                        spellcheck: "false",
-                        name: "metadata",
-                        id: "metadata",
-                        value: "{document.read().metadata}",
-                    }
+                    InputLabel { title: "Metapodatki", target: "metadata" }
+                    InputTextarea { id: "metadata", value: "{document.read().metadata}" }
                 }
                 li {
-                    label {
-                        class: "flex pb-2 font-semibold",
-                        for: "content",
-                        "Vsebina"
-                    }
-                    textarea {
-                        class: "textarea autoresize w-full",
-                        aria_autocomplete: "none",
-                        autocapitalize: "false",
-                        autocomplete: "false",
-                        spellcheck: "false",
-                        name: "content",
-                        id: "content",
-                        value: "{document.read().content}",
-                    }
+                    InputLabel { title: "Vsebina", target: "content" }
+                    InputTextarea { id: "content", value: "{document.read().content}" }
                 }
                 li {
                     class: "flex gap-2",
