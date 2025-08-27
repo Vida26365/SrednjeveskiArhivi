@@ -29,25 +29,24 @@ dx serve
 
 Za nalaganje dokumentov je desno zgoraj gumb _Dodajanje_. Odprla se bo stran, kamor lahko izberete kateri `pdf` dokument želite naložiti. Podpiramo pa tudi mehaniko "drag and drop".
 
-
-### Dokumenti
-
-Da so ogledate posamezen dokument, kliknite na gumb `poglej` ob želenem dokumentu.
+Da pridete do seznama dokumentov, zgoraj v navigacijski vrstici kliknete zavihel **Dokumenti**.
+Da so ogledate posamezen dokument, kliknite na gumb **Poglej** ob želenem dokumentu.
 
 Odpre se vam stran razdeljena na tri dele. Razmerje med predeli lahko zamenjate tako da z desnim klikom držite na rob med dvema deloma in z miško povlečete na tisto mesto kjer želite da rob je.
 
-Na levi strani lahko spreminjate vse podatke, razen `Naslov dokumenta`
+V srednjem panelu na dnu lahko najdete gumb **OCR** (_Optical character recognition_). Ko ga kliknete, bo program poskusil ugotoviti besedilo dokumenta. To lahko vzame nekaj časa (predvideno ne več kot minuto). Med tem časom morate ostati na tej srani, drugače se bo proces prekinil.
+Celotno besedilo dokmenta bo zapisano v polje **Vsebina**. Spodbudajmo vas, da preverite če je besedilo pravilno zapisano, kajti skoraj gotovo ne bo.
 
-Če želite dodati več `oseb/organizacij/lokacij/ključnih besed`, pritisnite tipko enter, ko je vaš kurzor v zadnjem vnosnem polju.
+V levem panelu lahko spreminjate vse podatke, razen **Naslov dokumenta**.
+Če želite dodati več oseb/organizacij/lokacij/ključnih besed, pritisnite tipko enter, ko je vaš kurzor v zadnjem od vnosnih polj.
+Osebam, organizacijam in lokacijam lahko dodate variacije imen, tako da na desni strani vnosnih prostorčkov kliknete gumb **+**. Pojavilo se bo še eno vnosno polje, kamor zapišete variacijo.
 
-Če želite odstraniti vnosni prostorček, na desni strani kliknite ikono za koš za smeti.
-
-<span style="color:red">**Pozor**</span>: Če imata dva polja isto ime, ko odstraniš enega, se odstrani tudi drugi.
-
-
-Če želite shraniti imena oseb, organizacij in lokacij z njihovimi variacijami, je na desni strani vnosnih prostorčkov gumb `+`. Ko ga kliknete, se bo pojavil še eno vnosno polje, kamor gre lahko variacija imena.
+Če želite odstraniti vnosni prostorček, na desni strani prostorčka kliknite ikono za koš za smeti.
 
 Na koncu ne pozabite pritisniti gumba shrani, čisto na dnu levega **IN** srednjega panela.
 
-Da pridete nazaj do lista dokumentov, zgoraj v navigacijski vrstici kliknete zavihel `Dokumenti`. Na voljo pa imete še list organizacij ter list oseb (pod zavihkoma `Organizacije` in `Osebe`).
+Pod zavihkom **Organizacije** si lahko ogledate vse omenjene oragnizacije v dokumentih.
+
+
+
 

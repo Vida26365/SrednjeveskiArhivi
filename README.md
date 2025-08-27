@@ -7,3 +7,5 @@ Cilj projekta je vzpostaviti uporabniški vmesnik, kjer bo uporabnik popravljal 
 V prejšnjem stoletju so bili srednjeveški zapisi na pisalni stroj pretipkani. Ti dokumenti bodo skenirani in pretvorjeni v tekstovne datoteke s pomočjo optične prepoznave črk.
 
 Srednjeveški zapisi so pridobljeni iz zasebnih virov in so primerni za javno objavo.
+
+Navodila za uporabnika si lahko pogledate v [Navodilih za uporabnika](NAVODILAzAuPORABNIKA.md).
