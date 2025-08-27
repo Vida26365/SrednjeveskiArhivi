@@ -72,11 +72,10 @@ pub fn DocumentUpload() -> Element {
                 continue;
             }
 
-            let file = FileDetails {
-                path: path.clone(),
-                name: path.file_name().unwrap_or("Neznano".as_ref()).to_string_lossy().to_string(),
-                size: filesize(path.metadata().map(|metadata| metadata.len()).unwrap_or(0)),
-            };
+            let name = path.file_name().unwrap_or("Neznano".as_ref()).to_string_lossy().to_string();
+            let size = filesize(path.metadata().map(|metadata| metadata.len()).unwrap_or(0));
+
+            let file = FileDetails { path, name, size };
 
             uploaded.write().push(file);
             state.set(UploadState::Idle);
@@ -136,6 +135,7 @@ pub fn DocumentUpload() -> Element {
 
             button {
                 class: "btn btn-soft btn-primary w-full rounded-box",
+                type: "submit",
                 disabled: uploaded.read().is_empty(),
                 onclick: move |_| async move {
                     match save().await {
@@ -181,6 +181,7 @@ pub fn DocumentUpload() -> Element {
                         }
                         button {
                             class: "cursor-pointer text-base-content/50 hover:text-base-content",
+                            type: "button",
                             onclick: move |_| { remove(&file); },
                             svg {
                                 class: "size-4 shrink-0",

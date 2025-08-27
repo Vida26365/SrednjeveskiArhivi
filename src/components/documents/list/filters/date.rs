@@ -1,16 +1,14 @@
 use dioxus::prelude::*;
 use sea_orm::Iterable;
 
+use crate::components::inputs::InputLabel;
 use crate::utils::date::Calendar;
 use crate::utils::text::capitalize;
 
 #[component]
 pub fn FilterDate() -> Element {
     rsx! {
-        label {
-            class: "flex pb-2 font-semibold",
-            "Datum"
-        }
+        InputLabel { title: "Datum" }
         fieldset {
             class: "space-y-2",
             label {

@@ -1,12 +1,11 @@
 use dioxus::prelude::*;
 
+use crate::components::inputs::InputLabel;
+
 #[component]
 pub fn Sorter() -> Element {
     rsx! {
-        label {
-            class: "flex pb-2 font-semibold",
-            "Razvrstitev"
-        }
+        InputLabel { title: "Razvrstitev" }
         fieldset {
             class: "flex gap-2",
             select {

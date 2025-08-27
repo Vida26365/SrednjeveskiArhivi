@@ -14,7 +14,7 @@ pub fn InputLocation(location: PrimaryLocationSignal) -> Element {
             spellcheck: "false",
             name: "primary-location",
             id: "primary-location",
-            value: "{location.read().clone().map_or(\"\".to_string(), |location| location.name)}",
+            value: "{location.read().as_ref().map_or(\"\", |location| &location.name)}",
         }
     }
 }

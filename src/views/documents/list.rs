@@ -124,7 +124,7 @@ fn apply_filtering(
     }
 
     if !filters.review.is_empty() {
-        query = query.filter(DocumentColumn::Review.is_in(filters.review.clone()));
+        query = query.filter(DocumentColumn::Review.is_in(filters.review.iter().copied()));
     }
 
     Ok(query)
