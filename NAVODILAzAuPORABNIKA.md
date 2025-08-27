@@ -50,5 +50,3 @@ Na koncu ne pozabite pritisniti gumba shrani, čisto na dnu levega **IN** srednj
 Pod zavihkom **Organizacije** si lahko ogledate vse omenjene oragnizacije v dokumentih.
 
 
-
-
