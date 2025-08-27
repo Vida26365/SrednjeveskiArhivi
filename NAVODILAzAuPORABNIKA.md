@@ -37,7 +37,9 @@ Odpre se vam stran razdeljena na tri dele. Razmerje med predeli lahko zamenjate 
 V srednjem panelu na dnu lahko najdete gumb **OCR** (_Optical character recognition_). Ko ga kliknete, bo program poskusil ugotoviti besedilo dokumenta. To lahko vzame nekaj časa (predvideno ne več kot minuto). Med tem časom morate ostati na tej srani, drugače se bo proces prekinil.
 Celotno besedilo dokmenta bo zapisano v polje **Vsebina**. Spodbudajmo vas, da preverite če je besedilo pravilno zapisano, kajti skoraj gotovo ne bo.
 
-V levem panelu lahko spreminjate vse podatke, razen **Naslov dokumenta**.
+Za uporabo naprednejšega prepoznavanja besedila z uporabo umetne inteligence (trenutno v izdelavi) potrebujete Python in ponudnika API-ja, kompatibilnega z OpenAI API (kot sta Ollama in vLLM), ter računalnik z dovolj zmogljivo grafično kartico. Za obdelavo večjih količin dokumentov priporočamo uporabo superračunalniške gruče (kot je SLING)."
+
+V levem panelu lahko spreminjate vse podatke, razen **ID** dokumenta.
 Če želite dodati več oseb/organizacij/lokacij/ključnih besed, pritisnite tipko enter, ko je vaš kurzor v zadnjem od vnosnih polj.
 Osebam, organizacijam in lokacijam lahko dodate variacije imen, tako da na desni strani vnosnih prostorčkov kliknete gumb **+**. Pojavilo se bo še eno vnosno polje, kamor zapišete variacijo.
 

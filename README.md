@@ -8,4 +8,4 @@ V prejšnjem stoletju so bili srednjeveški zapisi na pisalni stroj pretipkani. 
 
 Srednjeveški zapisi so pridobljeni iz zasebnih virov in so primerni za javno objavo.
 
-Navodila za uporabnika si lahko pogledate v [Navodilih za uporabnika](NAVODILAzAuPORABNIKA.md).
+Navodila za uporabnika si lahko pogledate v [Navodilih za uporabnika](NavodilaZaUporabnika.md).
