@@ -16,12 +16,22 @@ pub fn InputNestedList(
             id: "{id}",
 
             for (index, (name, aliases)) in values.read().iter().cloned().enumerate() {
-                ListItemOziromaVidaNeZnaRusta { id, index, name, aliases, values }
+                if name == "StringKiSeNikoliNeBoNapisalVAmplikacijii" {
+                    EmptyComponent {}
+                }
+                else {
+                    ListItemOziromaVidaNeZnaRusta { id, index, name, aliases, values }
+                }
             }
 
             LastItemOziromaVaskiPosebnez { id, values }
         }
     }
+}
+
+#[component]
+fn EmptyComponent() -> Element {
+    rsx! {}
 }
 
 #[component]
@@ -61,7 +71,8 @@ fn ListItemOziromaVidaNeZnaRusta(
                     class: "cursor-pointer text-base-content/50 hover:text-base-content",
                     type: "button",
                     onclick: move |_| {
-                        values.write().remove(index);
+                        // values.write().remove(index);
+                        values.write()[index] = (String::from("StringKiSeNikoliNeBoNapisalVAmplikacijii"), vec![]);
                     },
                     svg {
                         class: "size-4 shrink-0",
