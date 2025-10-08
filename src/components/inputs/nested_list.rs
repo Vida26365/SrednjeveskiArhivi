@@ -6,9 +6,11 @@ use dioxus_heroicons::outline::Shape;
 #[component]
 pub fn InputNestedList(
     id: &'static str,
-    #[props(into, default = vec![])] values: Vec<(String, Vec<String>)>,
+    #[props(into, default = vec![])] values: Vec<(Option<String>, Vec<String>)>,
+    // test_values: Vec<(Option<String>, Vec<String>)>,
 ) -> Element {
     let values = use_signal(|| values);
+    // let test_values = use_signal(|| test_values);
 
     rsx! {
         fieldset {
@@ -16,13 +18,22 @@ pub fn InputNestedList(
             id: "{id}",
 
             for (index, (name, aliases)) in values.read().iter().cloned().enumerate() {
-                if name == "StringKiSeNikoliNeBoNapisalVAmplikacijii" {
+                if name.is_none() {
                     EmptyComponent {}
                 }
                 else {
-                    ListItemOziromaVidaNeZnaRusta { id, index, name, aliases, values }
+                    ListItemOziromaVidaNeZnaRusta { id, index, name: name.unwrap(), aliases, values }
                 }
             }
+
+            // for (index, (name, aliases)) in values.read().iter().cloned().enumerate() {
+            //     if name == "StringKiSeNikoliNeBoNapisalVAmplikacijii" {
+            //         EmptyComponent {}
+            //     }
+            //     else {
+            //         ListItemOziromaVidaNeZnaRusta { id, index, name, aliases, values }
+            //     }
+            // }
 
             LastItemOziromaVaskiPosebnez { id, values }
         }
@@ -40,7 +51,7 @@ fn ListItemOziromaVidaNeZnaRusta(
     index: usize,
     name: ReadOnlySignal<String>,
     aliases: Vec<String>,
-    values: Signal<Vec<(String, Vec<String>)>>,
+    values: Signal<Vec<(Option<String>, Vec<String>)>>,
 ) -> Element {
     let mut aliases = use_signal(|| aliases);
 
@@ -59,7 +70,7 @@ fn ListItemOziromaVidaNeZnaRusta(
                     value: "{name}",
                     oninput: move |event| {
                         let mut values = values.write();
-                        values[index].0 = event.value();
+                        values[index].0 = Some(event.value());
                     },
                     onkeypress: move |event| {
                         if event.key() == Enter {
@@ -72,7 +83,7 @@ fn ListItemOziromaVidaNeZnaRusta(
                     type: "button",
                     onclick: move |_| {
                         // values.write().remove(index);
-                        values.write()[index] = (String::from("StringKiSeNikoliNeBoNapisalVAmplikacijii"), vec![]);
+                        values.write()[index] = (None, vec![]);
                     },
                     svg {
                         class: "size-4 shrink-0",
@@ -109,7 +120,7 @@ fn ListItemOziromaVidaNeZnaRusta(
 #[component]
 fn LastItemOziromaVaskiPosebnez(
     id: &'static str,
-    values: Signal<Vec<(String, Vec<String>)>>,
+    values: Signal<Vec<(Option<String>, Vec<String>)>>,
 ) -> Element {
     let mut name = use_signal(String::new);
     let mut aliases = use_signal(Vec::new);
@@ -133,7 +144,7 @@ fn LastItemOziromaVaskiPosebnez(
                     onkeypress: move |event| {
                         if event.key() == Enter {
                             event.prevent_default();
-                            values.write().push((name.read().clone(), aliases.read().clone()));
+                            values.write().push((Some(name.read().clone()), aliases.read().clone()));
                             name.set(String::new());
                             aliases.set(Vec::new());
                         }

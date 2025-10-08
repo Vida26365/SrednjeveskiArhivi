@@ -34,7 +34,7 @@ pub fn InputPersons(document: DocumentSignal, persons: PersonsSignal) -> Element
         .read()
         .iter()
         .map(|(person, aliases)| {
-            (person.name.clone(), aliases.iter().map(|alias| alias.name.clone()).collect())
+            (Some(person.name.clone()), aliases.iter().map(|alias| alias.name.clone()).collect())
         })
         .collect();
 
@@ -50,7 +50,10 @@ pub fn InputOrganizations(organizations: OrganizationsSignal) -> Element {
         .read()
         .iter()
         .map(|(organization, aliases)| {
-            (organization.name.clone(), aliases.iter().map(|alias| alias.name.clone()).collect())
+            (
+                Some(organization.name.clone()),
+                aliases.iter().map(|alias| alias.name.clone()).collect(),
+            )
         })
         .collect();
 
@@ -66,7 +69,7 @@ pub fn InputLocations(locations: LocationsSignal) -> Element {
         .read()
         .iter()
         .map(|(location, aliases)| {
-            (location.name.clone(), aliases.iter().map(|alias| alias.name.clone()).collect())
+            (Some(location.name.clone()), aliases.iter().map(|alias| alias.name.clone()).collect())
         })
         .collect();
 
