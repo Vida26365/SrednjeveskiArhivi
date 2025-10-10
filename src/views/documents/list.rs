@@ -1,6 +1,6 @@
 use anyhow::Result;
 use dioxus::prelude::*;
-use sea_orm::sea_query::{ConditionType, Expr};
+use sea_orm::sea_query::{ConditionType, Expr, ExprTrait, Func};
 use sea_orm::{
     ColumnTrait,
     EntityTrait,
@@ -8,6 +8,7 @@ use sea_orm::{
     QueryFilter,
     QueryOrder,
     QuerySelect,
+    QueryTrait,
     RelationTrait,
 };
 
@@ -23,6 +24,53 @@ use crate::components::documents::list::{
 use crate::components::skeleton::Skeleton;
 use crate::database::get_database;
 use crate::entities::{Document, DocumentColumn, DocumentRelation, LocationColumn};
+
+macro_rules! generate_entity_name_filters {
+    ($query:ident, $filter:expr, $base:ident) => {
+        if !$filter.1.is_empty() {
+            let names: Vec<String> = $filter.1.iter().map(|it| it.to_lowercase()).collect();
+
+            // Any: At least one name in the document matches the filter
+            // All: All filter names are present in the document names
+            let groups: Vec<Vec<String>> = match $filter.0 {
+                ConditionType::Any => vec![names],
+                ConditionType::All => names.into_iter().map(|name| vec![name]).collect(),
+            };
+
+            for group in groups {
+                paste::paste! {
+                    // Find entity IDs that have the main name matching the filter
+                    let ids_from_names_subquery = crate::entities::[<$base>]::find()
+                        .select_only()
+                        .column(crate::entities::[<$base Column>]::Id)
+                        .filter(Func::lower(Expr::col(crate::entities::[<$base Column>]::Name)).is_in(&group))
+                        .into_query();
+
+                    // Find entity IDs that have an alias matching the filter
+                    let ids_from_aliases_subquery = crate::entities::[<$base Alias>]::find()
+                        .select_only()
+                        .column(crate::entities::[<$base AliasColumn>]::[<$base>])
+                        .filter(Func::lower(Expr::col(crate::entities::[<$base AliasColumn>]::Name)).is_in(&group))
+                        .into_query();
+
+                    let combined_filter_expression =
+                        Expr::col(crate::entities::[<Document $base Column>]::[<$base>]).in_subquery(ids_from_names_subquery)
+                        .or(Expr::col(crate::entities::[<Document $base Column>]::[<$base>]).in_subquery(ids_from_aliases_subquery));
+
+                    $query = $query.filter(
+                        Expr::col((crate::entities::Document, crate::entities::DocumentColumn::Id)).in_subquery(
+                            crate::entities::[<Document $base>]::find()
+                                .select_only()
+                                .column(crate::entities::[<Document $base Column>]::Document)
+                                .filter(combined_filter_expression)
+                                .into_query(),
+                        ),
+                    );
+                }
+            }
+        }
+    };
+}
 
 fn apply_sorting(
     mut query: sea_orm::Select<Document>,
@@ -62,6 +110,10 @@ fn apply_filtering(
         }
         (None, None) => {}
     }
+
+    generate_entity_name_filters!(query, filters.persons, Person);
+    generate_entity_name_filters!(query, filters.organizations, Organization);
+    generate_entity_name_filters!(query, filters.locations, Location);
 
     if !filters.keywords.1.is_empty() {
         let keywords: Vec<_> = filters.keywords.1.iter().map(|kw| kw.to_lowercase()).collect();

@@ -81,6 +81,18 @@ pub struct DocumentFilters {
     /// Filter documents by date range (first, last).
     pub date: (Option<Date>, Option<Date>),
 
+    /// Filter documents by persons.
+    #[default(_code = "(ConditionType::Any, vec![])")]
+    pub persons: (ConditionType, Vec<String>),
+
+    /// Filter documents by organizations.
+    #[default(_code = "(ConditionType::Any, vec![])")]
+    pub organizations: (ConditionType, Vec<String>),
+
+    /// Filter documents by locations.
+    #[default(_code = "(ConditionType::Any, vec![])")]
+    pub locations: (ConditionType, Vec<String>),
+
     /// Filter documents by keywords.
     #[default(_code = "(ConditionType::Any, vec![])")]
     pub keywords: (ConditionType, Vec<String>),
