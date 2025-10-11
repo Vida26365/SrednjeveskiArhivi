@@ -10,6 +10,7 @@ use crate::utils::date::Date;
 use crate::utils::language::Language;
 
 mod filters;
+mod search;
 mod table;
 
 pub use filters::PaneFilters;
@@ -106,3 +107,22 @@ pub struct DocumentFilters {
 }
 
 pub type FiltersSignal = Signal<DocumentFilters>;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum DocumentSearchType {
+    Combined,
+    Text,
+    Vector,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, SmartDefault)]
+pub struct DocumentSearch {
+    /// The search query.
+    pub query: String,
+
+    /// The search type to perform.
+    #[default(_code = "DocumentSearchType::Combined")]
+    pub r#type: DocumentSearchType,
+}
+
+pub type SearchSignal = Signal<DocumentSearch>;

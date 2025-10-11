@@ -1,12 +1,21 @@
 use dioxus::prelude::*;
 
 use crate::Route;
-use crate::components::documents::list::DocumentsSignal;
+use crate::components::documents::list::search::SearchBar;
+use crate::components::documents::list::{DocumentsSignal, SearchSignal};
 use crate::entities::document::ReviewStatus;
 
 #[component]
-pub fn PaneTable(#[props(into)] documents: DocumentsSignal) -> Element {
+pub fn PaneTable(
+    #[props(into)] documents: DocumentsSignal,
+    #[props(into)] search: SearchSignal,
+) -> Element {
     rsx! {
+        div {
+            class: "mb-2",
+            SearchBar { search }
+        }
+
         div {
             class: "overflow-x-auto",
             table {

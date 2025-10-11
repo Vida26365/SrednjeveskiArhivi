@@ -16,6 +16,7 @@ use crate::components::alerts::AlertError;
 use crate::components::documents::list::{
     DocumentFilters,
     DocumentResponse,
+    DocumentSearch,
     DocumentSort,
     DocumentSortColumn,
     PaneFilters,
@@ -115,6 +116,8 @@ fn apply_filtering(
     generate_entity_name_filters!(query, filters.organizations, Organization);
     generate_entity_name_filters!(query, filters.locations, Location);
 
+    // TODO: Also filter based on primary location
+
     if !filters.keywords.1.is_empty() {
         let keywords: Vec<_> = filters.keywords.1.iter().map(|kw| kw.to_lowercase()).collect();
         let placeholders = keywords.iter().map(|_| "?").collect::<Vec<_>>().join(", ");
@@ -182,10 +185,24 @@ fn apply_filtering(
     Ok(query)
 }
 
+fn apply_search(
+    mut query: sea_orm::Select<Document>,
+    search: &DocumentSearch,
+) -> Result<sea_orm::Select<Document>> {
+    let text = search.query.trim();
+
+    if !text.is_empty() {
+        let expr = "documents.id IN (SELECT id FROM documents_fts(?))";
+        query = query.filter(Expr::cust_with_values(expr, [text.to_string()]));
+    }
+    Ok(query)
+}
+
 #[component]
 pub fn DocumentList() -> Element {
     let sort = use_signal(DocumentSort::default);
     let filters = use_signal(DocumentFilters::default);
+    let search = use_signal(DocumentSearch::default);
 
     let documents: Resource<Result<Vec<DocumentResponse>>> = use_resource(move || async move {
         let database = get_database().await;
@@ -194,6 +211,7 @@ pub fn DocumentList() -> Element {
 
         query = apply_sorting(query, &sort.read())?;
         query = apply_filtering(query, &filters.read())?;
+        query = apply_search(query, &search.read())?;
 
         Ok(query.into_partial_model().all(database).await?)
     });
@@ -213,7 +231,7 @@ pub fn DocumentList() -> Element {
                 class: "pane p-3",
                 match &*documents.read_unchecked() {
                     Some(Ok(documents)) => rsx! {
-                        PaneTable { documents: documents.clone() }
+                        PaneTable { documents: documents.clone(), search }
                     },
                     Some(Err(error)) => rsx! {
                         AlertError {
