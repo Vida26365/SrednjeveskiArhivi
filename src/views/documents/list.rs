@@ -1,6 +1,6 @@
 use anyhow::Result;
 use dioxus::prelude::*;
-use sea_orm::sea_query::{ConditionType, Expr, ExprTrait, Func};
+use sea_orm::sea_query::{Condition, ConditionType, Expr, ExprTrait, Func};
 use sea_orm::{
     ColumnTrait,
     EntityTrait,
@@ -27,7 +27,7 @@ use crate::database::get_database;
 use crate::entities::{Document, DocumentColumn, DocumentRelation, LocationColumn};
 
 macro_rules! generate_entity_name_filters {
-    ($query:ident, $filter:expr, $base:ident) => {
+    ($query:ident, $filter:expr, $base:ident $(, primary = $primary:ident)?) => {
         if !$filter.1.is_empty() {
             let names: Vec<String> = $filter.1.iter().map(|it| it.to_lowercase()).collect();
 
@@ -54,16 +54,27 @@ macro_rules! generate_entity_name_filters {
                         .filter(Func::lower(Expr::col(crate::entities::[<$base AliasColumn>]::Name)).is_in(&group))
                         .into_query();
 
-                    let combined_filter_expression =
+                    // Base expression that will be combined with the below expressions
+                    let mut combined_filter_condition = Condition::any();
+
+                    $(
+                        let primary_entity_expression =
+                            Expr::col((crate::entities::Document, DocumentColumn::$primary)).in_subquery(ids_from_names_subquery.clone())
+                            .or(Expr::col((crate::entities::Document, DocumentColumn::$primary)).in_subquery(ids_from_aliases_subquery.clone()));
+                        combined_filter_condition = combined_filter_condition.add(primary_entity_expression);
+                    )?
+
+                    let related_entity_expression =
                         Expr::col(crate::entities::[<Document $base Column>]::[<$base>]).in_subquery(ids_from_names_subquery)
                         .or(Expr::col(crate::entities::[<Document $base Column>]::[<$base>]).in_subquery(ids_from_aliases_subquery));
+                    combined_filter_condition = combined_filter_condition.add(related_entity_expression);
 
                     $query = $query.filter(
                         Expr::col((crate::entities::Document, crate::entities::DocumentColumn::Id)).in_subquery(
                             crate::entities::[<Document $base>]::find()
                                 .select_only()
                                 .column(crate::entities::[<Document $base Column>]::Document)
-                                .filter(combined_filter_expression)
+                                .filter(combined_filter_condition)
                                 .into_query(),
                         ),
                     );
@@ -114,9 +125,7 @@ fn apply_filtering(
 
     generate_entity_name_filters!(query, filters.persons, Person);
     generate_entity_name_filters!(query, filters.organizations, Organization);
-    generate_entity_name_filters!(query, filters.locations, Location);
-
-    // TODO: Also filter based on primary location
+    generate_entity_name_filters!(query, filters.locations, Location, primary = Location);
 
     if !filters.keywords.1.is_empty() {
         let keywords: Vec<_> = filters.keywords.1.iter().map(|kw| kw.to_lowercase()).collect();
