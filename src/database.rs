@@ -35,6 +35,64 @@ async fn create_table<E: EntityTrait>(database: &DbConn, entity: E) {
     }
 }
 
+async fn create_documents_fts_table(database: &DbConn) {
+    database
+        .execute_unprepared(
+            "CREATE VIRTUAL TABLE IF NOT EXISTS documents_fts
+            USING fts5(
+                id UNINDEXED,
+                title,
+                summary,
+                metadata,
+                content,
+                tokenize = 'trigram',
+                content = 'documents'
+            );",
+        )
+        .await
+        .expect("Failed to create documents FTS table");
+
+    database
+        .execute_unprepared(
+            "CREATE TRIGGER IF NOT EXISTS documents_fts_insert
+            AFTER INSERT ON documents BEGIN
+                INSERT INTO documents_fts(rowid, id, title, summary, metadata, content)
+                VALUES (new.rowid, new.id, new.title, new.summary, new.metadata, new.content);
+            END;",
+        )
+        .await
+        .expect("Failed to create documents FTS trigger");
+
+    database
+        .execute_unprepared(
+            "CREATE TRIGGER IF NOT EXISTS documents_fts_delete
+            BEFORE DELETE ON documents BEGIN
+                INSERT INTO documents_fts(documents_fts, rowid, id, title, summary, metadata, content)
+                VALUES('delete', old.rowid, old.id, old.title, old.summary, old.metadata, old.content);
+            END;",
+        )
+        .await
+        .expect("Failed to create documents FTS trigger");
+
+    database
+        .execute_unprepared(
+            "CREATE TRIGGER IF NOT EXISTS documents_fts_update
+            AFTER UPDATE ON documents BEGIN
+                INSERT INTO documents_fts(documents_fts, rowid, id, title, summary, metadata, content)
+                VALUES('delete', old.rowid, old.id, old.title, old.summary, old.metadata, old.content);
+                INSERT INTO documents_fts(rowid, id, title, summary, metadata, content)
+                VALUES (new.rowid, new.id, new.title, new.summary, new.metadata, new.content);
+            END;",
+        )
+        .await
+        .expect("Failed to create documents FTS trigger");
+
+    database
+        .execute_unprepared("INSERT INTO documents_fts(documents_fts) VALUES('rebuild');")
+        .await
+        .expect("Failed to rebuild documents FTS index");
+}
+
 async fn init_database() -> DatabaseConnection {
     info!("Connecting to database...");
 
@@ -57,6 +115,8 @@ async fn init_database() -> DatabaseConnection {
     create_table(&database, DocumentLocation).await;
     create_table(&database, DocumentOrganization).await;
     create_table(&database, DocumentPerson).await;
+
+    create_documents_fts_table(&database).await;
 
     database
 }
