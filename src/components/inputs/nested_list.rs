@@ -7,10 +7,8 @@ use dioxus_heroicons::outline::Shape;
 pub fn InputNestedList(
     id: &'static str,
     #[props(into, default = vec![])] values: Vec<(Option<String>, Vec<String>)>,
-    // test_values: Vec<(Option<String>, Vec<String>)>,
 ) -> Element {
     let values = use_signal(|| values);
-    // let test_values = use_signal(|| test_values);
 
     rsx! {
         fieldset {
@@ -25,15 +23,6 @@ pub fn InputNestedList(
                     ListItemOziromaVidaNeZnaRusta { id, index, name: name.unwrap(), aliases, values }
                 }
             }
-
-            // for (index, (name, aliases)) in values.read().iter().cloned().enumerate() {
-            //     if name == "StringKiSeNikoliNeBoNapisalVAmplikacijii" {
-            //         EmptyComponent {}
-            //     }
-            //     else {
-            //         ListItemOziromaVidaNeZnaRusta { id, index, name, aliases, values }
-            //     }
-            // }
 
             LastItemOziromaVaskiPosebnez { id, values }
         }
